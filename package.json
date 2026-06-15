@@ -1,0 +1,21 @@
+{
+  "name": "sprout-los",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sprout — digital loan-origination (LOS) app for Thailand. Screen gallery + WebView-ready PWA.",
+  "scripts": {
+    "start": "npx --yes serve -l 5173 .",
+    "serve": "python3 -m http.server 5173",
+    "cap:add:ios": "npx --yes @capacitor/cli add ios",
+    "cap:add:android": "npx --yes @capacitor/cli add android",
+    "cap:sync": "npx --yes @capacitor/cli sync",
+    "cap:open:ios": "npx --yes @capacitor/cli open ios",
+    "cap:open:android": "npx --yes @capacitor/cli open android"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/ios": "^6.1.0",
+    "@capacitor/android": "^6.1.0"
+  }
+}

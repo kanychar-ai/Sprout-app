@@ -1,0 +1,17 @@
+{
+  "appId": "th.sprout.los",
+  "appName": "Sprout",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0F1B33"
+  },
+  "android": {
+    "backgroundColor": "#0F1B33",
+    "allowMixedContent": false
+  }
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1E40AF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+  <!-- sprout leaf -->
+  <path d="M256 392c0-86 0-118 36-160 30-35 78-46 118-46 4 64-18 116-58 150-34 29-72 36-96 36z" fill="#C6F24E"/>
+  <path d="M256 392c0-70-2-104-40-142-30-30-74-40-112-40-2 58 16 104 54 138 33 30 74 44 98 44z" fill="#E7FBB8"/>
+  <rect x="244" y="300" width="24" height="120" rx="12" fill="#0F1B33"/>
+</svg>
