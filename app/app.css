@@ -3,28 +3,39 @@
 
 html, body { height: 100%; }
 body {
+  margin: 0;
   background: var(--paper);
-  /* honor device safe areas inside native WebView */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  /* lock the page — the app must NOT scroll as a whole; only the .view scrolls */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
-/* App is a single 393-wide column; on desktop it sits centered on a tinted backdrop */
+/* App is a single fixed-height column that fills the viewport (true app feel).
+   On desktop it becomes a centered phone-sized card. Outer page never scrolls. */
 .app-shell {
+  width: 100%;
   max-width: 440px;
   margin: 0 auto;
-  min-height: 100dvh;
+  height: 100dvh;            /* fixed height, not min-height */
   background: var(--paper);
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;          /* contain everything inside the frame */
   box-shadow: 0 0 0 1px var(--line);
 }
 @media (min-width: 900px) {
-  body { background: radial-gradient(120% 80% at 50% 0%, #1e2c4d 0%, #0b1730 60%, #07101f 100%); }
+  body {
+    background: radial-gradient(120% 80% at 50% 0%, #1e2c4d 0%, #0b1730 60%, #07101f 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .app-shell {
-    margin: 28px auto;
-    min-height: calc(100dvh - 56px);
-    border-radius: 34px;
+    width: 412px;
+    height: min(880px, calc(100dvh - 40px));   /* phone-sized, never taller than viewport */
+    margin: 0;
+    border-radius: 40px;
     overflow: hidden;
     box-shadow: 0 40px 90px rgba(0,0,0,.5);
   }
@@ -32,7 +43,8 @@ body {
 }
 
 .app-top {
-  position: sticky; top: 0; z-index: 30;
+  flex: 0 0 auto; z-index: 30;
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: rgba(246,247,249,.9); backdrop-filter: blur(10px);
   padding: 14px 18px 12px; display: flex; align-items: center; gap: 12px;
   border-bottom: 1px solid var(--line);
