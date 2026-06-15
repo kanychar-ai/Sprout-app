@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprout — Loan Origination · Screen Gallery</title>
+<meta name="description" content="Sprout — digital loan-origination (LOS) app for Thailand. Full screen gallery across shared entry, customer and staff lanes.">
+
+<meta name="theme-color" content="#2563EB">
+<style>
+/* ============================================================
+   Sprout — Digital Loan Origination (Thailand)
+   Design system + iPhone device frame + screen components
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Anuphan:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Brand */
+  --cobalt: #2563EB;
+  --cobalt-dark: #1E40AF;
+  --cobalt-50: #EFF4FF;
+  --cobalt-100: #DBE6FE;
+  --lime: #C6F24E;
+  --lime-dark: #A9D92E;
+  --navy: #0F1B33;
+  --navy-soft: #1B2A4A;
+
+  /* Surface */
+  --paper: #F6F7F9;
+  --card: #FFFFFF;
+  --ink: #0F1B33;
+  --ink-2: #475068;
+  --ink-3: #8A92A6;
+  --line: #ECEEF3;
+  --line-2: #E2E5EC;
+
+  /* Status (soft, no harsh red) */
+  --ok: #16A34A;
+  --ok-bg: #E7F6EC;
+  --amber: #E8920C;
+  --amber-bg: #FCF1DD;
+  --info: #2563EB;
+  --info-bg: #E7EEFE;
+  --soft-red: #D8654F;          /* muted, used sparingly for blocking states */
+  --soft-red-bg: #FBEAE6;
+
+  --radius: 22px;
+  --radius-sm: 14px;
+  --shadow-card: 0 6px 22px rgba(15,27,51,.06), 0 1px 3px rgba(15,27,51,.05);
+  --shadow-pop: 0 18px 50px rgba(15,27,51,.16);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  margin: 0;
+  font-family: 'Anuphan', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+h1,h2,h3,h4,.font-display { font-family: 'Bricolage Grotesque', sans-serif; letter-spacing: -.01em; }
+
+/* ===================== iPhone Device Frame ===================== */
+.device {
+  width: 421px;            /* 393 screen + 14px titanium frame each side */
+  flex: 0 0 auto;
+  position: relative;
+}
+.device-frame {
+  width: 421px;
+  height: 880px;
+  border-radius: 60px;
+  padding: 14px;
+  background:
+    linear-gradient(160deg, #d9dade 0%, #a7a9b0 18%, #ececef 38%, #8d8f97 60%, #c9cace 82%, #9a9ca3 100%);
+  box-shadow:
+    0 30px 70px rgba(15,27,51,.18),
+    inset 0 0 0 2px rgba(255,255,255,.35),
+    inset 0 2px 6px rgba(255,255,255,.6),
+    inset 0 -2px 6px rgba(0,0,0,.25);
+}
+.device-inner {
+  width: 393px;
+  height: 852px;
+  border-radius: 47px;
+  background: #000;
+  padding: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.screen {
+  width: 385px;
+  height: 844px;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+}
+/* Dynamic Island */
+.island {
+  position: absolute;
+  top: 11px; left: 50%; transform: translateX(-50%);
+  width: 122px; height: 34px;
+  background: #000; border-radius: 20px;
+  z-index: 60;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 12px; gap: 8px;
+}
+.island::before { content:""; width:9px; height:9px; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #2a3550, #05070d); }
+
+/* Status bar */
+.statusbar {
+  height: 54px; flex: 0 0 54px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 26px 8px; font-size: 14px; font-weight: 600;
+  position: relative; z-index: 50; color: var(--ink);
+}
+.statusbar.on-dark { color: #fff; }
+.statusbar .sb-time { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.statusbar .sb-right { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+
+/* Home indicator */
+.home-ind { position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+  width:134px; height:5px; border-radius:3px; background: rgba(15,27,51,.28); z-index:55; }
+.home-ind.on-dark { background: rgba(255,255,255,.5); }
+
+/* Scrollable body inside a screen (we cap height; mockups are pre-fit) */
+.app-body { flex: 1 1 auto; overflow: hidden; display:flex; flex-direction:column; }
+.pad { padding: 0 20px; }
+
+/* ===================== Generic UI atoms ===================== */
+.badge { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;
+  padding:4px 10px; border-radius:999px; line-height:1; white-space:nowrap; }
+.badge.ok { background:var(--ok-bg); color:var(--ok); }
+.badge.amber { background:var(--amber-bg); color:var(--amber); }
+.badge.info { background:var(--info-bg); color:var(--cobalt); }
+.badge.red { background:var(--soft-red-bg); color:var(--soft-red); }
+.badge.lime { background:var(--lime); color:var(--navy); }
+.badge.navy { background:var(--navy); color:#fff; }
+.badge.ghost { background:#fff; color:var(--ink-2); border:1px solid var(--line-2); }
+.dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+
+.card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow-card); padding:16px; }
+.card.flat { box-shadow:none; border:1px solid var(--line); }
+.tile { background:var(--card); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px; }
+
+.btn { display:flex; align-items:center; justify-content:center; gap:8px;
+  height:52px; border-radius:16px; font-weight:700; font-size:16px; font-family:'Anuphan';
+  border:none; width:100%; cursor:pointer; }
+.btn.primary { background:var(--cobalt); color:#fff; box-shadow:0 8px 18px rgba(37,99,235,.28); }
+.btn.lime { background:var(--lime); color:var(--navy); box-shadow:0 8px 18px rgba(198,242,78,.4); }
+.btn.dark { background:var(--navy); color:#fff; }
+.btn.ghost { background:#fff; color:var(--ink); border:1.5px solid var(--line-2); box-shadow:none; }
+.btn.sm { height:42px; font-size:14px; border-radius:13px; }
+.btn.google { background:#fff; color:var(--ink); border:1.5px solid var(--line-2); box-shadow:none; }
+.btn[disabled] { opacity:.45; }
+
+.input { background:#fff; border:1.5px solid var(--line-2); border-radius:14px; height:52px;
+  display:flex; align-items:center; gap:10px; padding:0 14px; font-size:15px; color:var(--ink); }
+.input .ph { color:var(--ink-3); }
+.input.focus { border-color:var(--cobalt); box-shadow:0 0 0 4px var(--cobalt-50); }
+.input.error { border-color:var(--soft-red); background:var(--soft-red-bg); }
+.label { font-size:12.5px; font-weight:600; color:var(--ink-2); margin:0 0 6px 2px; }
+.help { font-size:11.5px; color:var(--ink-3); margin:6px 2px 0; }
+.help.err { color:var(--soft-red); }
+.help.ok { color:var(--ok); }
+
+.appbar { display:flex; align-items:center; gap:12px; padding:6px 18px 12px; }
+.appbar .ico { width:38px; height:38px; border-radius:12px; background:#fff; border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:18px; }
+.appbar h3 { margin:0; font-size:18px; }
+.appbar .sub { font-size:11.5px; color:var(--ink-3); }
+
+.muted { color:var(--ink-3); }
+.tiny { font-size:11px; }
+.row { display:flex; align-items:center; }
+.between { justify-content:space-between; }
+.gap6{gap:6px}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}
+.mt6{margin-top:6px}.mt8{margin-top:8px}.mt10{margin-top:10px}.mt12{margin-top:12px}.mt14{margin-top:14px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.center{align-items:center}.col{flex-direction:column}
+
+.divider{height:1px;background:var(--line);margin:14px 0;}
+
+/* progress steps */
+.steps { display:flex; gap:6px; }
+.steps i { flex:1; height:5px; border-radius:3px; background:var(--line-2); }
+.steps i.on { background:var(--cobalt); }
+.steps i.done { background:var(--lime); }
+
+/* segmented tabs */
+.seg { display:flex; background:#EDEFF4; border-radius:14px; padding:4px; gap:4px; }
+.seg button { flex:1; border:none; background:transparent; height:38px; border-radius:11px;
+  font-family:'Anuphan'; font-weight:600; font-size:13.5px; color:var(--ink-2); }
+.seg button.on { background:#fff; color:var(--cobalt); box-shadow:0 2px 6px rgba(15,27,51,.08); }
+
+/* bottom nav */
+.tabbar { flex:0 0 auto; display:flex; justify-content:space-around; align-items:center;
+  padding:10px 8px 26px; background:#fff; border-top:1px solid var(--line); }
+.tabbar a { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px;
+  color:var(--ink-3); text-decoration:none; }
+.tabbar a .ti { font-size:20px; }
+.tabbar a.on { color:var(--cobalt); }
+
+/* list item */
+.li { display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+.li:last-child{border-bottom:none;}
+.avatar { width:42px; height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:#fff; font-size:15px; flex:0 0 auto; }
+
+/* SYSTEM INTERNAL note */
+.sysnote { background:var(--navy); color:#cdd6ea; border-radius:16px; padding:13px 14px; font-size:11.5px; line-height:1.5; }
+.sysnote .h { display:flex; align-items:center; gap:7px; color:#fff; font-weight:700; font-size:10.5px;
+  letter-spacing:.14em; margin-bottom:6px; }
+.sysnote .h .pill { background:var(--lime); color:var(--navy); padding:2px 7px; border-radius:6px; letter-spacing:.06em; }
+.sysnote b { color:#fff; }
+.sysnote code { background:rgba(255,255,255,.1); padding:1px 5px; border-radius:5px; color:#dfe8ff; }
+
+/* big number / amount */
+.amount { font-family:'Bricolage Grotesque'; font-weight:700; }
+
+/* gauge ring */
+.ring { --p:62; width:120px; height:120px; border-radius:50%;
+  background: conic-gradient(var(--cobalt) calc(var(--p)*1%), var(--line-2) 0);
+  display:flex; align-items:center; justify-content:center; }
+.ring .hole { width:92px; height:92px; border-radius:50%; background:#fff; display:flex;
+  flex-direction:column; align-items:center; justify-content:center; }
+
+/* hero gradient */
+.hero { background:linear-gradient(150deg, var(--cobalt) 0%, var(--cobalt-dark) 92%); color:#fff; }
+.hero-navy { background:linear-gradient(160deg, var(--navy) 0%, #16284b 100%); color:#fff; }
+
+/* document / camera frame */
+.scanframe { position:relative; border-radius:18px; overflow:hidden;
+  background:linear-gradient(135deg,#1c2740,#0b1222); height:230px; }
+.scanframe .corner { position:absolute; width:30px; height:30px; border:3px solid var(--lime); }
+.c-tl{top:18px;left:18px;border-right:none;border-bottom:none;border-radius:8px 0 0 0;}
+.c-tr{top:18px;right:18px;border-left:none;border-bottom:none;border-radius:0 8px 0 0;}
+.c-bl{bottom:18px;left:18px;border-right:none;border-top:none;border-radius:0 0 0 8px;}
+.c-br{bottom:18px;right:18px;border-left:none;border-top:none;border-radius:0 0 8px 0;}
+
+/* QR */
+.qr { width:188px; height:188px; border-radius:18px; background:
+  repeating-conic-gradient(#0F1B33 0 25%, #fff 0 50%) 50%/16px 16px; position:relative; }
+.qr::after{content:"";position:absolute;inset:38%;background:#fff;border-radius:6px;
+  box-shadow:0 0 0 6px #fff;}
+
+/* file thumb */
+.thumb { border-radius:12px; border:1px solid var(--line); height:78px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:4px; background:#fff; font-size:11px; color:var(--ink-2); }
+
+/* skeleton shimmer for prescreen */
+.bar { height:10px; border-radius:6px; background:linear-gradient(90deg,#eef0f5,#e2e6ef,#eef0f5);
+  background-size:200% 100%; animation:sh 1.4s linear infinite; }
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* chat bubbles */
+.bub { max-width:78%; padding:10px 13px; border-radius:16px; font-size:13.5px; line-height:1.45; }
+.bub.them { background:#fff; border:1px solid var(--line); border-bottom-left-radius:5px; align-self:flex-start; }
+.bub.me { background:var(--cobalt); color:#fff; border-bottom-right-radius:5px; align-self:flex-end; }
+
+/* keyboard mock */
+.kbd { background:#D1D5DC; padding:8px 5px 6px; display:flex; flex-direction:column; gap:7px; }
+.kbd .krow{display:flex; gap:6px; justify-content:center;}
+.kbd .key{background:#fff; border-radius:6px; min-width:30px; height:38px; display:flex; align-items:center;
+  justify-content:center; font-size:15px; box-shadow:0 1px 0 rgba(0,0,0,.25); font-family:'Anuphan'; flex:1;}
+.kbd .key.wide{flex:2;}
+
+/* ===================== Gallery chrome ===================== */
+.gwrap { max-width:1500px; margin:0 auto; padding:0 26px 120px; }
+.masthead { padding:56px 0 30px; }
+.masthead .kick { display:inline-flex; gap:8px; align-items:center; background:var(--navy); color:#fff;
+  padding:7px 14px; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:.04em; }
+.masthead .kick .sq{width:9px;height:9px;border-radius:3px;background:var(--lime);}
+.masthead h1 { font-size:clamp(40px,6vw,76px); line-height:.98; margin:18px 0 10px; max-width:16ch; }
+.masthead h1 .hl { color:var(--cobalt); }
+.masthead p { font-size:17px; color:var(--ink-2); max-width:62ch; line-height:1.55; margin:0; }
+.legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+.legend .chip{ background:#fff; border:1px solid var(--line); border-radius:999px; padding:8px 14px;
+  font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.swatch{ width:14px;height:14px;border-radius:5px; }
+
+.lane { margin-top:64px; }
+.lane-head { position:sticky; top:0; z-index:20; background:rgba(246,247,249,.86);
+  backdrop-filter:blur(10px); padding:18px 0 16px; margin-bottom:8px; border-bottom:1px solid var(--line); }
+.lane-head .num{ font-family:'Bricolage Grotesque'; font-size:13px; font-weight:700; color:var(--cobalt);
+  letter-spacing:.18em; }
+.lane-head h2{ font-size:34px; margin:6px 0 6px; }
+.lane-head p{ margin:0; color:var(--ink-2); font-size:15px; max-width:74ch; }
+
+.shelf { display:flex; gap:40px 34px; flex-wrap:wrap; padding-top:34px; }
+.frame-wrap { display:flex; flex-direction:column; }
+.cap { width:421px; margin-top:18px; }
+.cap .n { display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px;
+  padding:0 9px; border-radius:9px; background:var(--navy); color:#fff; font-weight:700; font-size:13px;
+  font-family:'Bricolage Grotesque'; margin-right:9px; }
+.cap .t { font-family:'Bricolage Grotesque'; font-weight:600; font-size:18px; }
+.cap .d { color:var(--ink-2); font-size:13.5px; margin-top:7px; line-height:1.5; }
+.cap .flag { display:inline-block; margin-top:9px; font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:7px; }
+.cap .flag.happy{ background:var(--ok-bg); color:var(--ok); }
+.cap .flag.edge{ background:var(--amber-bg); color:var(--amber); }
+.cap .flag.block{ background:var(--soft-red-bg); color:var(--soft-red); }
+.cap .flag.sys{ background:var(--navy); color:var(--lime); }
+
+footer.gfoot { margin-top:90px; border-top:1px solid var(--line); padding-top:34px; color:var(--ink-2); font-size:14px; }
+footer.gfoot a{ color:var(--cobalt); }
+
+@media (max-width:520px){
+  .device,.device-frame{ width:100%; max-width:393px; }
+  .device-frame{ height:auto; aspect-ratio:421/880; }
+  .cap{ width:100%; max-width:393px; }
+}
+
+</style>
+<script>
+  /* When bundled inside the native iOS/Android WebView (Capacitor), launch the
+     full-screen app shell instead of the design gallery. Browsers see the gallery. */
+  if (window.Capacitor || /SproutApp/i.test(navigator.userAgent)) {
+    location.replace('app/index.html');
+  }
+</script>
+</head>
+<body>
+<div class="gwrap">
+
+  <!-- ===================== MASTHEAD ===================== -->
+  <header class="masthead">
+    <span class="kick"><span class="sq"></span> SPROUT · DIGITAL LOAN ORIGINATION · THAILAND 🇹🇭</span>
+    <h1>Borrow <span class="hl">responsibly.</span> Decide with confidence.</h1>
+    <p>A complete mobile loan-origination system rendered as realistic iPhone captures (393×852),
+       grouped by user lane. Built to Thai AML/CFT and Bank of Thailand Responsible-Lending norms —
+       e-KYC, NCB credit-bureau consent, DSR ≤ 70%, EIR disclosure, sanctions/PEP/FATCA screening,
+       AML risk rating and maker–checker governance. Every flow shows the happy path <em>and</em> its failure branch.</p>
+    <div class="legend">
+      <span class="chip"><span class="swatch" style="background:#2563EB"></span> Cobalt primary</span>
+      <span class="chip"><span class="swatch" style="background:#1E40AF"></span> Cobalt dark</span>
+      <span class="chip"><span class="swatch" style="background:#C6F24E"></span> Lime accent</span>
+      <span class="chip"><span class="swatch" style="background:#0F1B33"></span> Navy emphasis</span>
+      <span class="chip"><span class="dot" style="background:#16A34A"></span> OK</span>
+      <span class="chip"><span class="dot" style="background:#E8920C"></span> Needs attention</span>
+      <span class="chip">Bricolage Grotesque · Anuphan</span>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       LANE 1 — SHARED ENTRY
+       ============================================================ -->
+  <section class="lane" id="lane-entry">
+    <div class="lane-head">
+      <div class="num">LANE 01</div>
+      <h2>Shared entry</h2>
+      <p>Onboarding, account creation with consent, mobile OTP, login with Google, and automatic role
+         detection — one account maps to exactly one role (customer <em>or</em> staff).</p>
+    </div>
+    <div class="shelf">
+
+      <!-- 1.1 Onboarding -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen hero" style="background:linear-gradient(160deg,#2563EB 0%,#1E40AF 100%)">
+            <div class="statusbar on-dark"><span class="sb-time">9:41</span>
+              <span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body pad" style="color:#fff">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+                <div style="width:62px;height:62px;border-radius:20px;background:var(--lime);display:flex;align-items:center;justify-content:center;font-size:34px;">🌱</div>
+                <h1 style="font-size:42px;line-height:1.02;margin:26px 0 12px;">Money that<br>grows with you.</h1>
+                <p style="font-size:15px;color:#dbe6fe;line-height:1.55;margin:0;">Personal loans from ฿5,000 to ฿2,000,000.
+                  Transparent EIR. A decision you can trust — built on Bank of Thailand responsible-lending rules.</p>
+                <div class="row gap8 mt20">
+                  <span class="badge" style="background:rgba(255,255,255,.15);color:#fff">⚡ Indicative offer in 60s</span>
+                  <span class="badge" style="background:rgba(255,255,255,.15);color:#fff">🔒 PDPA secured</span>
+                </div>
+              </div>
+              <div style="padding-bottom:26px">
+                <div class="row gap6" style="justify-content:center;margin-bottom:18px">
+                  <span class="dot" style="background:var(--lime);width:22px;border-radius:4px"></span>
+                  <span class="dot" style="background:rgba(255,255,255,.4)"></span>
+                  <span class="dot" style="background:rgba(255,255,255,.4)"></span>
+                </div>
+                <button class="btn lime">Get started</button>
+                <button class="btn" style="background:rgba(255,255,255,.12);color:#fff;margin-top:10px">I already have an account</button>
+              </div>
+            </div>
+            <div class="home-ind on-dark"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">1.1</span><span class="t">Onboarding</span></div>
+          <div class="d">Clean intro carousel. Leads with the indicative offer hook and PDPA assurance before any data is collected.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 1.2 Create account -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Create account</h3><div class="sub">Step 1 of 2 · Your details</div></div></div>
+              <div class="pad" style="overflow:hidden;flex:1">
+                <div>
+                  <div class="label">Full name (as on Thai ID)</div>
+                  <div class="input"><span>👤</span> Somchai Jaidee</div>
+                </div>
+                <div class="mt12">
+                  <div class="label">Username</div>
+                  <div class="input focus"><span>@</span> somchai.j <span style="margin-left:auto;color:var(--ok)">✓</span></div>
+                  <div class="help ok">Available</div>
+                </div>
+                <div class="mt12">
+                  <div class="label">Mobile number</div>
+                  <div class="input"><span>🇹🇭 +66</span> 81 234 5678</div>
+                </div>
+                <div class="mt12">
+                  <div class="label">Password</div>
+                  <div class="input"><span>🔒</span> ••••••••••• <span style="margin-left:auto">👁</span></div>
+                  <div class="row gap6 mt8"><i style="height:5px;flex:1;border-radius:3px;background:var(--ok)"></i><i style="height:5px;flex:1;border-radius:3px;background:var(--ok)"></i><i style="height:5px;flex:1;border-radius:3px;background:var(--ok)"></i><i style="height:5px;flex:1;border-radius:3px;background:var(--line-2)"></i></div>
+                  <div class="help">Strong · 8+ chars, number & symbol</div>
+                </div>
+                <div class="tile mt14" style="display:flex;gap:11px;align-items:flex-start;padding:13px">
+                  <div style="width:22px;height:22px;border-radius:7px;background:var(--cobalt);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto">✓</div>
+                  <div style="font-size:12px;color:var(--ink-2);line-height:1.5">I consent to the <b style="color:var(--cobalt)">PDPA terms</b> and to a
+                    <b style="color:var(--cobalt)">NCB credit-bureau check</b> when I apply.</div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Continue</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">1.2</span><span class="t">Create account</span></div>
+          <div class="d">Name, username (live availability), mobile, password strength meter, and an explicit dual consent — PDPA + NCB credit-bureau check.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 1.3 OTP -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Verify mobile</h3><div class="sub">Step 2 of 2</div></div></div>
+              <div class="pad" style="flex:1">
+                <div class="card flat" style="text-align:center;padding:18px">
+                  <div style="font-size:13px;color:var(--ink-2)">We sent a 6-digit code to</div>
+                  <div class="amount" style="font-size:21px;margin-top:4px">+66 8X XXX 5678</div>
+                  <div class="badge info" style="margin-top:8px">SMS · last 4 shown only</div>
+                </div>
+                <div class="row gap8 mt20" style="justify-content:space-between">
+                  <div class="input focus" style="width:48px;justify-content:center;height:58px;font-size:22px;font-weight:700">2</div>
+                  <div class="input focus" style="width:48px;justify-content:center;height:58px;font-size:22px;font-weight:700">9</div>
+                  <div class="input focus" style="width:48px;justify-content:center;height:58px;font-size:22px;font-weight:700">4</div>
+                  <div class="input" style="width:48px;justify-content:center;height:58px;font-size:22px;font-weight:700;color:var(--ink-3)">|</div>
+                  <div class="input" style="width:48px;justify-content:center;height:58px"></div>
+                  <div class="input" style="width:48px;justify-content:center;height:58px"></div>
+                </div>
+                <div class="row between mt16" style="font-size:13px">
+                  <span class="muted">Resend code in</span><span style="font-weight:700;color:var(--cobalt)">00:24</span>
+                </div>
+                <div class="sysnote mt16">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  OTP TTL <code>5 min</code>, max <code>5 attempts</code> then 30-min lock. Number is masked in UI & logs
+                  (last 4 only) per <b>PDPA data-minimisation</b>.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Verify</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">1.3</span><span class="t">Mobile OTP</span></div>
+          <div class="d">Masked number (last 4 only), 6-box code entry, resend timer. INTERNAL card documents TTL, attempt limits and PDPA masking.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 1.4 Login -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body pad">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+                <div style="width:54px;height:54px;border-radius:17px;background:var(--cobalt);display:flex;align-items:center;justify-content:center;font-size:28px">🌱</div>
+                <h1 style="font-size:32px;margin:20px 0 4px">Welcome back</h1>
+                <p class="muted" style="margin:0 0 22px;font-size:14px">Sign in to continue your application.</p>
+                <div class="label">Username</div>
+                <div class="input"><span>@</span> somchai.j</div>
+                <div class="label mt12">Password</div>
+                <div class="input"><span>🔒</span> •••••••••• <span style="margin-left:auto">👁</span></div>
+                <div style="text-align:right;margin-top:8px"><span style="font-size:12.5px;color:var(--cobalt);font-weight:600">Forgot password?</span></div>
+                <button class="btn primary mt16">Log in</button>
+                <div class="row center gap10 mt16"><div class="divider" style="flex:1;margin:0"></div><span class="tiny muted">or</span><div class="divider" style="flex:1;margin:0"></div></div>
+                <button class="btn google mt16"><span style="font-weight:800;font-size:17px">G</span> Continue with Google</button>
+              </div>
+              <div style="text-align:center;padding-bottom:22px;font-size:13px" class="muted">
+                New here? <b style="color:var(--cobalt)">Create account</b>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">1.4</span><span class="t">Login</span></div>
+          <div class="d">Username/password plus Google SSO. Single sign-in surface for both customers and staff.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 1.5 Auto role detection -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen hero-navy">
+            <div class="statusbar on-dark"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body pad" style="color:#fff">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+                <div style="width:70px;height:70px;border-radius:50%;border:3px solid var(--lime);display:flex;align-items:center;justify-content:center;font-size:32px">🔐</div>
+                <h2 style="font-size:24px;margin:22px 0 6px">Signing you in…</h2>
+                <p style="color:#aab8d6;font-size:14px;margin:0 0 26px">Detecting your role from this account</p>
+                <div class="card" style="width:100%;text-align:left;background:rgba(255,255,255,.07);box-shadow:none;border:1px solid rgba(255,255,255,.12)">
+                  <div class="row gap10"><div class="avatar" style="background:var(--cobalt)">S</div>
+                    <div><div style="font-weight:700;color:#fff">somchai.j</div><div class="tiny" style="color:#aab8d6">knychr1991@gmail.com</div></div>
+                    <span class="badge lime" style="margin-left:auto">CUSTOMER</span>
+                  </div>
+                  <div class="divider" style="background:rgba(255,255,255,.1)"></div>
+                  <div class="row gap8" style="font-size:12px;color:#cdd6ea"><span class="dot" style="background:var(--ok)"></span> 1 account = 1 role · routing to Customer home</div>
+                </div>
+                <div class="row gap6 mt20"><span class="bar" style="width:60px;background:rgba(255,255,255,.25)"></span></div>
+              </div>
+              <div class="sysnote" style="margin-bottom:22px;background:#0a1326">
+                <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                Role claim resolved from IAM (<code>role:customer</code> | <code>role:staff</code>). Staff accounts are
+                provisioned via SSO/AD and <b>cannot</b> self-register. Mixed roles are rejected at token issuance.
+              </div>
+            </div>
+            <div class="home-ind on-dark"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">1.5</span><span class="t">Auto role detection</span></div>
+          <div class="d">Post-auth router. Resolves a single role claim and forwards to the correct lane; staff are provisioned, never self-registered.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LANE 2 — CUSTOMER
+       ============================================================ -->
+  <section class="lane" id="lane-customer">
+    <div class="lane-head">
+      <div class="num">LANE 02</div>
+      <h2>Customer</h2>
+      <p>From a first indicative offer through the 4-step application — e-KYC, income, receiving bank,
+         documents, tax &amp; compliance, e-signature — to pre-screening, status tracking and PromptPay repayment.
+         Each step shows its error branch.</p>
+    </div>
+    <div class="shelf">
+
+      <!-- 2.1 First-time home -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="pad" style="padding-top:6px">
+                <div class="row between center">
+                  <div><div class="tiny muted">Hello</div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px">Somchai 👋</div></div>
+                  <div class="avatar" style="background:var(--lime);color:var(--navy)">S</div>
+                </div>
+                <div class="card hero mt14" style="padding:18px">
+                  <div class="row between"><span class="badge" style="background:rgba(255,255,255,.18);color:#fff">⚡ Indicative · pre-bureau</span><span class="tiny" style="color:#dbe6fe">No loan yet</span></div>
+                  <div class="tiny mt12" style="color:#dbe6fe">You could borrow up to</div>
+                  <div class="amount" style="font-size:38px;color:#fff;line-height:1.1">฿180,000</div>
+                  <div class="tiny" style="color:#cfe0ff">est. EIR from 15.99% · subject to checks</div>
+                  <button class="btn lime sm mt14" style="width:auto;padding:0 18px">See my estimate →</button>
+                </div>
+                <div class="row gap10 mt14">
+                  <div class="tile" style="flex:1;text-align:center"><div style="font-size:22px">🧮</div><div class="tiny" style="font-weight:600;margin-top:4px">EIR calc</div></div>
+                  <div class="tile" style="flex:1;text-align:center"><div style="font-size:22px">📄</div><div class="tiny" style="font-weight:600;margin-top:4px">Products</div></div>
+                  <div class="tile" style="flex:1;text-align:center"><div style="font-size:22px">💬</div><div class="tiny" style="font-weight:600;margin-top:4px">Help</div></div>
+                </div>
+                <div class="card flat mt14" style="padding:14px">
+                  <div class="row between center"><b style="font-size:14px">Your readiness</b><span class="badge amber">2 steps left</span></div>
+                  <div class="steps mt10"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
+                  <div class="tiny muted mt8">Verify ID & income to convert your indicative offer into a real one.</div>
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <a class="on"><span class="ti">⌂</span>Home</a><a><span class="ti">🧮</span>Calc</a>
+              <a><span class="ti">📋</span>Apply</a><a><span class="ti">👤</span>Me</a>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.1</span><span class="t">First-time home</span></div>
+          <div class="d">No active loan. Shows an <em>indicative</em> (pre-bureau) credit ceiling, quick actions and a readiness tracker nudging toward verification.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 2.2 How much can I borrow -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>How much can I borrow?</h3><div class="sub">Indicative estimate</div></div></div>
+              <div class="pad" style="flex:1">
+                <div class="card flat">
+                  <div class="label">Monthly income</div>
+                  <div class="input"><span>฿</span> 45,000</div>
+                  <div class="label mt12">Existing monthly debt</div>
+                  <div class="input"><span>฿</span> 8,500</div>
+                </div>
+                <div class="card mt14" style="text-align:center;background:var(--navy);color:#fff">
+                  <div class="tiny" style="color:#aab8d6">Estimated borrowing power</div>
+                  <div class="amount" style="font-size:36px;color:var(--lime)">฿180,000</div>
+                  <div class="row gap8" style="justify-content:center;margin-top:6px"><span class="badge" style="background:rgba(255,255,255,.12);color:#fff">DSR 41%</span><span class="badge ok">Within 70% cap</span></div>
+                </div>
+                <div class="card flat mt12" style="padding:13px">
+                  <div class="row between"><span class="tiny muted">Debt Service Ratio</span><span class="tiny" style="font-weight:700">41% / 70%</span></div>
+                  <div style="height:9px;border-radius:5px;background:var(--line-2);margin-top:8px;overflow:hidden"><div style="width:58%;height:100%;background:linear-gradient(90deg,var(--cobalt),var(--lime))"></div></div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  <code>DSR = (existing debt + new instalment) / gross income</code>. BoT Responsible-Lending cap
+                  <b>≤ 70%</b>. Estimate uses declared income only; verified income may change the ceiling.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Apply for this amount</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.2</span><span class="t">Borrowing estimate</span></div>
+          <div class="d">Income + debt → live borrowing power with a DSR gauge against the 70% cap. INTERNAL card states the formula and limit.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 2.3 Products -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Loan products</h3><div class="sub">Choose what fits</div></div></div>
+              <div class="pad" style="flex:1">
+                <div class="card" style="border:2px solid var(--cobalt)">
+                  <div class="row between"><b>Personal Loan</b><span class="badge lime">Popular</span></div>
+                  <div class="tiny muted mt6">Unsecured · ฿20k–฿2M · 6–60 mo</div>
+                  <div class="row gap12 mt12"><div><div class="tiny muted">EIR from</div><div class="amount" style="font-size:20px;color:var(--cobalt)">15.99%</div></div><div><div class="tiny muted">Max term</div><div class="amount" style="font-size:20px">60 mo</div></div></div>
+                </div>
+                <div class="card flat mt12">
+                  <div class="row between"><b>Salaryman Quick</b><span class="badge info">Fast</span></div>
+                  <div class="tiny muted mt6">For payroll customers · ฿10k–฿300k</div>
+                  <div class="row gap12 mt12"><div><div class="tiny muted">EIR from</div><div class="amount" style="font-size:20px">18.50%</div></div><div><div class="tiny muted">Decision</div><div class="amount" style="font-size:20px">~1 day</div></div></div>
+                </div>
+                <div class="card flat mt12">
+                  <div class="row between"><b>Nano / Micro</b><span class="badge ghost">Reg. capped</span></div>
+                  <div class="tiny muted mt6">Small ticket · ≤ ฿20,000</div>
+                  <div class="row gap12 mt12"><div><div class="tiny muted">EIR cap</div><div class="amount" style="font-size:20px">33%</div></div><div><div class="tiny muted">Term</div><div class="amount" style="font-size:20px">≤ 24 mo</div></div></div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Continue with Personal Loan</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.3</span><span class="t">Products</span></div>
+          <div class="d">Product catalogue with EIR-from, ticket range and term. Nano/Micro carries the regulatory EIR cap badge.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 2.4 EIR calculator OK -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>EIR calculator</h3><div class="sub">Personal Loan</div></div></div>
+              <div class="pad" style="flex:1">
+                <div class="card flat" style="padding:14px">
+                  <div class="row between"><span class="label" style="margin:0">Amount</span><b style="color:var(--cobalt)">฿150,000</b></div>
+                  <div style="height:6px;border-radius:4px;background:var(--line-2);margin:10px 0;position:relative"><div style="width:46%;height:100%;background:var(--cobalt);border-radius:4px"></div><div style="position:absolute;left:46%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--cobalt)"></div></div>
+                  <div class="row between"><span class="label" style="margin:0">Term</span><b>36 months</b></div>
+                  <div style="height:6px;border-radius:4px;background:var(--line-2);margin:10px 0;position:relative"><div style="width:60%;height:100%;background:var(--cobalt);border-radius:4px"></div><div style="position:absolute;left:60%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--cobalt)"></div></div>
+                </div>
+                <div class="card mt12" style="background:var(--navy);color:#fff">
+                  <div class="row between center"><div><div class="tiny" style="color:#aab8d6">Monthly payment</div><div class="amount" style="font-size:28px;color:var(--lime)">฿5,270</div></div>
+                    <div style="text-align:right"><div class="tiny" style="color:#aab8d6">EIR</div><div class="amount" style="font-size:22px">16.9%</div></div></div>
+                  <div class="divider" style="background:rgba(255,255,255,.12)"></div>
+                  <div class="row between tiny"><span style="color:#aab8d6">Total payable</span><span>฿189,720</span></div>
+                </div>
+                <div class="card flat mt12" style="padding:13px">
+                  <div class="row between center"><span class="tiny muted">Credit-limit check</span><span class="badge ok">✓ ฿150k of ฿180k</span></div>
+                  <div style="height:9px;border-radius:5px;background:var(--line-2);margin-top:8px;overflow:hidden"><div style="width:83%;height:100%;background:linear-gradient(90deg,var(--cobalt),var(--lime))"></div></div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Apply · ฿150,000</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.4</span><span class="t">EIR calculator</span></div>
+          <div class="d">Amount/term sliders compute monthly payment, EIR and total payable, with a live credit-limit check bar (within limit).</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 2.5 EIR over-limit error -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>EIR calculator</h3><div class="sub">Personal Loan</div></div></div>
+              <div class="pad" style="flex:1">
+                <div class="card flat" style="padding:14px">
+                  <div class="row between"><span class="label" style="margin:0">Amount</span><b style="color:var(--soft-red)">฿240,000</b></div>
+                  <div style="height:6px;border-radius:4px;background:var(--line-2);margin:10px 0;position:relative"><div style="width:96%;height:100%;background:var(--soft-red);border-radius:4px"></div><div style="position:absolute;left:96%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--soft-red)"></div></div>
+                  <div class="row between"><span class="label" style="margin:0">Term</span><b>36 months</b></div>
+                </div>
+                <div class="card mt12" style="border:1.5px solid var(--soft-red);background:var(--soft-red-bg)">
+                  <div class="row gap10" style="align-items:flex-start"><span style="font-size:20px">⚠️</span>
+                    <div><b style="color:var(--soft-red)">Over your credit limit</b>
+                    <div class="tiny" style="color:#9a4233;margin-top:4px">฿240,000 exceeds your approved ceiling of <b>฿180,000</b> by ฿60,000. Reduce the amount or verify higher income to raise your limit.</div></div></div>
+                </div>
+                <div class="card flat mt12" style="padding:13px">
+                  <div class="row between center"><span class="tiny muted">Credit-limit check</span><span class="badge red">✗ 133% of ฿180k</span></div>
+                  <div style="height:9px;border-radius:5px;background:var(--line-2);margin-top:8px;overflow:hidden"><div style="width:100%;height:100%;background:var(--soft-red)"></div></div>
+                </div>
+                <div class="row gap10 mt12">
+                  <button class="btn ghost sm" style="flex:1">Set to ฿180,000</button>
+                  <button class="btn dark sm" style="flex:1">Verify income</button>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary" disabled>Apply · over limit</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.5</span><span class="t">EIR · over-limit error</span></div>
+          <div class="d">Failure branch: requested amount exceeds the approved ceiling. Inline soft-amber/red alert, blocked CTA, two recovery actions.</div>
+          <span class="flag block">Failure path</span>
+        </div>
+      </div>
+
+      <!-- 2.6 e-KYC scan (4-step) -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Verify identity</h3><div class="sub">Step 1 of 4 · e-KYC</div></div></div>
+              <div class="pad"><div class="steps"><i class="on"></i><i></i><i></i><i></i></div></div>
+              <div class="pad mt12" style="flex:1">
+                <div style="font-size:13px;color:var(--ink-2)">Place your <b>Thai national ID</b> inside the frame. Hold steady.</div>
+                <div class="scanframe mt12">
+                  <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
+                  <div style="position:absolute;inset:46px 30px;border-radius:10px;background:linear-gradient(135deg,#2b3a5e,#1a2540);display:flex;align-items:center;justify-content:center;color:#7e8db0;font-size:12px">Thai National ID</div>
+                  <div style="position:absolute;left:30px;right:30px;top:50%;height:2px;background:var(--lime);box-shadow:0 0 12px var(--lime)"></div>
+                </div>
+                <div class="row gap8 mt12"><span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span></div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  OCR + NDID/DOPA chip check + liveness. Max <code>5 attempts</code>; on failure → manual review queue.
+                  Stored encrypted; raw image purged after extraction (PDPA).
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">📷 Capture</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.6</span><span class="t">e-KYC · ID scan</span></div>
+          <div class="d">Step 1/4. Live capture frame with quality hints. INTERNAL card explains OCR/NDID/liveness, the 5-attempt cap and PDPA purge.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 2.7 e-KYC errors -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Verify identity</h3><div class="sub">Step 1 of 4 · e-KYC</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="scanframe" style="height:170px;filter:blur(1px)">
+                  <div class="corner c-tl" style="border-color:var(--soft-red)"></div><div class="corner c-tr" style="border-color:var(--soft-red)"></div><div class="corner c-bl" style="border-color:var(--soft-red)"></div><div class="corner c-br" style="border-color:var(--soft-red)"></div>
+                  <div style="position:absolute;inset:36px 26px;border-radius:10px;background:#243353;opacity:.7"></div>
+                </div>
+                <div class="card mt12" style="border:1.5px solid var(--soft-red);background:var(--soft-red-bg);padding:13px">
+                  <div class="row gap8"><span>🌫️</span><b style="color:var(--soft-red)">Image too blurry</b></div>
+                  <div class="tiny" style="color:#9a4233;margin-top:4px">We couldn't read your ID. Clean the lens and avoid glare.</div>
+                </div>
+                <div class="mt10" style="display:flex;flex-direction:column;gap:8px">
+                  <div class="tile" style="display:flex;align-items:center;gap:10px;padding:11px"><span>🚫</span><div style="flex:1"><b class="tiny">Invalid document</b><div class="tiny muted">Not a recognised Thai ID — use the front side.</div></div><span class="badge red">Attempt 2</span></div>
+                  <div class="tile" style="display:flex;align-items:center;gap:10px;padding:11px;border-color:var(--soft-red)"><span>🔒</span><div style="flex:1"><b class="tiny" style="color:var(--soft-red)">Max attempts reached</b><div class="tiny muted">5 / 5 used · routed to manual review.</div></div><span class="badge red">5/5</span></div>
+                </div>
+                <div class="sysnote mt10">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Branches: <code>blur</code> · <code>invalid_doc</code> · <code>attempts_exhausted(5)</code> → set
+                  <code>kyc_status=manual_review</code>, notify staff queue, customer can still proceed offline-assisted.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px;display:flex;gap:10px">
+                <button class="btn ghost" style="flex:1">Try again</button>
+                <button class="btn dark" style="flex:1">Get help 💬</button>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.7</span><span class="t">e-KYC · errors</span></div>
+          <div class="d">Three stacked failure states — blur, invalid document, and max-5-attempts lock that escalates to manual review.</div>
+          <span class="flag block">Failure path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 2.8 Income + occupation API -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Income</h3><div class="sub">Step 2 of 4</div></div></div>
+              <div class="pad"><div class="steps"><i class="done"></i><i class="on"></i><i></i><i></i></div></div>
+              <div class="pad mt12" style="flex:1">
+                <div class="label">Occupation</div>
+                <div class="input focus"><span>🔎</span> eng <span style="margin-left:auto" class="muted">▲</span></div>
+                <div class="card flat" style="margin-top:6px;padding:6px">
+                  <div style="padding:9px 10px;border-radius:9px;background:var(--cobalt-50)"><b class="tiny" style="color:var(--cobalt)">Engineer</b><div class="tiny muted">Salaried · ISCO 2140</div></div>
+                  <div style="padding:9px 10px"><b class="tiny">Civil Engineer</b></div>
+                  <div style="padding:9px 10px"><b class="tiny">Electrical Engineer</b></div>
+                  <div class="tiny muted" style="padding:6px 10px 2px">↑ from Occupation API · ISCO-08</div>
+                </div>
+                <div class="label mt12">Employer</div>
+                <div class="input"><span>🏢</span> SCG Co., Ltd.</div>
+                <div class="row gap10 mt12">
+                  <div style="flex:1"><div class="label">Monthly income</div><div class="input"><span>฿</span> 45,000</div></div>
+                  <div style="flex:1"><div class="label">Pay type</div><div class="input">Payroll ▾</div></div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Continue</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.8</span><span class="t">Income · occupation API</span></div>
+          <div class="d">Step 2/4. Type-ahead occupation lookup backed by an ISCO-08 API dropdown, plus employer, income and pay-type.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 2.9 Receiving bank + name match -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Receiving account</h3><div class="sub">Step 3 of 4</div></div></div>
+              <div class="pad"><div class="steps"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div></div>
+              <div class="pad mt12" style="flex:1">
+                <div class="label">Bank</div>
+                <div class="row gap8" style="overflow:hidden">
+                  <div class="tile" style="flex:1;text-align:center;padding:10px;border:2px solid var(--cobalt)"><div style="width:30px;height:30px;border-radius:8px;background:#4e2a84;margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">S</div><div class="tiny mt6" style="font-weight:600">SCB</div></div>
+                  <div class="tile" style="flex:1;text-align:center;padding:10px"><div style="width:30px;height:30px;border-radius:8px;background:#0a5c2e;margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">K</div><div class="tiny mt6">KBank</div></div>
+                  <div class="tile" style="flex:1;text-align:center;padding:10px"><div style="width:30px;height:30px;border-radius:8px;background:#1279be;margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">T</div><div class="tiny mt6">KTB</div></div>
+                  <div class="tile" style="flex:1;text-align:center;padding:10px"><div style="width:30px;height:30px;border-radius:8px;background:#f7c600;margin:0 auto;color:#333;display:flex;align-items:center;justify-content:center;font-weight:800">B</div><div class="tiny mt6">BBL</div></div>
+                </div>
+                <div class="tiny muted mt6">Logos from Bank Directory API · PromptPay-ready</div>
+                <div class="label mt12">Account number</div>
+                <div class="input"><span>#</span> 123-4-56789-0</div>
+                <div class="card mt12" style="border:1.5px solid var(--ok);background:var(--ok-bg);padding:13px">
+                  <div class="row gap8"><span>✓</span><b style="color:var(--ok)">Name matches</b></div>
+                  <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>“Mr. Somchai Jaidee”</b> matches your verified ID name.</div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Name-match rule: disbursement account holder must equal e-KYC name (fuzzy ≥ <code>0.92</code>).
+                  Mismatch → block payout, flag for AML review.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Continue</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.9</span><span class="t">Receiving bank · name-match</span></div>
+          <div class="d">Step 3/4. Bank picker with logos from a directory API; account-holder name is verified against the e-KYC name (pass shown).</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 2.10 Document upload (book bank) -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Documents</h3><div class="sub">Step 4 of 4 · Upload</div></div></div>
+              <div class="pad"><div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div></div>
+              <div class="pad mt12" style="flex:1">
+                <div class="row between center"><b style="font-size:14px">Book bank (passbook)</b><span class="badge ok">2 files</span></div>
+                <div class="row gap10 mt10">
+                  <div class="thumb" style="flex:1"><span style="font-size:20px">📘</span>before.jpg<span class="badge ghost tiny" style="padding:2px 7px">cover</span></div>
+                  <div class="thumb" style="flex:1;border:1.5px solid var(--cobalt)"><span style="font-size:20px">🧾</span>after.jpg<span class="badge info tiny" style="padding:2px 7px">first page</span></div>
+                  <div class="thumb" style="flex:1;border-style:dashed;color:var(--cobalt)"><span style="font-size:22px">＋</span>Add</div>
+                </div>
+                <div class="card flat mt12" style="padding:11px">
+                  <b class="tiny">Other documents</b>
+                  <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">Payslip_May.pdf · 240KB</div><span class="badge ok tiny">Uploaded</span></div>
+                  <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">Statement_3mo.pdf · 1.1MB</div><span class="badge amber tiny">62%</span></div>
+                  <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">House_reg.jpg · 380KB</div><span class="badge ok tiny">Uploaded</span></div>
+                </div>
+                <div class="row gap10 mt10">
+                  <button class="btn ghost sm" style="flex:1">👁 Preview</button>
+                  <button class="btn ghost sm" style="flex:1">📷 Camera</button>
+                  <button class="btn ghost sm" style="flex:1">📁 Files</button>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Submit application</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.10</span><span class="t">Documents · book bank</span></div>
+          <div class="d">Step 4/4. Book-bank before/after capture with preview, multi-file list (uploaded / in-progress), and camera/files sources.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 2.11 Tax & compliance -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Tax &amp; compliance</h3><div class="sub">Regulatory declarations</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card flat">
+                  <b class="tiny">FATCA / CRS</b>
+                  <div class="li" style="padding:11px 0"><div style="flex:1" class="tiny">Are you a US person for tax?</div>
+                    <div class="seg" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
+                  <div class="li" style="padding:11px 0;border:none"><div style="flex:1" class="tiny">Tax resident outside Thailand?</div>
+                    <div class="seg" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
+                </div>
+                <div class="card flat mt12">
+                  <b class="tiny">PEP declaration</b>
+                  <div class="li" style="padding:11px 0;border:none"><div style="flex:1" class="tiny">Are you / a close associate a Politically Exposed Person?</div>
+                    <div class="seg" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Declarations feed AML risk scoring. <code>FATCA=Yes</code> → W-9/W-8BEN flow.
+                  <code>PEP=Yes</code> → enhanced due diligence + senior-approver gate. All answers are screened
+                  against sanctions/PEP lists regardless of self-declaration.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Confirm declarations</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.11</span><span class="t">Tax &amp; compliance</span></div>
+          <div class="d">FATCA/CRS tax-residency questions and a PEP self-declaration. INTERNAL card maps each answer to AML scoring and EDD gates.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 2.12 e-signature -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Loan agreement</h3><div class="sub">Review &amp; e-sign</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card" style="background:var(--navy);color:#fff">
+                  <div class="tiny" style="color:#aab8d6">Key terms · EIR disclosure</div>
+                  <div class="row between mt8"><span class="tiny" style="color:#cdd6ea">Principal</span><b>฿150,000</b></div>
+                  <div class="row between mt6"><span class="tiny" style="color:#cdd6ea">EIR (effective)</span><b style="color:var(--lime)">16.9% p.a.</b></div>
+                  <div class="row between mt6"><span class="tiny" style="color:#cdd6ea">Monthly</span><b>฿5,270 × 36</b></div>
+                  <div class="row between mt6"><span class="tiny" style="color:#cdd6ea">Total payable</span><b>฿189,720</b></div>
+                </div>
+                <div class="card flat mt12" style="max-height:120px;overflow:hidden;position:relative">
+                  <b class="tiny">Loan agreement</b>
+                  <div class="tiny muted" style="line-height:1.6;margin-top:6px">1. The Borrower agrees to repay the principal and interest at the effective interest rate disclosed above…
+                    2. Early settlement permitted without penalty per BoT guidance… 3. The Lender may report
+                    repayment conduct to the National Credit Bureau…</div>
+                  <div style="position:absolute;inset:auto 0 0 0;height:40px;background:linear-gradient(transparent,#fff)"></div>
+                </div>
+                <div class="tile mt12" style="display:flex;gap:11px;align-items:flex-start">
+                  <div style="width:22px;height:22px;border-radius:7px;background:var(--cobalt);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto">✓</div>
+                  <div class="tiny" style="line-height:1.5">I have read and <b>accept</b> the agreement and EIR disclosure. I agree this acceptance is my electronic signature (Electronic Transactions Act).</div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn lime">✍️ Accept &amp; sign</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.12</span><span class="t">E-signature</span></div>
+          <div class="d">EIR disclosure summary + scrollable agreement. Signing is an explicit accept-checkbox tied to the e-Transactions Act.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 2.13 Pre-screening -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen hero-navy">
+            <div class="statusbar on-dark"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body pad" style="color:#fff">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+                <div class="ring" style="--p:68;margin:0 auto;background:conic-gradient(var(--lime) 68%, rgba(255,255,255,.15) 0)"><div class="hole" style="background:#0f1b33"><div class="amount" style="font-size:26px;color:#fff">68%</div><div class="tiny" style="color:#aab8d6">screening</div></div></div>
+                <h2 style="text-align:center;font-size:22px;margin:22px 0 4px">Pre-screening your application</h2>
+                <p class="tiny" style="text-align:center;color:#aab8d6;margin:0 0 20px">Usually under a minute. You can close the app — we'll notify you.</p>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div class="row gap10" style="font-size:13px;color:#dfe7f7"><span class="dot" style="background:var(--ok)"></span> Identity verified (e-KYC) <span style="margin-left:auto">✓</span></div>
+                  <div class="row gap10" style="font-size:13px;color:#dfe7f7"><span class="dot" style="background:var(--ok)"></span> NCB credit bureau <span style="margin-left:auto">✓</span></div>
+                  <div class="row gap10" style="font-size:13px;color:#dfe7f7"><span class="dot" style="background:var(--ok)"></span> Sanctions / PEP / FATCA <span style="margin-left:auto">✓</span></div>
+                  <div class="row gap10" style="font-size:13px;color:#fff"><span class="dot" style="background:var(--lime)"></span> Affordability (DSR) <span class="bar" style="width:50px;margin-left:auto"></span></div>
+                  <div class="row gap10" style="font-size:13px;color:#7e8db0"><span class="dot" style="background:rgba(255,255,255,.2)"></span> Final scoring <span style="margin-left:auto">…</span></div>
+                </div>
+              </div>
+              <div class="sysnote" style="margin-bottom:22px;background:#0a1326">
+                <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                Async orchestration: NCB pull, AML screening, DSR &amp; scorecard run in parallel. Hard-stops
+                (sanctions hit) auto-decline; soft flags route to maker–checker queue.
+              </div>
+            </div>
+            <div class="home-ind on-dark"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.13</span><span class="t">Background pre-screening</span></div>
+          <div class="d">Live checklist of parallel checks (KYC, NCB, sanctions/PEP/FATCA, DSR, scoring). INTERNAL card explains hard-stop vs soft-flag routing.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 2.14 Status tracking (3-in-1) -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Application status</h3><div class="sub">#SPR-240615-0291</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card" style="background:var(--ok-bg);border:1.5px solid var(--ok)">
+                  <div class="row between center"><b style="color:var(--ok)">🎉 Approved</b><span class="badge ok">Offer ready</span></div>
+                  <div class="amount mt8" style="font-size:30px;color:var(--navy)">฿150,000</div>
+                  <div class="tiny muted">EIR 16.9% · ฿5,270 / mo · 36 mo</div>
+                  <button class="btn lime sm mt12">Accept &amp; disburse</button>
+                </div>
+                <div class="card flat mt12" style="padding:12px">
+                  <div class="tiny muted">Other possible outcomes</div>
+                  <div class="li" style="padding:10px 0"><span>🟠</span><div style="flex:1" class="tiny">Not approved this time — see reasons &amp; re-apply in 30 days</div><span class="badge amber tiny">Declined</span></div>
+                  <div class="li" style="padding:10px 0;border:none"><span>💬</span><div style="flex:1" class="tiny">Officer requested more info — open chat</div><span class="badge info tiny">Chat</span></div>
+                </div>
+                <div class="card flat mt12" style="padding:12px">
+                  <b class="tiny">Timeline</b>
+                  <div class="li" style="padding:8px 0"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Submitted · 14:02</div></div>
+                  <div class="li" style="padding:8px 0"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Pre-screened · 14:03</div></div>
+                  <div class="li" style="padding:8px 0;border:none"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Approved (maker–checker) · 15:40</div></div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px;display:flex;gap:10px"><button class="btn ghost" style="flex:1">💬 Chat</button><button class="btn primary" style="flex:2">View offer</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.14</span><span class="t">Status tracking</span></div>
+          <div class="d">Approved offer headline, plus the alternative outcomes (not approved / chat) and an audit timeline including the maker–checker step.</div>
+          <span class="flag happy">Happy</span><span class="flag edge" style="margin-left:6px">+ Edge states</span>
+        </div>
+      </div>
+
+      <!-- 2.15 Repayment PromptPay QR -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Repay loan</h3><div class="sub">PromptPay QR</div></div></div>
+              <div class="pad mt6" style="flex:1;display:flex;flex-direction:column;align-items:center">
+                <div class="card flat" style="width:100%;text-align:center;padding:12px">
+                  <div class="tiny muted">Instalment 3 of 36 · due 25 Jun</div>
+                  <div class="amount" style="font-size:26px">฿5,270.00</div>
+                </div>
+                <div class="card mt12" style="padding:18px;display:flex;flex-direction:column;align-items:center">
+                  <div class="row gap8 center"><span style="font-weight:800;color:#003d7a">PromptPay</span><span class="badge info tiny">Thai QR</span></div>
+                  <div class="qr mt12"></div>
+                  <div class="tiny muted mt12">Scan with any Thai banking app</div>
+                  <div class="tiny" style="font-weight:700;margin-top:2px">Sprout Finance · ref SPR0291</div>
+                </div>
+                <div class="row gap10 mt12" style="width:100%">
+                  <button class="btn ghost sm" style="flex:1">💾 Save QR</button>
+                  <button class="btn ghost sm" style="flex:1">🏦 Pay in app</button>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">I've paid · check status</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">2.15</span><span class="t">Repayment · PromptPay</span></div>
+          <div class="d">Instalment due card with a generated PromptPay Thai-QR (amount + reference embedded), save/share and in-app pay options.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LANE 3 — STAFF
+       ============================================================ -->
+  <section class="lane" id="lane-staff">
+    <div class="lane-head">
+      <div class="num">LANE 03</div>
+      <h2>Staff</h2>
+      <p>A unified task queue feeding the case hub: application review, scorecard, AML/compliance screening,
+         document verification, chat and a true maker–checker decision — the reviewer recommends, a different
+         approver decides — ending in disbursement.</p>
+    </div>
+    <div class="shelf">
+
+      <!-- 3.1 My tasks queue -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="pad" style="padding-top:6px">
+                <div class="row between center"><div><div class="tiny muted">Credit Officer</div><div style="font-family:'Bricolage Grotesque';font-weight:700;font-size:20px">My tasks</div></div><span class="badge navy">STAFF</span></div>
+                <div class="seg mt12"><button class="on">To review · 7</button><button>To approve · 3</button></div>
+              </div>
+              <div class="pad mt12" style="flex:1">
+                <div class="card flat" style="padding:0">
+                  <div class="li pad" style="padding:13px 14px"><div class="avatar" style="background:var(--cobalt)">S</div><div style="flex:1"><b class="tiny">Somchai J. · ฿150k</b><div class="tiny muted">#SPR-0291 · SLA 2h</div></div><span class="badge amber">Review</span></div>
+                  <div class="li pad" style="padding:13px 14px"><div class="avatar" style="background:#7c3aed">M</div><div style="flex:1"><b class="tiny">Malee P. · ฿80k</b><div class="tiny muted">#SPR-0288 · PEP flag</div></div><span class="badge red">EDD</span></div>
+                  <div class="li pad" style="padding:13px 14px"><div class="avatar" style="background:#0891b2">N</div><div style="flex:1"><b class="tiny">Niran K. · ฿300k</b><div class="tiny muted">#SPR-0285 · docs pending</div></div><span class="badge ghost">Hold</span></div>
+                  <div class="li pad" style="padding:13px 14px;border:none"><div class="avatar" style="background:#16a34a">W</div><div style="flex:1"><b class="tiny">Wira S. · ฿45k</b><div class="tiny muted">#SPR-0284 · clean</div></div><span class="badge amber">Review</span></div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Queue auto-prioritises by SLA &amp; risk. A maker cannot see the <b>To approve</b> tab for a case they
+                  reviewed (segregation of duties).
+                </div>
+              </div>
+            </div>
+            <div class="tabbar"><a class="on"><span class="ti">✅</span>Tasks</a><a><span class="ti">🔎</span>Search</a><a><span class="ti">📊</span>Stats</a><a><span class="ti">👤</span>Me</a></div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.1</span><span class="t">My tasks queue</span></div>
+          <div class="d">Unified queue with <em>To review</em> / <em>To approve</em> tabs, SLA &amp; risk badges. INTERNAL card enforces segregation of duties.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.2 Case search -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Case search</h3></div></div>
+              <div class="pad"><div class="input focus"><span>🔎</span> 0291 <span style="margin-left:auto" class="muted">✕</span></div>
+                <div class="row gap6 mt10" style="flex-wrap:wrap"><span class="badge ghost">Status: Any ▾</span><span class="badge ghost">Risk: High ▾</span><span class="badge info">Mine</span></div>
+              </div>
+              <div class="pad mt12" style="flex:1">
+                <div class="tiny muted">3 results</div>
+                <div class="card flat mt8" style="padding:0">
+                  <div class="li pad" style="padding:13px 14px"><div class="avatar" style="background:var(--cobalt)">S</div><div style="flex:1"><b class="tiny">Somchai Jaidee</b><div class="tiny muted">#SPR-240615-0291 · ฿150k</div></div><span class="badge amber">In review</span></div>
+                  <div class="li pad" style="padding:13px 14px"><div class="avatar" style="background:#64748b">S</div><div style="flex:1"><b class="tiny">Somsak Meechai</b><div class="tiny muted">#SPR-240514-0291b · ฿95k</div></div><span class="badge ok">Disbursed</span></div>
+                  <div class="li pad" style="padding:13px 14px;border:none"><div class="avatar" style="background:#94a3b8">A</div><div style="flex:1"><b class="tiny">Anong Suk</b><div class="tiny muted">#SPR-240301-0291c · ฿20k</div></div><span class="badge ghost">Declined</span></div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Search spans ID/case/name/phone. Every query is <b>audit-logged</b> with officer ID for AML traceability.
+                </div>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.2</span><span class="t">Case search</span></div>
+          <div class="d">Search by case/ID/name/phone with status &amp; risk filters. INTERNAL card notes audit-logging of every query.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.3 Case hub -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Case hub</h3><div class="sub">#SPR-240615-0291</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card" style="background:var(--navy);color:#fff">
+                  <div class="row between center"><div class="row gap10"><div class="avatar" style="background:var(--cobalt)">S</div><div><b>Somchai Jaidee</b><div class="tiny" style="color:#aab8d6">Engineer · ฿45k/mo</div></div></div><span class="badge amber">In review</span></div>
+                  <div class="row gap12 mt12"><div><div class="tiny" style="color:#aab8d6">Request</div><b style="color:var(--lime)">฿150,000</b></div><div><div class="tiny" style="color:#aab8d6">EIR</div><b>16.9%</b></div><div><div class="tiny" style="color:#aab8d6">DSR</div><b>41%</b></div></div>
+                </div>
+                <div class="card flat mt12" style="padding:8px">
+                  <div class="li pad" style="padding:11px"><span>📋</span><div style="flex:1" class="tiny">Application data</div><span class="badge ok tiny">Complete</span><span class="muted">›</span></div>
+                  <div class="li pad" style="padding:11px"><span>📊</span><div style="flex:1" class="tiny">Score breakdown</div><b class="tiny" style="color:var(--cobalt)">A- · 742</b><span class="muted">›</span></div>
+                  <div class="li pad" style="padding:11px"><span>🛡️</span><div style="flex:1" class="tiny">Compliance &amp; screening</div><span class="badge amber tiny">1 flag</span><span class="muted">›</span></div>
+                  <div class="li pad" style="padding:11px"><span>📎</span><div style="flex:1" class="tiny">Documents (6)</div><span class="badge amber tiny">1 review</span><span class="muted">›</span></div>
+                  <div class="li pad" style="padding:11px;border:none"><span>💬</span><div style="flex:1" class="tiny">Chat with customer</div><span class="badge info tiny">2 new</span><span class="muted">›</span></div>
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px;display:flex;gap:10px"><button class="btn ghost" style="flex:1">Request docs</button><button class="btn primary" style="flex:1">Recommend ▸</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.3</span><span class="t">Case hub</span></div>
+          <div class="d">Single pane of glass per case: applicant summary, request/EIR/DSR, and entry points to every review surface.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 3.4 Application-data review -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Application data</h3><div class="sub">#SPR-0291 · review</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card flat" style="padding:12px">
+                  <b class="tiny">Identity (e-KYC)</b>
+                  <div class="li" style="padding:9px 0"><div style="flex:1" class="tiny">Thai ID · 1-1029-xxxxx-42-1</div><span class="badge ok tiny">NDID ✓</span></div>
+                  <div class="li" style="padding:9px 0;border:none"><div style="flex:1" class="tiny">Name match · ID ↔ bank</div><span class="badge ok tiny">0.98 ✓</span></div>
+                </div>
+                <div class="card flat mt10" style="padding:12px">
+                  <b class="tiny">Income</b>
+                  <div class="li" style="padding:9px 0"><div style="flex:1" class="tiny">Declared ฿45,000</div><span class="badge ok tiny">Payslip ✓</span></div>
+                  <div class="li" style="padding:9px 0;border:none"><div style="flex:1" class="tiny">Bank-verified avg</div><b class="tiny">฿46,800</b></div>
+                </div>
+                <div class="card flat mt10" style="padding:12px">
+                  <b class="tiny">Affordability</b>
+                  <div class="li" style="padding:9px 0;border:none"><div style="flex:1" class="tiny">DSR (incl. new loan)</div><span class="badge ok tiny">41% ≤ 70%</span></div>
+                </div>
+                <div class="sysnote mt10">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Declared vs verified deltas &gt; <code>15%</code> auto-flag. NCB bureau pull stored read-only; officer edits
+                  create an immutable change-log entry.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Looks good · next</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.4</span><span class="t">Application-data review</span></div>
+          <div class="d">Side-by-side declared vs verified data across identity, income and affordability, with auto-flag and change-log rules.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.5 Score breakdown -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Score breakdown</h3><div class="sub">#SPR-0291</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card" style="text-align:center;background:var(--navy);color:#fff">
+                  <div class="ring" style="--p:74;margin:0 auto;background:conic-gradient(var(--lime) 74%, rgba(255,255,255,.15) 0)"><div class="hole" style="background:#0f1b33"><div class="amount" style="font-size:28px;color:#fff">742</div><div class="tiny" style="color:#aab8d6">Grade A-</div></div></div>
+                  <div class="tiny mt8" style="color:#aab8d6">Probability of default · 3.1%</div>
+                </div>
+                <div class="card flat mt12" style="padding:13px">
+                  <div class="row between mt6"><span class="tiny">Bureau history (NCB)</span><b class="tiny" style="color:var(--ok)">+ Strong</b></div>
+                  <div style="height:7px;border-radius:4px;background:var(--line-2);margin:6px 0 12px"><div style="width:82%;height:100%;background:var(--cobalt);border-radius:4px"></div></div>
+                  <div class="row between"><span class="tiny">Affordability (DSR)</span><b class="tiny" style="color:var(--ok)">+ Good</b></div>
+                  <div style="height:7px;border-radius:4px;background:var(--line-2);margin:6px 0 12px"><div style="width:68%;height:100%;background:var(--cobalt);border-radius:4px"></div></div>
+                  <div class="row between"><span class="tiny">Stability / tenure</span><b class="tiny" style="color:var(--amber)">~ Fair</b></div>
+                  <div style="height:7px;border-radius:4px;background:var(--line-2);margin:6px 0 12px"><div style="width:54%;height:100%;background:var(--amber);border-radius:4px"></div></div>
+                  <div class="row between"><span class="tiny">Utilisation</span><b class="tiny" style="color:var(--ok)">+ Low</b></div>
+                  <div style="height:7px;border-radius:4px;background:var(--line-2);margin:6px 0 0"><div style="width:30%;height:100%;background:var(--cobalt);border-radius:4px"></div></div>
+                </div>
+                <div class="sysnote mt10">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Explainable scorecard — top reason codes shown. Model governance: versioned, bias-monitored;
+                  officer sees factors but cannot override the grade, only the decision.
+                </div>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.5</span><span class="t">Score breakdown</span></div>
+          <div class="d">Explainable scorecard — grade, PD and weighted reason-code factors. INTERNAL card states model governance limits.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.6 Compliance & screening -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Compliance &amp; screening</h3><div class="sub">#SPR-0291 · AML/CFT</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card flat" style="padding:0">
+                  <div class="li pad" style="padding:13px 14px"><span>🌍</span><div style="flex:1"><b class="tiny">Sanctions (UN/OFAC/TH)</b><div class="tiny muted">0 hits</div></div><span class="badge ok">Clear</span></div>
+                  <div class="li pad" style="padding:13px 14px"><span>🏛️</span><div style="flex:1"><b class="tiny">PEP screening</b><div class="tiny muted">Possible match · spouse</div></div><span class="badge amber">Review</span></div>
+                  <div class="li pad" style="padding:13px 14px"><span>🇺🇸</span><div style="flex:1"><b class="tiny">FATCA / CRS</b><div class="tiny muted">Non-US · TH tax resident</div></div><span class="badge ok">Clear</span></div>
+                  <div class="li pad" style="padding:13px 14px;border:none"><span>📰</span><div style="flex:1"><b class="tiny">Adverse media</b><div class="tiny muted">0 relevant</div></div><span class="badge ok">Clear</span></div>
+                </div>
+                <div class="card mt12" style="background:var(--amber-bg);border:1.5px solid var(--amber)">
+                  <div class="row between center"><b class="tiny" style="color:var(--amber)">AML risk rating</b><span class="badge amber">MEDIUM</span></div>
+                  <div class="tiny mt6" style="color:#8a6207">PEP-adjacent → Enhanced Due Diligence required. Source-of-funds note needed before approval.</div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Risk = max(customer, product, channel, geography). <code>MEDIUM/HIGH</code> ⇒ EDD + senior approver.
+                  Confirmed sanctions hit ⇒ hard auto-decline + STR consideration (AMLO).
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px;display:flex;gap:10px"><button class="btn ghost" style="flex:1">False positive</button><button class="btn dark" style="flex:1">Start EDD</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.6</span><span class="t">Compliance &amp; screening</span></div>
+          <div class="d">Sanctions / PEP / FATCA / adverse-media results with a composite AML risk rating triggering EDD. Shows a PEP edge flag.</div>
+          <span class="flag edge">Edge state</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.7 Document verify -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Verify documents</h3><div class="sub">#SPR-0291 · 6 files</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card flat" style="padding:12px">
+                  <div class="row gap10"><div class="thumb" style="width:64px;height:64px">🪪</div>
+                    <div style="flex:1"><b class="tiny">Thai ID (front)</b><div class="tiny muted">OCR confidence 99%</div>
+                      <div class="row gap6 mt8"><span class="badge ok tiny">✓ Verified</span></div></div></div>
+                </div>
+                <div class="card flat mt10" style="padding:12px;border:1.5px solid var(--amber)">
+                  <div class="row gap10"><div class="thumb" style="width:64px;height:64px">📘</div>
+                    <div style="flex:1"><b class="tiny">Book bank · after.jpg</b><div class="tiny muted">Name legible · last txn unclear</div>
+                      <div class="row gap6 mt8"><span class="badge amber tiny">Needs review</span></div></div></div>
+                </div>
+                <div class="card flat mt10" style="padding:12px">
+                  <div class="row gap10"><div class="thumb" style="width:64px;height:64px">🧾</div>
+                    <div style="flex:1"><b class="tiny">Payslip_May.pdf</b><div class="tiny muted">Employer mismatch vs form</div>
+                      <div class="row gap6 mt8"><span class="badge red tiny">Re-request</span></div></div></div>
+                </div>
+                <div class="sysnote mt10">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Per-file states: <code>verified</code> · <code>needs_review</code> · <code>re_request</code>. Re-request notifies
+                  the customer with a reason; case parks in <b>awaiting-docs</b> without losing review progress.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px;display:flex;gap:10px"><button class="btn ghost" style="flex:1">✓ Verify selected</button><button class="btn dark" style="flex:1">Re-request</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.7</span><span class="t">Document verify</span></div>
+          <div class="d">Per-document verdicts — Verified, Needs review, Re-request — each with OCR confidence and a reason. Edge + failure on two files.</div>
+          <span class="flag edge">Edge state</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.8 Chat -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body" style="background:#EEF1F6">
+              <div class="appbar" style="background:#fff;border-bottom:1px solid var(--line)"><div class="ico">‹</div><div class="avatar" style="background:var(--cobalt);width:34px;height:34px;border-radius:11px">S</div><div><h3 style="font-size:15px">Somchai J.</h3><div class="sub" style="color:var(--ok)">● online · #SPR-0291</div></div></div>
+              <div class="pad" style="flex:1;display:flex;flex-direction:column;gap:9px;padding-top:14px">
+                <div class="tiny muted" style="text-align:center">Today</div>
+                <div class="bub them">Hi — is the payslip I sent okay?</div>
+                <div class="bub me">Hi Somchai 👋 The payslip employer doesn't match your form. Could you re-upload May's official payslip?</div>
+                <div class="bub them" style="padding:8px">🧾 <b>Payslip_May_v2.pdf</b><div class="tiny muted">240 KB · tap to view</div></div>
+                <div class="bub me">Received, thank you — reviewing now.</div>
+                <div class="tiny" style="text-align:center;color:var(--ink-3)">🔒 Messages are logged to the case file</div>
+              </div>
+              <div style="background:#fff;border-top:1px solid var(--line);padding:10px 14px 22px;display:flex;gap:10px;align-items:center">
+                <span style="font-size:20px">📎</span>
+                <div class="input" style="flex:1;height:42px;border-radius:21px"><span class="ph">Message…</span></div>
+                <div style="width:42px;height:42px;border-radius:50%;background:var(--cobalt);color:#fff;display:flex;align-items:center;justify-content:center">➤</div>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.8</span><span class="t">Chat</span></div>
+          <div class="d">Officer↔customer thread with file attachments, tied to the case and logged to the audit file for compliance.</div>
+          <span class="flag happy">Happy path</span>
+        </div>
+      </div>
+
+      <!-- 3.9 Maker-checker -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Decision</h3><div class="sub">#SPR-0291 · Maker–Checker</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card flat" style="padding:13px">
+                  <div class="row gap10"><div class="avatar" style="background:var(--cobalt);width:34px;height:34px;border-radius:11px">P</div>
+                    <div style="flex:1"><b class="tiny">Maker · Ploy (reviewer)</b><div class="tiny muted">Recommended · 15:12</div></div><span class="badge info">Recommend ✓</span></div>
+                  <div class="tile mt10" style="padding:11px"><div class="tiny muted">Recommendation</div><b class="tiny" style="color:var(--cobalt)">Approve ฿150,000 @ 16.9% EIR</b><div class="tiny muted mt6">“DSR 41%, A- score, PEP cleared as false-positive (spouse). EDD note attached.”</div></div>
+                </div>
+                <div class="card mt12" style="border:2px solid var(--cobalt)">
+                  <div class="row gap10"><div class="avatar" style="background:var(--navy);width:34px;height:34px;border-radius:11px">Y</div>
+                    <div style="flex:1"><b class="tiny">Checker · You (approver)</b><div class="tiny muted">Senior credit · decide</div></div><span class="badge amber">Pending</span></div>
+                  <div class="divider"></div>
+                  <div class="row gap10"><button class="btn ghost sm" style="flex:1">Return to maker</button><button class="btn dark sm" style="flex:1">Decline</button></div>
+                  <button class="btn lime mt10">Approve &amp; issue offer</button>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Four-eyes: approver ≠ maker, enforced server-side. EDD/PEP cases require senior tier.
+                  Decision, identity &amp; rationale are immutably logged.
+                </div>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.9</span><span class="t">Maker–checker</span></div>
+          <div class="d">The reviewer's recommendation + rationale, decided by a different senior approver (approve / decline / return). Four-eyes enforced.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.10 Request more docs -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Request more docs</h3><div class="sub">#SPR-0291</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="tiny muted">Select what to request from the customer</div>
+                <div class="card flat mt8" style="padding:6px">
+                  <div class="li pad" style="padding:11px"><div style="width:22px;height:22px;border-radius:7px;background:var(--cobalt);color:#fff;display:flex;align-items:center;justify-content:center">✓</div><div style="flex:1" class="tiny">Official May payslip (employer match)</div></div>
+                  <div class="li pad" style="padding:11px"><div style="width:22px;height:22px;border-radius:7px;background:var(--cobalt);color:#fff;display:flex;align-items:center;justify-content:center">✓</div><div style="flex:1" class="tiny">Book bank · clearer last page</div></div>
+                  <div class="li pad" style="padding:11px;border:none"><div style="width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line-2)"></div><div style="flex:1" class="tiny">Source-of-funds note (EDD)</div></div>
+                </div>
+                <div class="label mt12">Message to customer</div>
+                <div class="card flat" style="padding:11px"><div class="tiny" style="line-height:1.5">“Please re-upload your May payslip showing your employer name, and a clearer book-bank page. Thank you!”</div></div>
+                <div class="row gap8 mt10"><span class="badge ghost">+ Thai translation</span><span class="badge info">Due in 7 days</span></div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Sets case to <code>awaiting_docs</code>, pauses SLA clock, push + SMS to customer. Review progress preserved.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Send request</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.10</span><span class="t">Request more docs</span></div>
+          <div class="d">Checklist of items to re-request + editable bilingual message and due date; parks the case as awaiting-docs and pauses SLA.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.11 Update status -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Update status</h3><div class="sub">#SPR-0291</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card flat" style="padding:8px">
+                  <div class="li pad" style="padding:12px"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Approved</div><div style="width:20px;height:20px;border-radius:50%;border:6px solid var(--cobalt)"></div></div>
+                  <div class="li pad" style="padding:12px"><span class="dot" style="background:var(--amber)"></span><div style="flex:1" class="tiny">Approved with conditions</div><div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2)"></div></div>
+                  <div class="li pad" style="padding:12px"><span class="dot" style="background:var(--soft-red)"></span><div style="flex:1" class="tiny">Not approved</div><div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2)"></div></div>
+                  <div class="li pad" style="padding:12px;border:none"><span class="dot" style="background:var(--ink-3)"></span><div style="flex:1" class="tiny">On hold</div><div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2)"></div></div>
+                </div>
+                <div class="label mt12">Reason code</div>
+                <div class="input">Affordability &amp; bureau OK ▾</div>
+                <div class="label mt12">Internal note</div>
+                <div class="card flat" style="padding:11px"><div class="tiny muted">Conditions cleared post-EDD. Offer at requested amount.</div></div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Status change requires reason code + note. Customer-facing copy is auto-generated (no internal
+                  notes leak). Transition validated against maker–checker state.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn primary">Save status</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.11</span><span class="t">Update status</span></div>
+          <div class="d">Choose the case outcome with a mandatory reason code and internal note; customer-facing text is generated separately.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+      <!-- 3.12 Disbursement -->
+      <div class="frame-wrap">
+        <div class="device"><div class="device-frame"><div class="device-inner">
+          <div class="island"></div>
+          <div class="screen">
+            <div class="statusbar"><span class="sb-time">9:41</span><span class="sb-right">●●● 5G ▮▮▮</span></div>
+            <div class="app-body">
+              <div class="appbar"><div class="ico">‹</div><div><h3>Disbursement</h3><div class="sub">#SPR-0291 · final</div></div></div>
+              <div class="pad mt6" style="flex:1">
+                <div class="card" style="background:var(--ok-bg);border:1.5px solid var(--ok);text-align:center">
+                  <div style="font-size:28px">✅</div><b style="color:var(--ok)">Approved &amp; ready to disburse</b>
+                  <div class="amount mt6" style="font-size:30px;color:var(--navy)">฿150,000</div>
+                </div>
+                <div class="card flat mt12" style="padding:13px">
+                  <div class="row between"><span class="tiny muted">To account</span><b class="tiny">SCB · xxx-x-x6789-0</b></div>
+                  <div class="row between mt8"><span class="tiny muted">Holder</span><b class="tiny">Mr. Somchai Jaidee</b></div>
+                  <div class="row between mt8"><span class="tiny muted">Name match</span><span class="badge ok tiny">0.98 ✓</span></div>
+                  <div class="row between mt8"><span class="tiny muted">Net (after fee)</span><b class="tiny" style="color:var(--cobalt)">฿149,500</b></div>
+                </div>
+                <div class="card flat mt12" style="padding:13px">
+                  <b class="tiny">Pre-disbursement gates</b>
+                  <div class="li" style="padding:8px 0"><span style="color:var(--ok)">✓</span><div style="flex:1" class="tiny">Maker–checker approved</div></div>
+                  <div class="li" style="padding:8px 0"><span style="color:var(--ok)">✓</span><div style="flex:1" class="tiny">e-Signature captured</div></div>
+                  <div class="li" style="padding:8px 0;border:none"><span style="color:var(--ok)">✓</span><div style="flex:1" class="tiny">AML/EDD cleared</div></div>
+                </div>
+                <div class="sysnote mt12">
+                  <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+                  Payout via bank rail to the name-matched PromptPay/account only. Dual-control release;
+                  triggers loan-account creation &amp; first NCB reporting.
+                </div>
+              </div>
+              <div class="pad" style="padding-bottom:18px"><button class="btn lime">💸 Release ฿149,500</button></div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div></div></div>
+        <div class="cap">
+          <div><span class="n">3.12</span><span class="t">Disbursement</span></div>
+          <div class="d">Final payout to the name-matched account with net-of-fee amount and a pre-disbursement gate checklist under dual control.</div>
+          <span class="flag happy">Happy path</span><span class="flag sys" style="margin-left:6px">System rule</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <footer class="gfoot">
+    <p><b>Sprout LOS</b> · screen gallery · 32 screens across 3 lanes · THB (฿) · built to Thai AML/CFT &amp; BoT Responsible-Lending norms.</p>
+    <p class="muted">This is a high-fidelity design + front-end reference. The same screens ship as a WebView-wrapped app
+       (iOS App Store / Google Play) and as an installable PWA for mobile &amp; desktop browsers — see <a href="app/index.html">/app</a> and <code>README.md</code>.</p>
+  </footer>
+
+</div>
+</body>
+</html>
