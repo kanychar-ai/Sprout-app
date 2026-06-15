@@ -15,7 +15,7 @@ This repo ships **two things**:
 | | |
 |---|---|
 | **Brand** | Electric cobalt `#2563EB` / dark `#1E40AF`, lime accent `#C6F24E`, navy `#0F1B33`, paper background |
-| **Type** | Bricolage Grotesque (headings) · Anuphan (body, รองรับภาษาไทย) |
+| **Type** | Bricolage Grotesque (headings) · Anuphan (body, Thai-capable) |
 | **Currency** | THB (฿) |
 | **Status colours** | green = ok · amber = needs attention (no harsh red) |
 

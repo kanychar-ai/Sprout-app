@@ -9,7 +9,7 @@
   "orientation": "portrait",
   "background_color": "#0F1B33",
   "theme_color": "#2563EB",
-  "lang": "th-TH",
+  "lang": "en",
   "categories": ["finance"],
   "icons": [
     { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },

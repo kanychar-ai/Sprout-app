@@ -7,7 +7,7 @@
   var FEE = 0.005;             // small processing component folded into the effective rate
 
   var TITLES = {
-    home:   ['Sprout', 'เงินกู้ที่โปร่งใส · transparent lending'],
+    home:   ['Sprout', 'Transparent lending'],
     calc:   ['EIR calculator', 'Personal Loan'],
     status: ['Application status', '#SPR-240615-0291'],
     repay:  ['Repay loan', 'PromptPay QR']
