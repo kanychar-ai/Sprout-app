@@ -12,8 +12,8 @@
   // [title, subtitle] for the shared top bar. `null` ⇒ screen draws its own header (hero/immersive).
   var TITLES = {
     onboard:  null,
-    create:   ['Create account', 'Step 1 of 2 · Your details'],
-    otp:      ['Verify mobile', 'Step 2 of 2'],
+    create:   ['Create account', ''],
+    otp:      ['Verify mobile', ''],
     login:    null,
     role:     null,
     home:     ['Sprout', 'Transparent lending'],
@@ -60,7 +60,11 @@
     nav.style.display = SHOW_NAV[name] ? '' : 'none';
     navBtns.forEach(function (b) { b.classList.toggle('on', b.dataset.go === NAV_FOR[name]); });
 
-    if (TITLES[name]) { title.textContent = TITLES[name][0]; subtitle.textContent = TITLES[name][1]; }
+    if (TITLES[name]) {
+      title.textContent = TITLES[name][0];
+      subtitle.textContent = TITLES[name][1];
+      subtitle.style.display = TITLES[name][1] ? '' : 'none';
+    }
     back.hidden = immersive;   // hero screens own their navigation; flow screens get a back arrow
 
     if (push !== false) { if (history[history.length - 1] !== name) history.push(name); }
@@ -68,6 +72,7 @@
     views[name].scrollTop = 0;
 
     if (name === 'prescreen') runPrescreen();
+    if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home'); }, 1400);
   }
 
   // navigation wiring (data-go on any element)
@@ -114,9 +119,21 @@
     var t = 24, timer = document.getElementById('otpTimer');
     setInterval(function () {
       if (t > 0) t--;
-      timer.textContent = '00:' + (t < 10 ? '0' : '') + t;
+      timer.textContent = '0:' + (t < 10 ? '0' : '') + t;
     }, 1000);
   }
+
+  // ---- password show / hide toggles ----
+  document.querySelectorAll('[data-eye]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var f = document.getElementById(btn.dataset.eye);
+      if (!f) return;
+      var show = f.type === 'password';
+      f.type = show ? 'text' : 'password';
+      btn.classList.toggle('on', show);
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+  });
 
   // ---- occupation typeahead (income step) ----
   var occList = document.getElementById('occList');
@@ -291,6 +308,8 @@
   }
   var paid = document.getElementById('paidBtn');
   if (paid) paid.addEventListener('click', function () { showToast('✓ Payment received — instalment 3 marked paid'); });
+  var forgot = document.getElementById('liForgot');
+  if (forgot) forgot.addEventListener('click', function () { showToast('📩 Reset link sent to your registered number'); });
   document.getElementById('applyBtn').addEventListener('click', function () {
     if (!this.disabled) showToast('✓ Application started — verifying your identity');
   });

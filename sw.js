@@ -1,5 +1,5 @@
-/* Sprout LOS — service worker (offline-first PWA shell) */
-const CACHE = 'sprout-los-v2';
+/* Sprout LOS — service worker (network-first PWA shell) */
+const CACHE = 'sprout-los-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -23,16 +23,17 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+/* Network-first: always try the live build, fall back to cache only when offline.
+   This guarantees a fresh app shell after every deploy (no more stale renders). */
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then((cached) =>
-      cached ||
-      fetch(e.request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        return res;
-      }).catch(() => caches.match('./index.html'))
+    fetch(e.request).then((res) => {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      return res;
+    }).catch(() =>
+      caches.match(e.request).then((cached) => cached || caches.match('./index.html'))
     )
   );
 });

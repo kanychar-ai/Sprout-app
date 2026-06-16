@@ -27,54 +27,49 @@
 
   <!-- ===================== AUTH / ENTRY ===================== -->
 
-  <!-- 1.1 Onboarding -->
-  <section class="view fill hero-view" data-view="onboard" hidden>
-    <div class="auth-hero" style="background:linear-gradient(160deg,#2563EB 0%,#1E40AF 100%)">
-      <div class="auth-mid">
-        <div class="brand-badge">🌱</div>
-        <h1 class="auth-h1">Money that<br>grows with you.</h1>
-        <p class="auth-p">Personal loans from ฿5,000 to ฿2,000,000. Transparent EIR. A decision you can trust — built on Bank of Thailand responsible-lending rules.</p>
-        <div class="row gap8 mt20" style="flex-wrap:wrap">
-          <span class="badge ondark">⚡ Indicative offer in 60s</span>
-          <span class="badge ondark">🔒 PDPA secured</span>
-        </div>
+  <!-- 1.1 Onboarding splash -->
+  <section class="view fill" data-view="onboard" hidden>
+    <div class="splash">
+      <div class="splash-mid">
+        <div class="logo-tile"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27V13" /><path d="M16 16c0-4 3-7 8-7 0 5-4 8-8 8Z" /><path d="M16 19c0-3-2.4-6-7-6 0 4 3 6 7 6Z" /></svg></div>
+        <h1 class="splash-title">Sprout</h1>
+        <p class="splash-sub">Borrow smart,<br>grow from here</p>
       </div>
-      <div class="auth-foot">
-        <div class="dots"><span class="d on"></span><span class="d"></span><span class="d"></span></div>
-        <button class="btn lime" data-go="create">Get started</button>
-        <button class="btn translucent mt10" data-go="login">I already have an account</button>
+      <div class="splash-foot">
+        <div class="chips">
+          <span class="chip">Apply in 5 min</span>
+          <span class="chip">No branch needed</span>
+        </div>
+        <button class="btn primary" id="onbStart" data-go="create">Get started</button>
+        <p class="splash-alt">Already a member? <b class="link" data-go="login">Log in</b></p>
       </div>
     </div>
   </section>
 
   <!-- 1.2 Create account -->
   <section class="view" data-view="create" hidden>
-    <div class="steps mb14"><i class="on"></i><i></i></div>
-    <div class="label">Full name (as on Thai ID)</div>
-    <div class="input"><span>👤</span> Somchai Jaidee</div>
-    <div class="label mt12">Username</div>
-    <div class="input focus"><span>@</span> somchai.j <span style="margin-left:auto;color:var(--ok)">✓</span></div>
-    <div class="help ok">Available</div>
+    <div class="label">Full name</div>
+    <div class="input"><input class="bare" id="suName" value="Mintra Jaidee" autocomplete="name" placeholder="Your full name"></div>
+    <div class="label mt12">Username <span class="label-hint">· you'll log in with this</span></div>
+    <div class="input"><span>👤</span><input class="bare" id="suUser" value="mintra.jaidee" autocomplete="username" placeholder="username"></div>
     <div class="label mt12">Mobile number</div>
-    <div class="input"><span>🇹🇭 +66</span> 81 234 5678</div>
-    <div class="label mt12">Password</div>
-    <div class="input"><span>🔒</span> ••••••••••• <span style="margin-left:auto">👁</span></div>
+    <div class="input"><span>📱</span><input class="bare" id="suMobile" inputmode="tel" value="081-234-5678" autocomplete="tel" placeholder="08X-XXX-XXXX"></div>
+    <div class="label mt12">Create password</div>
+    <div class="input"><span>🔒</span><input class="bare" id="suPass" type="password" value="Sprout123!" autocomplete="new-password" placeholder="Create a password"><button class="eye" id="suEye" type="button" aria-label="Show password" data-eye="suPass">👁</button></div>
     <div class="row gap6 mt8"><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar"></i></div>
     <div class="help">Strong · 8+ chars, number &amp; symbol</div>
     <div class="tile mt14 consent" data-toggle="consent">
       <div class="ck on"><span>✓</span></div>
-      <div class="ctxt">I consent to the <b>PDPA terms</b> and to a <b>NCB credit-bureau check</b> when I apply.</div>
+      <div class="ctxt">I agree to the <b>Terms &amp; Privacy</b> and consent to e-KYC and credit-bureau (NCB) checks.</div>
     </div>
-    <button class="btn primary mt16" data-go="otp">Continue</button>
+    <button class="btn primary mt16" id="suSubmit" data-go="otp">Create account</button>
+    <p class="splash-alt mt14">Already a member? <b class="link" data-go="login">Log in</b></p>
   </section>
 
-  <!-- 1.3 OTP -->
+  <!-- 1.3 Verify mobile / OTP -->
   <section class="view" data-view="otp" hidden>
-    <div class="card flat" style="text-align:center;padding:18px">
-      <div class="tiny muted">We sent a 6-digit code to</div>
-      <div class="amount" style="font-size:21px;margin-top:4px">+66 8X XXX 5678</div>
-      <div class="badge info" style="margin-top:8px">SMS · last 4 shown only</div>
-    </div>
+    <h1 class="flow-h1">Confirm your number</h1>
+    <p class="flow-sub">Enter the 6-digit code we sent to <b>••••••••5678</b></p>
     <div class="otp-row mt20" id="otpRow">
       <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 1">
       <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 2">
@@ -83,33 +78,33 @@
       <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 5">
       <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 6">
     </div>
-    <div class="row between mt16" style="font-size:13px">
-      <span class="muted">Resend code in</span><span style="font-weight:700;color:var(--cobalt)" id="otpTimer">00:24</span>
+    <div class="row center mt16" style="font-size:13px">
+      <span class="muted">Resend code in&nbsp;</span><span style="font-weight:700;color:var(--cobalt)" id="otpTimer">0:24</span>
     </div>
-    <div class="sysnote mt16">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      OTP TTL <code>5 min</code>, max <code>5 attempts</code> then 30-min lock. Number is masked in UI &amp; logs (last 4 only) per <b>PDPA data-minimisation</b>.
+    <button class="btn primary mt20" id="otpSubmit" data-go="role">Verify &amp; finish</button>
+    <div class="infobox mt14">
+      <span class="ib-ic">🔒</span>
+      <span>Your number secures every future login</span>
     </div>
-    <button class="btn primary mt16" data-go="role">Verify</button>
   </section>
 
   <!-- 1.4 Login -->
   <section class="view fill" data-view="login" hidden>
     <div class="login-wrap">
       <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
-        <div class="brand-badge sm">🌱</div>
-        <h1 style="font-size:32px;margin:20px 0 4px">Welcome back</h1>
-        <p class="muted" style="margin:0 0 22px;font-size:14px">Sign in to continue your application.</p>
+        <div class="logo-tile sm"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27V13" /><path d="M16 16c0-4 3-7 8-7 0 5-4 8-8 8Z" /><path d="M16 19c0-3-2.4-6-7-6 0 4 3 6 7 6Z" /></svg></div>
+        <h1 class="flow-h1" style="margin-top:18px">Welcome back</h1>
+        <p class="flow-sub">Log in to continue your application.</p>
         <div class="label">Username</div>
-        <div class="input"><span>@</span> somchai.j</div>
+        <div class="input"><span>👤</span><input class="bare" id="liUser" value="mintra.jaidee" autocomplete="username" placeholder="username"></div>
         <div class="label mt12">Password</div>
-        <div class="input"><span>🔒</span> •••••••••• <span style="margin-left:auto">👁</span></div>
-        <div style="text-align:right;margin-top:8px"><span style="font-size:12.5px;color:var(--cobalt);font-weight:600">Forgot password?</span></div>
-        <button class="btn primary mt16" data-go="role">Log in</button>
+        <div class="input"><span>🔒</span><input class="bare" id="liPass" type="password" value="Sprout123!" autocomplete="current-password" placeholder="Your password"><button class="eye" id="liEye" type="button" aria-label="Show password" data-eye="liPass">👁</button></div>
+        <div style="text-align:right;margin-top:10px"><b class="link" style="font-size:12.5px;color:var(--cobalt)" id="liForgot">Forgot password?</b></div>
+        <button class="btn primary mt16" id="liSubmit" data-go="role">Log in</button>
         <div class="row center gap10 mt16"><div class="divider" style="flex:1;margin:0"></div><span class="tiny muted">or</span><div class="divider" style="flex:1;margin:0"></div></div>
-        <button class="btn google mt16" data-go="role"><span style="font-weight:800;font-size:17px">G</span> Continue with Google</button>
+        <button class="btn google mt16" id="liGoogle" data-go="role"><span style="font-weight:800;font-size:17px">G</span> Continue with Google</button>
       </div>
-      <div style="text-align:center;font-size:13px" class="muted">New here? <b style="color:var(--cobalt)" data-go="create">Create account</b></div>
+      <p class="splash-alt">New here? <b class="link" data-go="create">Create account</b></p>
     </div>
   </section>
 
