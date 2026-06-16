@@ -18,14 +18,124 @@
 
 <div class="app-shell immersive" id="shell">
 
-  <!-- top bar -->
+  <!-- top bar (hidden on hero/immersive screens) -->
   <div class="app-top">
     <button class="back" id="back" aria-label="Back" hidden>‹</button>
     <div style="flex:1"><h2 id="title">Sprout</h2><div class="sub" id="subtitle">Transparent lending</div></div>
     <div class="avatar" style="background:var(--lime);color:var(--navy);width:34px;height:34px;border-radius:11px">S</div>
   </div>
 
-  <!-- ===== HOME ===== -->
+  <!-- ===================== AUTH / ENTRY ===================== -->
+
+  <!-- 1.1 Onboarding -->
+  <section class="view fill hero-view" data-view="onboard" hidden>
+    <div class="auth-hero" style="background:linear-gradient(160deg,#2563EB 0%,#1E40AF 100%)">
+      <div class="auth-mid">
+        <div class="brand-badge">🌱</div>
+        <h1 class="auth-h1">Money that<br>grows with you.</h1>
+        <p class="auth-p">Personal loans from ฿5,000 to ฿2,000,000. Transparent EIR. A decision you can trust — built on Bank of Thailand responsible-lending rules.</p>
+        <div class="row gap8 mt20" style="flex-wrap:wrap">
+          <span class="badge ondark">⚡ Indicative offer in 60s</span>
+          <span class="badge ondark">🔒 PDPA secured</span>
+        </div>
+      </div>
+      <div class="auth-foot">
+        <div class="dots"><span class="d on"></span><span class="d"></span><span class="d"></span></div>
+        <button class="btn lime" data-go="create">Get started</button>
+        <button class="btn translucent mt10" data-go="login">I already have an account</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.2 Create account -->
+  <section class="view" data-view="create" hidden>
+    <div class="steps mb14"><i class="on"></i><i></i></div>
+    <div class="label">Full name (as on Thai ID)</div>
+    <div class="input"><span>👤</span> Somchai Jaidee</div>
+    <div class="label mt12">Username</div>
+    <div class="input focus"><span>@</span> somchai.j <span style="margin-left:auto;color:var(--ok)">✓</span></div>
+    <div class="help ok">Available</div>
+    <div class="label mt12">Mobile number</div>
+    <div class="input"><span>🇹🇭 +66</span> 81 234 5678</div>
+    <div class="label mt12">Password</div>
+    <div class="input"><span>🔒</span> ••••••••••• <span style="margin-left:auto">👁</span></div>
+    <div class="row gap6 mt8"><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar"></i></div>
+    <div class="help">Strong · 8+ chars, number &amp; symbol</div>
+    <div class="tile mt14 consent" data-toggle="consent">
+      <div class="ck on"><span>✓</span></div>
+      <div class="ctxt">I consent to the <b>PDPA terms</b> and to a <b>NCB credit-bureau check</b> when I apply.</div>
+    </div>
+    <button class="btn primary mt16" data-go="otp">Continue</button>
+  </section>
+
+  <!-- 1.3 OTP -->
+  <section class="view" data-view="otp" hidden>
+    <div class="card flat" style="text-align:center;padding:18px">
+      <div class="tiny muted">We sent a 6-digit code to</div>
+      <div class="amount" style="font-size:21px;margin-top:4px">+66 8X XXX 5678</div>
+      <div class="badge info" style="margin-top:8px">SMS · last 4 shown only</div>
+    </div>
+    <div class="otp-row mt20" id="otpRow">
+      <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 1">
+      <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 2">
+      <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 3">
+      <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 4">
+      <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 5">
+      <input class="otp-box" inputmode="numeric" maxlength="1" aria-label="digit 6">
+    </div>
+    <div class="row between mt16" style="font-size:13px">
+      <span class="muted">Resend code in</span><span style="font-weight:700;color:var(--cobalt)" id="otpTimer">00:24</span>
+    </div>
+    <div class="sysnote mt16">
+      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+      OTP TTL <code>5 min</code>, max <code>5 attempts</code> then 30-min lock. Number is masked in UI &amp; logs (last 4 only) per <b>PDPA data-minimisation</b>.
+    </div>
+    <button class="btn primary mt16" data-go="role">Verify</button>
+  </section>
+
+  <!-- 1.4 Login -->
+  <section class="view fill" data-view="login" hidden>
+    <div class="login-wrap">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="brand-badge sm">🌱</div>
+        <h1 style="font-size:32px;margin:20px 0 4px">Welcome back</h1>
+        <p class="muted" style="margin:0 0 22px;font-size:14px">Sign in to continue your application.</p>
+        <div class="label">Username</div>
+        <div class="input"><span>@</span> somchai.j</div>
+        <div class="label mt12">Password</div>
+        <div class="input"><span>🔒</span> •••••••••• <span style="margin-left:auto">👁</span></div>
+        <div style="text-align:right;margin-top:8px"><span style="font-size:12.5px;color:var(--cobalt);font-weight:600">Forgot password?</span></div>
+        <button class="btn primary mt16" data-go="role">Log in</button>
+        <div class="row center gap10 mt16"><div class="divider" style="flex:1;margin:0"></div><span class="tiny muted">or</span><div class="divider" style="flex:1;margin:0"></div></div>
+        <button class="btn google mt16" data-go="role"><span style="font-weight:800;font-size:17px">G</span> Continue with Google</button>
+      </div>
+      <div style="text-align:center;font-size:13px" class="muted">New here? <b style="color:var(--cobalt)" data-go="create">Create account</b></div>
+    </div>
+  </section>
+
+  <!-- 1.5 Auto role detection -->
+  <section class="view fill hero-view" data-view="role" hidden>
+    <div class="auth-hero hero-navy" style="text-align:center">
+      <div class="auth-mid" style="align-items:center;text-align:center">
+        <div class="role-ring">🔐</div>
+        <h2 style="font-size:24px;margin:22px 0 6px">Signing you in…</h2>
+        <p style="color:#aab8d6;font-size:14px;margin:0 0 26px">Detecting your role from this account</p>
+        <div class="card role-card">
+          <div class="row gap10"><div class="avatar" style="background:var(--cobalt)">S</div>
+            <div style="text-align:left"><div style="font-weight:700;color:#fff">somchai.j</div><div class="tiny" style="color:#aab8d6">knychr1991@gmail.com</div></div>
+            <span class="badge lime" style="margin-left:auto">CUSTOMER</span>
+          </div>
+          <div class="divider" style="background:rgba(255,255,255,.1)"></div>
+          <div class="row gap8" style="font-size:12px;color:#cdd6ea"><span class="dot" style="background:var(--ok)"></span> 1 account = 1 role · routing to Customer home</div>
+        </div>
+        <div class="row gap6 mt20"><span class="bar" style="width:60px;background:rgba(255,255,255,.25)"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CUSTOMER ===================== -->
+
+  <!-- 2.1 HOME -->
   <section class="view home" data-view="home">
     <header class="home-hero">
       <div class="hh-top">
@@ -38,11 +148,11 @@
           <i class="nd"></i>
         </button>
       </div>
-      <div class="hh-label">Available credit</div>
+      <div class="hh-label">Available credit · <span style="opacity:.9">indicative</span></div>
       <div class="hh-amount">฿180,000</div>
-      <div class="hh-sub"><span class="pill">Indicative</span> EIR from 15.99%</div>
+      <div class="hh-sub"><span class="pill">Pre-bureau</span> EIR from 15.99%</div>
       <div class="hh-cta">
-        <button class="btn lime" data-go="calc">Apply now</button>
+        <button class="btn lime" data-go="estimate">Apply now</button>
         <button class="hh-ghost" data-go="status">Track status</button>
       </div>
     </header>
@@ -60,9 +170,9 @@
         <span class="qa-ic"><svg viewBox="0 0 24 24"><path d="M3.5 8.5a3 3 0 0 1 3-3h10.5a2 2 0 0 1 2 2v1"/><rect x="3.5" y="7.5" width="17" height="12" rx="3"/><path d="M15.5 13.5h3"/></svg></span>
         Repay
       </button>
-      <button class="qa">
-        <span class="qa-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.6"/><path d="M12 16.5h0"/></svg></span>
-        Support
+      <button class="qa" data-go="products">
+        <span class="qa-ic"><svg viewBox="0 0 24 24"><path d="M5 5h14v5H5zM5 14h14v5H5z"/></svg></span>
+        Products
       </button>
     </div>
 
@@ -70,7 +180,7 @@
     <div class="card flat" style="padding:15px">
       <div class="steps"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
       <div class="tiny muted mt10">Identity &amp; account done. Verify income &amp; documents to turn your indicative offer into a real one.</div>
-      <button class="btn primary mt12" data-go="calc">Continue application</button>
+      <button class="btn primary mt12" data-go="estimate">Continue application</button>
     </div>
 
     <div class="sec-h"><b>Recent activity</b><span>See all</span></div>
@@ -98,7 +208,51 @@
     </div>
   </section>
 
-  <!-- ===== CALCULATOR (live) ===== -->
+  <!-- 2.2 Borrowing estimate -->
+  <section class="view" data-view="estimate" hidden>
+    <div class="card flat">
+      <div class="label">Monthly income</div>
+      <input class="field" id="estIncome" inputmode="numeric" value="45000">
+      <div class="label mt12">Existing monthly debt</div>
+      <input class="field" id="estDebt" inputmode="numeric" value="8500">
+    </div>
+    <div class="card mt14" style="text-align:center;background:var(--navy);color:#fff">
+      <div class="tiny" style="color:#aab8d6">Estimated borrowing power</div>
+      <div class="amount" id="estPower" style="font-size:36px;color:var(--lime)">฿180,000</div>
+      <div class="row gap8" style="justify-content:center;margin-top:6px"><span class="badge" style="background:rgba(255,255,255,.12);color:#fff" id="estDsrBadge">DSR 41%</span><span class="badge ok" id="estCapBadge">Within 70% cap</span></div>
+    </div>
+    <div class="card flat mt12" style="padding:13px">
+      <div class="row between"><span class="tiny muted">Debt Service Ratio</span><span class="tiny" style="font-weight:700" id="estDsrLabel">41% / 70%</span></div>
+      <div class="track mt8"><div class="track-fill" id="estDsrBar" style="width:58%"></div></div>
+    </div>
+    <div class="sysnote mt12">
+      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+      <code>DSR = (existing debt + new instalment) / gross income</code>. BoT Responsible-Lending cap <b>≤ 70%</b>. Estimate uses declared income only; verified income may change the ceiling.
+    </div>
+    <button class="btn primary mt14" data-go="products">Apply for this amount</button>
+  </section>
+
+  <!-- 2.3 Products -->
+  <section class="view" data-view="products" hidden>
+    <div class="card" style="border:2px solid var(--cobalt)">
+      <div class="row between"><b>Personal Loan</b><span class="badge lime">Popular</span></div>
+      <div class="tiny muted mt6">Unsecured · ฿20k–฿2M · 6–60 mo</div>
+      <div class="row gap12 mt12"><div><div class="tiny muted">EIR from</div><div class="amount" style="font-size:20px;color:var(--cobalt)">15.99%</div></div><div><div class="tiny muted">Max term</div><div class="amount" style="font-size:20px">60 mo</div></div></div>
+    </div>
+    <div class="card flat mt12">
+      <div class="row between"><b>Salaryman Quick</b><span class="badge info">Fast</span></div>
+      <div class="tiny muted mt6">For payroll customers · ฿10k–฿300k</div>
+      <div class="row gap12 mt12"><div><div class="tiny muted">EIR from</div><div class="amount" style="font-size:20px">18.50%</div></div><div><div class="tiny muted">Decision</div><div class="amount" style="font-size:20px">~1 day</div></div></div>
+    </div>
+    <div class="card flat mt12">
+      <div class="row between"><b>Nano / Micro</b><span class="badge ghost">Reg. capped</span></div>
+      <div class="tiny muted mt6">Small ticket · ≤ ฿20,000</div>
+      <div class="row gap12 mt12"><div><div class="tiny muted">EIR cap</div><div class="amount" style="font-size:20px">33%</div></div><div><div class="tiny muted">Term</div><div class="amount" style="font-size:20px">≤ 24 mo</div></div></div>
+    </div>
+    <button class="btn primary mt14" data-go="calc">Continue with Personal Loan</button>
+  </section>
+
+  <!-- 2.4 CALCULATOR (live) -->
   <section class="view" data-view="calc" hidden>
     <b style="font-size:14px">Personal Loan · EIR calculator</b>
     <div class="card flat mt12">
@@ -126,12 +280,12 @@
 
     <div class="card flat mt12" style="padding:13px">
       <div class="row between center"><span class="tiny muted">Credit-limit check</span><span class="badge ok" id="limitBadge">✓ within ฿180k</span></div>
-      <div style="height:9px;border-radius:5px;background:var(--line-2);margin-top:8px;overflow:hidden"><div id="limitBar" style="width:83%;height:100%;background:linear-gradient(90deg,var(--cobalt),var(--lime))"></div></div>
+      <div class="track mt8"><div class="track-fill" id="limitBar" style="width:83%"></div></div>
     </div>
 
     <div class="card flat mt12" style="padding:13px">
       <div class="row between center"><span class="tiny muted">Debt Service Ratio (DSR)</span><span class="badge" id="dsrBadge">41% / 70%</span></div>
-      <div style="height:9px;border-radius:5px;background:var(--line-2);margin-top:8px;overflow:hidden"><div id="dsrBar" style="width:58%;height:100%;background:linear-gradient(90deg,var(--cobalt),var(--lime))"></div></div>
+      <div class="track mt8"><div class="track-fill" id="dsrBar" style="width:58%"></div></div>
     </div>
 
     <div id="overLimit" class="card mt12" style="border:1.5px solid var(--soft-red);background:var(--soft-red-bg)" hidden>
@@ -140,14 +294,162 @@
         <div class="tiny" id="overLimitMsg" style="color:#9a4233;margin-top:4px"></div></div></div>
     </div>
 
-    <button class="btn primary mt14" id="applyBtn" data-go="status">Apply · ฿150,000</button>
+    <button class="btn primary mt14" id="applyBtn" data-go="kyc">Apply · ฿150,000</button>
     <div class="sysnote mt12">
       <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
       EIR computed on reducing balance: <code>EIR=(1+i)^12−1</code>. Approval is blocked when amount &gt; ceiling or DSR &gt; 70%.
     </div>
   </section>
 
-  <!-- ===== STATUS ===== -->
+  <!-- 2.6 e-KYC ID scan -->
+  <section class="view" data-view="kyc" hidden>
+    <div class="steps mb12"><i class="on"></i><i></i><i></i><i></i></div>
+    <div style="font-size:13px;color:var(--ink-2)">Place your <b>Thai national ID</b> inside the frame. Hold steady.</div>
+    <div class="scanframe mt12">
+      <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
+      <div style="position:absolute;inset:46px 30px;border-radius:10px;background:linear-gradient(135deg,#2b3a5e,#1a2540);display:flex;align-items:center;justify-content:center;color:#7e8db0;font-size:12px">Thai National ID</div>
+      <div class="scanline"></div>
+    </div>
+    <div class="row gap8 mt12" style="flex-wrap:wrap"><span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span></div>
+    <div class="sysnote mt12">
+      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+      OCR + NDID/DOPA chip check + liveness. Max <code>5 attempts</code>; on failure → manual review queue. Stored encrypted; raw image purged after extraction (PDPA).
+    </div>
+    <button class="btn primary mt14" data-go="income">📷 Capture</button>
+  </section>
+
+  <!-- 2.8 Income + occupation API -->
+  <section class="view" data-view="income" hidden>
+    <div class="steps mb12"><i class="done"></i><i class="on"></i><i></i><i></i></div>
+    <div class="label">Occupation</div>
+    <div class="input focus" id="occInput"><span>🔎</span><input class="bare" id="occField" value="Engineer" autocomplete="off"></div>
+    <div class="card flat" id="occList" style="margin-top:6px;padding:6px">
+      <div class="occ on" data-occ="Engineer"><b class="tiny" style="color:var(--cobalt)">Engineer</b><div class="tiny muted">Salaried · ISCO 2140</div></div>
+      <div class="occ" data-occ="Civil Engineer"><b class="tiny">Civil Engineer</b></div>
+      <div class="occ" data-occ="Electrical Engineer"><b class="tiny">Electrical Engineer</b></div>
+      <div class="tiny muted" style="padding:6px 10px 2px">↑ from Occupation API · ISCO-08</div>
+    </div>
+    <div class="label mt12">Employer</div>
+    <div class="input"><span>🏢</span> SCG Co., Ltd.</div>
+    <div class="row gap10 mt12">
+      <div style="flex:1"><div class="label">Monthly income</div><div class="input"><span>฿</span> 45,000</div></div>
+      <div style="flex:1"><div class="label">Pay type</div><div class="input">Payroll ▾</div></div>
+    </div>
+    <button class="btn primary mt16" data-go="bank">Continue</button>
+  </section>
+
+  <!-- 2.9 Receiving bank + name match -->
+  <section class="view" data-view="bank" hidden>
+    <div class="steps mb12"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
+    <div class="label">Bank</div>
+    <div class="row gap8 bankpick" id="bankPick">
+      <button class="tile bank on" data-bank="SCB"><span class="bk" style="background:#4e2a84">S</span><div class="tiny mt6" style="font-weight:600">SCB</div></button>
+      <button class="tile bank" data-bank="KBank"><span class="bk" style="background:#0a5c2e">K</span><div class="tiny mt6">KBank</div></button>
+      <button class="tile bank" data-bank="KTB"><span class="bk" style="background:#1279be">T</span><div class="tiny mt6">KTB</div></button>
+      <button class="tile bank" data-bank="BBL"><span class="bk" style="background:#f7c600;color:#333">B</span><div class="tiny mt6">BBL</div></button>
+    </div>
+    <div class="tiny muted mt6">Logos from Bank Directory API · PromptPay-ready</div>
+    <div class="label mt12">Account number</div>
+    <div class="input"><span>#</span> 123-4-56789-0</div>
+    <div class="card mt12" style="border:1.5px solid var(--ok);background:var(--ok-bg);padding:13px">
+      <div class="row gap8"><span>✓</span><b style="color:var(--ok)">Name matches</b></div>
+      <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>"Mr. Somchai Jaidee"</b> matches your verified ID name.</div>
+    </div>
+    <div class="sysnote mt12">
+      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+      Name-match rule: disbursement account holder must equal e-KYC name (fuzzy ≥ <code>0.92</code>). Mismatch → block payout, flag for AML review.
+    </div>
+    <button class="btn primary mt14" data-go="docs">Continue</button>
+  </section>
+
+  <!-- 2.10 Documents -->
+  <section class="view" data-view="docs" hidden>
+    <div class="steps mb12"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div>
+    <div class="row between center"><b style="font-size:14px">Book bank (passbook)</b><span class="badge ok">2 files</span></div>
+    <div class="row gap10 mt10">
+      <div class="thumb" style="flex:1"><span style="font-size:20px">📘</span>before.jpg<span class="badge ghost tiny" style="padding:2px 7px">cover</span></div>
+      <div class="thumb" style="flex:1;border:1.5px solid var(--cobalt)"><span style="font-size:20px">🧾</span>after.jpg<span class="badge info tiny" style="padding:2px 7px">first page</span></div>
+      <button class="thumb addthumb" data-add="doc" style="flex:1;border-style:dashed;color:var(--cobalt)"><span style="font-size:22px">＋</span>Add</button>
+    </div>
+    <div class="card flat mt12" style="padding:11px">
+      <b class="tiny">Other documents</b>
+      <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">Payslip_May.pdf · 240KB</div><span class="badge ok tiny">Uploaded</span></div>
+      <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">Statement_3mo.pdf · 1.1MB</div><span class="badge amber tiny" id="upPct">62%</span></div>
+      <div class="li" style="padding:9px 0;border:none"><div style="width:30px">📄</div><div style="flex:1" class="tiny">House_reg.jpg · 380KB</div><span class="badge ok tiny">Uploaded</span></div>
+    </div>
+    <div class="row gap10 mt10">
+      <button class="btn ghost sm" style="flex:1" data-add="doc">👁 Preview</button>
+      <button class="btn ghost sm" style="flex:1" data-add="doc">📷 Camera</button>
+      <button class="btn ghost sm" style="flex:1" data-add="doc">📁 Files</button>
+    </div>
+    <button class="btn primary mt14" data-go="tax">Submit application</button>
+  </section>
+
+  <!-- 2.11 Tax & compliance -->
+  <section class="view" data-view="tax" hidden>
+    <div class="card flat">
+      <b class="tiny">FATCA / CRS</b>
+      <div class="li" style="padding:11px 0"><div style="flex:1" class="tiny">Are you a US person for tax?</div>
+        <div class="seg toggle" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
+      <div class="li" style="padding:11px 0;border:none"><div style="flex:1" class="tiny">Tax resident outside Thailand?</div>
+        <div class="seg toggle" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
+    </div>
+    <div class="card flat mt12">
+      <b class="tiny">PEP declaration</b>
+      <div class="li" style="padding:11px 0;border:none"><div style="flex:1" class="tiny">Are you / a close associate a Politically Exposed Person?</div>
+        <div class="seg toggle" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
+    </div>
+    <div class="sysnote mt12">
+      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+      Declarations feed AML risk scoring. <code>FATCA=Yes</code> → W-9/W-8BEN flow. <code>PEP=Yes</code> → enhanced due diligence + senior-approver gate. All answers are screened against sanctions/PEP lists regardless of self-declaration.
+    </div>
+    <button class="btn primary mt14" data-go="esign">Confirm declarations</button>
+  </section>
+
+  <!-- 2.12 e-signature -->
+  <section class="view" data-view="esign" hidden>
+    <div class="card" style="background:var(--navy);color:#fff">
+      <div class="tiny" style="color:#aab8d6">Key terms · EIR disclosure</div>
+      <div class="row between mt8"><span class="tiny" style="color:#cdd6ea">Principal</span><b id="esPrincipal">฿150,000</b></div>
+      <div class="row between mt6"><span class="tiny" style="color:#cdd6ea">EIR (effective)</span><b style="color:var(--lime)" id="esEir">16.9% p.a.</b></div>
+      <div class="row between mt6"><span class="tiny" style="color:#cdd6ea">Monthly</span><b id="esMonthly">฿5,270 × 36</b></div>
+      <div class="row between mt6"><span class="tiny" style="color:#cdd6ea">Total payable</span><b id="esTotal">฿189,720</b></div>
+    </div>
+    <div class="card flat mt12" style="max-height:130px;overflow:hidden;position:relative">
+      <b class="tiny">Loan agreement</b>
+      <div class="tiny muted" style="line-height:1.6;margin-top:6px">1. The Borrower agrees to repay the principal and interest at the effective interest rate disclosed above… 2. Early settlement permitted without penalty per BoT guidance… 3. The Lender may report repayment conduct to the National Credit Bureau…</div>
+      <div style="position:absolute;inset:auto 0 0 0;height:40px;background:linear-gradient(transparent,#fff)"></div>
+    </div>
+    <div class="tile mt12 consent" data-toggle="esign">
+      <div class="ck on"><span>✓</span></div>
+      <div class="ctxt tiny">I have read and <b>accept</b> the agreement and EIR disclosure. I agree this acceptance is my electronic signature (Electronic Transactions Act).</div>
+    </div>
+    <button class="btn lime mt14" data-go="prescreen">✍️ Accept &amp; sign</button>
+  </section>
+
+  <!-- 2.13 Pre-screening -->
+  <section class="view fill hero-view" data-view="prescreen" hidden>
+    <div class="auth-hero hero-navy">
+      <div class="auth-mid" style="justify-content:center">
+        <div class="ring" id="psRing" style="--p:0;margin:0 auto;background:conic-gradient(var(--lime) 0%, rgba(255,255,255,.15) 0)"><div class="hole" style="background:#0f1b33"><div class="amount" id="psPct" style="font-size:26px;color:#fff">0%</div><div class="tiny" style="color:#aab8d6">screening</div></div></div>
+        <h2 style="text-align:center;font-size:22px;margin:22px 0 4px">Pre-screening your application</h2>
+        <p class="tiny" style="text-align:center;color:#aab8d6;margin:0 0 20px">Usually under a minute. You can close the app — we'll notify you.</p>
+        <div style="display:flex;flex-direction:column;gap:10px" id="psList">
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Identity verified (e-KYC) <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> NCB credit bureau <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Sanctions / PEP / FATCA <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Affordability (DSR) <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Final scoring <span class="psck">…</span></div>
+        </div>
+      </div>
+      <div class="sysnote" style="background:#0a1326">
+        <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+        Async orchestration: NCB pull, AML screening, DSR &amp; scorecard run in parallel. Hard-stops (sanctions hit) auto-decline; soft flags route to maker–checker queue.
+      </div>
+    </div>
+  </section>
+
+  <!-- 2.14 STATUS -->
   <section class="view" data-view="status" hidden>
     <div class="card" style="background:var(--ok-bg);border:1.5px solid var(--ok)">
       <div class="row between center"><b style="color:var(--ok)">🎉 Approved</b><span class="badge ok">Offer ready</span></div>
@@ -168,7 +470,7 @@
     </div>
   </section>
 
-  <!-- ===== REPAY ===== -->
+  <!-- 2.15 REPAY -->
   <section class="view" data-view="repay" hidden>
     <div class="card flat" style="text-align:center;padding:12px">
       <div class="tiny muted">Instalment 3 of 36 · due 25 Jun</div>
@@ -187,6 +489,27 @@
     </div>
   </section>
 
+  <!-- Profile / Me -->
+  <section class="view" data-view="me" hidden>
+    <div class="card" style="background:var(--navy);color:#fff">
+      <div class="row gap12 center">
+        <div class="avatar" style="background:var(--cobalt);width:52px;height:52px;border-radius:17px;font-size:20px">S</div>
+        <div><b style="font-size:17px">Somchai Jaidee</b><div class="tiny" style="color:#aab8d6">knychr1991@gmail.com · CUSTOMER</div></div>
+      </div>
+    </div>
+    <div class="card flat mt12" style="padding:6px 14px">
+      <div class="li" style="padding:13px 0"><span>🪪</span><div style="flex:1" class="tiny">Identity (e-KYC)</div><span class="badge ok tiny">Verified</span></div>
+      <div class="li" style="padding:13px 0"><span>🏦</span><div style="flex:1" class="tiny">Receiving account</div><span class="tiny muted">SCB · x6789-0</span></div>
+      <div class="li" style="padding:13px 0"><span>🔔</span><div style="flex:1" class="tiny">Notifications</div><span class="tiny muted">On</span></div>
+      <div class="li" style="padding:13px 0;border:none"><span>🌐</span><div style="flex:1" class="tiny">Language</div><span class="tiny muted">English · ไทย</span></div>
+    </div>
+    <button class="btn ghost mt12" data-go="onboard">Sign out</button>
+    <div class="sysnote mt12">
+      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
+      One account maps to exactly one role. Staff are provisioned via SSO and cannot self-register.
+    </div>
+  </section>
+
   <!-- bottom nav -->
   <nav class="app-nav">
     <button data-go="home" class="on">
@@ -199,11 +522,11 @@
     </button>
     <button data-go="status">
       <span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="4.6" width="14" height="16.4" rx="2.6"/><path d="M9 4.6V3.9A1.8 1.8 0 0 1 10.8 2.1h2.4A1.8 1.8 0 0 1 15 3.9v.7"/><path d="M8.8 13.4l2.1 2.1 4.3-4.3"/></svg></span>
-      <span>Status</span>
+      <span>Apply</span>
     </button>
-    <button data-go="repay">
-      <span class="ic"><svg viewBox="0 0 24 24"><path d="M3.5 8.5a3 3 0 0 1 3-3h10.5a2 2 0 0 1 2 2v1"/><rect x="3.5" y="7.5" width="17" height="12" rx="3"/><path d="M15.5 13.5h3"/><circle cx="16.4" cy="13.5" r="0.2"/></svg></span>
-      <span>Repay</span>
+    <button data-go="me">
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+      <span>Me</span>
     </button>
   </nav>
 

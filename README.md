@@ -9,8 +9,12 @@ This repo ships **two things**:
 1. **A high-fidelity screen gallery** (`index.html`) — 32 screens rendered as realistic iPhone
    captures (393×852, Dynamic Island, titanium frames), grouped by user lane, each numbered + captioned,
    with happy-path **and** failure/edge branches.
-2. **A runnable mobile app** (`app/`) — a responsive, installable PWA that is wrapped in a native
-   **WebView** for the **App Store / Google Play**, and also opens directly in any mobile or desktop browser.
+2. **A runnable mobile app** (`app/`) — a responsive, installable PWA that walks the **full customer
+   journey** end-to-end (onboarding → account → OTP → login → role detection → home → borrowing estimate
+   → products → live EIR/DSR calculator → e-KYC → income → receiving bank → documents → tax &amp; compliance
+   → e-signature → pre-screening → approval status → PromptPay repayment, plus a profile tab). It is wrapped
+   in a native **WebView** for the **App Store / Google Play**, and also opens directly in any mobile or
+   desktop browser.
 
 | | |
 |---|---|
@@ -121,9 +125,10 @@ full-screen **`app/`** shell automatically (browsers keep seeing the gallery).
 .
 ├── index.html              # design gallery (32 screens, 3 lanes)
 ├── app/
-│   ├── index.html          # WebView/PWA app shell
-│   ├── app.css             # full-screen responsive layout
-│   └── app.js              # routing + live EIR/DSR calculator
+│   ├── index.html          # WebView/PWA app shell — all 19 customer-journey screens
+│   ├── app.css             # full-screen responsive layout + screen components
+│   └── app.js              # flow router (back-stack, hash deep-links) + live EIR/DSR calculator,
+│                           #   OTP entry, occupation/bank pickers, animated pre-screening
 ├── assets/
 │   ├── styles.css          # design system + iPhone frame + components
 │   ├── icon.svg            # app icon (vector)
