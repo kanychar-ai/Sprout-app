@@ -258,14 +258,38 @@
     var iM = NOMINAL_ANNUAL / 12, n = 36;
     var power = headroom * (1 - Math.pow(1 + iM, -n)) / iM;
     power = Math.min(LIMIT, Math.max(0, Math.round(power / 5000) * 5000));
+    var pmt = power > 0 ? power * iM / (1 - Math.pow(1 + iM, -n)) : 0;
     var dsrNow = Math.round(existing / inc * 100);
+
     setText('estPower', baht(power));
-    setText('estDsrBadge', 'DSR ' + dsrNow + '%');
-    setText('estDsrLabel', dsrNow + '% / 70%');
+    setText('estRepay', power > 0
+      ? 'about ' + baht(Math.round(pmt)) + ' / month over ' + n + ' months'
+      : 'Enter your income to see an estimate');
+
+    // friendly "how comfortable is this?" wording instead of raw DSR jargon
     var bar = document.getElementById('estDsrBar');
     if (bar) bar.style.width = Math.min(100, Math.round(dsrNow / 70 * 100)) + '%';
-    var cap = document.getElementById('estCapBadge');
-    if (cap) { cap.textContent = dsrNow <= 70 ? 'Within 70% cap' : 'Over 70% cap'; cap.className = 'badge ' + (dsrNow <= 70 ? 'ok' : 'red'); }
+    var tone, badgeText, titleText, msgTail;
+    if (dsrNow > 70) {
+      tone = 'red'; badgeText = 'Too tight'; titleText = 'This may be a stretch';
+      msgTail = 'that is above the level most lenders allow, so try a smaller amount or a longer term.';
+    } else if (dsrNow > 55) {
+      tone = 'amber'; badgeText = 'A bit tight'; titleText = 'Manageable — keep an eye on it';
+      msgTail = 'that is getting close to the usual 70% limit, so borrow carefully.';
+    } else {
+      tone = 'ok'; badgeText = 'Looks good'; titleText = 'Comfortable to repay';
+      msgTail = 'most lenders are comfortable up to 70%, so you have room to borrow.';
+    }
+    var badge = document.getElementById('estComfortBadge');
+    if (badge) { badge.textContent = badgeText; badge.className = 'badge ' + tone; }
+    setText('estComfortTitle', titleText);
+    if (bar) bar.style.background = tone === 'red'
+      ? 'var(--soft-red)'
+      : tone === 'amber'
+        ? 'linear-gradient(90deg,var(--cobalt),var(--amber))'
+        : 'linear-gradient(90deg,var(--cobalt),var(--lime))';
+    var msg = document.getElementById('estComfortMsg');
+    if (msg) msg.innerHTML = 'Right now about <b>' + dsrNow + '%</b> of your income goes to paying off debt — ' + msgTail;
   }
   if (estIncome && estDebt) { [estIncome, estDebt].forEach(function (el) { el.addEventListener('input', estimate); }); estimate(); }
 

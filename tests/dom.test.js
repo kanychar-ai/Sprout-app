@@ -169,15 +169,26 @@ async function run() {
     check(`nav tab ${go} highlighted`, a.hasClass(`.app-nav [data-go="${go}"]`, 'on'));
   }
 
-  // 6 · Borrowing estimate fields --------------------------------------------
+  // 6 · Borrowing estimate fields + friendly wording -------------------------
   group('6 · Borrowing estimate');
   a.go('estimate');
   a.fill('#estIncome', '60000');
   a.fill('#estDebt', '5000');
   check('estimate income fillable', a.val('#estIncome') === '60000');
+  check('estimate debt fillable', a.val('#estDebt') === '5000');
   check('estimate recomputes power', a.text('#estPower') !== '฿0' && a.text('#estPower').startsWith('฿'));
+  check('estimate shows a monthly repayment', /month/.test(a.text('#estRepay')));
+  check('estimate uses plain comfort wording', /income/.test(a.text('#estComfortMsg')));
+  check('estimate avoids "Debt Service Ratio" jargon', !/Debt Service Ratio/.test(a.q('[data-view="estimate"]').textContent));
+  check('estimate comfort badge is friendly', ['Looks good', 'A bit tight', 'Too tight'].includes(a.text('#estComfortBadge')));
+  check('estimate has no SYSTEM·INTERNAL box', a.q('[data-view="estimate"] .sysnote') === null);
+  // a high-debt borrower should be warned, not silently approved
+  a.fill('#estDebt', '50000');
+  check('over-stretched borrower flagged "Too tight"', a.text('#estComfortBadge') === 'Too tight');
+  a.fill('#estDebt', '5000');
+  check('comfortable borrower flagged "Looks good"', a.text('#estComfortBadge') === 'Looks good');
   a.click('[data-view="estimate"] [data-go="products"]');
-  check('estimate Apply → products', a.visible('products'));
+  check('estimate "See my loan options" → products', a.visible('products'));
 
   // 7 · Products -------------------------------------------------------------
   group('7 · Products');
@@ -262,6 +273,14 @@ async function run() {
   a.go('me');
   a.click('[data-view="me"] [data-go="onboard"]');
   check('profile Sign out → onboard', a.visible('onboard'));
+
+  // 11 · Customer-friendly: no internal/dev jargon shown ---------------------
+  group('11 · No internal jargon for customers');
+  const bodyText = a.document.body.textContent;
+  check('no "SYSTEM · INTERNAL" boxes anywhere', a.count('.sysnote') === 0);
+  check('no raw DSR formula visible', !/DSR\s*=\s*\(/.test(bodyText));
+  check('no "maker–checker" jargon', !/maker.checker/i.test(bodyText));
+  check('no "AML screening" jargon', !/AML/i.test(bodyText));
 
   // ---- report --------------------------------------------------------------
   console.log(`\n${'='.repeat(48)}`);

@@ -60,7 +60,7 @@
     <div class="help">Strong · 8+ chars, number &amp; symbol</div>
     <div class="tile mt14 consent" data-toggle="consent">
       <div class="ck on"><span>✓</span></div>
-      <div class="ctxt">I agree to the <b>Terms &amp; Privacy</b> and consent to e-KYC and credit-bureau (NCB) checks.</div>
+      <div class="ctxt">I agree to the <b>Terms &amp; Privacy</b> and to an identity and credit check.</div>
     </div>
     <button class="btn primary mt16" id="suSubmit" data-go="otp">Create account</button>
     <p class="splash-alt mt14">Already a member? <b class="link" data-go="login">Log in</b></p>
@@ -197,10 +197,7 @@
       </div>
     </div>
 
-    <div class="sysnote mt16" style="margin-bottom:6px">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      Indicative ceiling is pre-bureau. Real offer requires e-KYC, NCB pull, DSR ≤ 70% and AML screening.
-    </div>
+    <div class="note-soft mt16" style="margin-bottom:6px">💡 This is an early estimate. We'll confirm your real offer after a quick ID and income check.</div>
   </section>
 
   <!-- 2.2 Borrowing estimate -->
@@ -212,19 +209,17 @@
       <input class="field" id="estDebt" inputmode="numeric" value="8500">
     </div>
     <div class="card mt14" style="text-align:center;background:var(--navy);color:#fff">
-      <div class="tiny" style="color:#aab8d6">Estimated borrowing power</div>
+      <div class="tiny" style="color:#aab8d6">You could borrow up to</div>
       <div class="amount" id="estPower" style="font-size:36px;color:var(--lime)">฿180,000</div>
-      <div class="row gap8" style="justify-content:center;margin-top:6px"><span class="badge" style="background:rgba(255,255,255,.12);color:#fff" id="estDsrBadge">DSR 41%</span><span class="badge ok" id="estCapBadge">Within 70% cap</span></div>
+      <div class="tiny" id="estRepay" style="color:#aab8d6;margin-top:4px">about ฿6,300 / month over 36 months</div>
     </div>
-    <div class="card flat mt12" style="padding:13px">
-      <div class="row between"><span class="tiny muted">Debt Service Ratio</span><span class="tiny" style="font-weight:700" id="estDsrLabel">41% / 70%</span></div>
-      <div class="track mt8"><div class="track-fill" id="estDsrBar" style="width:58%"></div></div>
+    <div class="card flat mt12" style="padding:14px">
+      <div class="row between center"><span style="font-weight:600" id="estComfortTitle">Comfortable to repay</span><span class="badge ok" id="estComfortBadge">Looks good</span></div>
+      <div class="track mt8"><div class="track-fill" id="estDsrBar" style="width:27%"></div></div>
+      <div class="tiny muted" id="estComfortMsg" style="margin-top:9px;line-height:1.55">Right now about <b>19%</b> of your income goes to paying off debt — most lenders are comfortable up to 70%, so you have room to borrow.</div>
     </div>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      <code>DSR = (existing debt + new instalment) / gross income</code>. BoT Responsible-Lending cap <b>≤ 70%</b>. Estimate uses declared income only; verified income may change the ceiling.
-    </div>
-    <button class="btn primary mt14" data-go="products">Apply for this amount</button>
+    <div class="note-soft mt12">💡 This is an early estimate based on what you told us. Your final amount is confirmed after a quick income check.</div>
+    <button class="btn primary mt14" data-go="products">See my loan options</button>
   </section>
 
   <!-- 2.3 Products -->
@@ -279,7 +274,7 @@
     </div>
 
     <div class="card flat mt12" style="padding:13px">
-      <div class="row between center"><span class="tiny muted">Debt Service Ratio (DSR)</span><span class="badge" id="dsrBadge">41% / 70%</span></div>
+      <div class="row between center"><span class="tiny muted">Income used for repayments</span><span class="badge" id="dsrBadge">41% / 70%</span></div>
       <div class="track mt8"><div class="track-fill" id="dsrBar" style="width:58%"></div></div>
     </div>
 
@@ -290,10 +285,7 @@
     </div>
 
     <button class="btn primary mt14" id="applyBtn" data-go="kyc">Apply · ฿150,000</button>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      EIR computed on reducing balance: <code>EIR=(1+i)^12−1</code>. Approval is blocked when amount &gt; ceiling or DSR &gt; 70%.
-    </div>
+    <div class="note-soft mt12">💡 <b>EIR</b> is the all-in yearly rate — it already includes fees, so the figure above is what you really pay. You can pay off early anytime with no penalty.</div>
   </section>
 
   <!-- 2.6 e-KYC ID scan -->
@@ -306,10 +298,7 @@
       <div class="scanline"></div>
     </div>
     <div class="row gap8 mt12" style="flex-wrap:wrap"><span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span></div>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      OCR + NDID/DOPA chip check + liveness. Max <code>5 attempts</code>; on failure → manual review queue. Stored encrypted; raw image purged after extraction (PDPA).
-    </div>
+    <div class="note-soft mt12">🔒 Your ID is encrypted and the photo is deleted right after we read it (PDPA).</div>
     <button class="btn primary mt14" data-go="income">📷 Capture</button>
   </section>
 
@@ -350,10 +339,7 @@
       <div class="row gap8"><span>✓</span><b style="color:var(--ok)">Name matches</b></div>
       <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>"Mr. Somchai Jaidee"</b> matches your verified ID name.</div>
     </div>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      Name-match rule: disbursement account holder must equal e-KYC name (fuzzy ≥ <code>0.92</code>). Mismatch → block payout, flag for AML review.
-    </div>
+    <div class="note-soft mt12">🔒 For your safety, money can only be sent to a bank account in your own name.</div>
     <button class="btn primary mt14" data-go="docs">Continue</button>
   </section>
 
@@ -394,10 +380,7 @@
       <div class="li" style="padding:11px 0;border:none"><div style="flex:1" class="tiny">Are you / a close associate a Politically Exposed Person?</div>
         <div class="seg toggle" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
     </div>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      Declarations feed AML risk scoring. <code>FATCA=Yes</code> → W-9/W-8BEN flow. <code>PEP=Yes</code> → enhanced due diligence + senior-approver gate. All answers are screened against sanctions/PEP lists regardless of self-declaration.
-    </div>
+    <div class="note-soft mt12">ℹ️ These questions are required by Thai law before we can open your loan. Most people answer "No" to all of them.</div>
     <button class="btn primary mt14" data-go="esign">Confirm declarations</button>
   </section>
 
@@ -430,17 +413,14 @@
         <h2 style="text-align:center;font-size:22px;margin:22px 0 4px">Pre-screening your application</h2>
         <p class="tiny" style="text-align:center;color:#aab8d6;margin:0 0 20px">Usually under a minute. You can close the app — we'll notify you.</p>
         <div style="display:flex;flex-direction:column;gap:10px" id="psList">
-          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Identity verified (e-KYC) <span class="psck">…</span></div>
-          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> NCB credit bureau <span class="psck">…</span></div>
-          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Sanctions / PEP / FATCA <span class="psck">…</span></div>
-          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Affordability (DSR) <span class="psck">…</span></div>
-          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Final scoring <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Confirming your identity <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Checking your credit history <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Quick background checks <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Making sure it's affordable <span class="psck">…</span></div>
+          <div class="row gap10 psitem" style="font-size:13px"><span class="dot"></span> Final review <span class="psck">…</span></div>
         </div>
       </div>
-      <div class="sysnote" style="background:#0a1326">
-        <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-        Async orchestration: NCB pull, AML screening, DSR &amp; scorecard run in parallel. Hard-stops (sanctions hit) auto-decline; soft flags route to maker–checker queue.
-      </div>
+      <p class="tiny" style="text-align:center;color:#8aa; padding:0 18px 4px">🔒 We're checking your details securely. Nothing is shared without your consent.</p>
     </div>
   </section>
 
@@ -456,7 +436,7 @@
       <b class="tiny">Timeline</b>
       <div class="li" style="padding:8px 0"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Submitted · 14:02</div></div>
       <div class="li" style="padding:8px 0"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Pre-screened · 14:03</div></div>
-      <div class="li" style="padding:8px 0;border:none"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Approved (maker–checker) · 15:40</div></div>
+      <div class="li" style="padding:8px 0;border:none"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Approved · 15:40</div></div>
     </div>
     <div class="card flat mt12" style="padding:12px">
       <div class="tiny muted">Other possible outcomes</div>
@@ -478,10 +458,7 @@
       <div class="tiny" style="font-weight:700;margin-top:2px">Sprout Finance · ref SPR0291</div>
     </div>
     <button class="btn primary mt14" id="paidBtn">I've paid · check status</button>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      QR payload carries amount + reference; payment is reconciled by webhook before the instalment is marked paid.
-    </div>
+    <div class="note-soft mt12">ℹ️ After you pay, it can take a moment to confirm. We'll mark this instalment paid automatically — no need to send a slip.</div>
   </section>
 
   <!-- Profile / Me -->
@@ -499,10 +476,6 @@
       <div class="li" style="padding:13px 0;border:none"><span>🌐</span><div style="flex:1" class="tiny">Language</div><span class="tiny muted">English · ไทย</span></div>
     </div>
     <button class="btn ghost mt12" data-go="onboard">Sign out</button>
-    <div class="sysnote mt12">
-      <div class="h"><span class="pill">SYSTEM</span> · INTERNAL</div>
-      One account maps to exactly one role. Staff are provisioned via SSO and cannot self-register.
-    </div>
   </section>
 
   <!-- bottom nav -->

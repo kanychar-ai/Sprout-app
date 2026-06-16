@@ -162,16 +162,30 @@ test.describe('2 · Home + bottom navigation', () => {
   });
 });
 
-test.describe('3 · Borrowing estimate — fields recompute power & DSR', () => {
-  test('estIncome / estDebt update the estimate, then Apply → products', async ({ page }) => {
+test.describe('3 · Borrowing estimate — friendly, plain-language affordability', () => {
+  test('estIncome / estDebt update power + repayment & comfort, then → products', async ({ page }) => {
     await goView(page, 'estimate');
     await page.fill('#estIncome', '60000');
     await page.fill('#estDebt', '5000');
     await expect(page.locator('#estPower')).not.toHaveText('฿0');
-    await expect(page.locator('#estDsrBadge')).toContainText('DSR');
+    await expect(page.locator('#estRepay')).toContainText('month');
+    await expect(page.locator('#estComfortBadge')).toHaveText('Looks good');
+    await expect(page.locator('[data-view="estimate"]')).not.toContainText('Debt Service Ratio');
+    await expect(page.locator('[data-view="estimate"] .sysnote')).toHaveCount(0);
 
+    // an over-stretched borrower is warned, not silently approved
+    await page.fill('#estDebt', '50000');
+    await expect(page.locator('#estComfortBadge')).toHaveText('Too tight');
+
+    await page.fill('#estDebt', '5000');
     await page.locator('[data-view="estimate"] [data-go="products"]').click();
     await expectView(page, 'products');
+  });
+});
+
+test.describe('3b · No internal/dev jargon shown to customers', () => {
+  test('the app shows no "SYSTEM · INTERNAL" boxes', async ({ page }) => {
+    await expect(page.locator('.sysnote')).toHaveCount(0);
   });
 });
 
