@@ -31,13 +31,16 @@ body {
     align-items: center;
     justify-content: center;
   }
+  /* Locked to iPhone 17 Pro logical screen: 402 × 874 pt */
   .app-shell {
-    width: 412px;
-    height: min(880px, calc(100dvh - 40px));   /* phone-sized, never taller than viewport */
+    width: 402px;
+    height: min(874px, calc(100dvh - 28px));
+    aspect-ratio: 402 / 874;
     margin: 0;
-    border-radius: 40px;
+    border-radius: 46px;
     overflow: hidden;
-    box-shadow: 0 40px 90px rgba(0,0,0,.5);
+    /* titanium device bezel drawn outside — doesn't shrink the 402pt screen */
+    box-shadow: 0 0 0 11px #0c0d10, 0 0 0 13px #2a2d34, 0 44px 100px rgba(0,0,0,.55);
   }
   .desktop-hint { display: flex !important; }
 }
