@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - claude/sharp-lovelace-2pradm
+      - claude/lucid-volta-yrotb7
       - main
   workflow_dispatch:
 
