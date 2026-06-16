@@ -31,6 +31,7 @@
     subtitle.textContent = TITLES[name][1];
     if (push !== false) { if (history[history.length - 1] !== name) history.push(name); }
     back.hidden = (name === 'home');
+    document.getElementById('shell').classList.toggle('immersive', name === 'home');
     if (location.hash !== '#' + name) location.hash = name;
     views[name].scrollTop = 0;
   }

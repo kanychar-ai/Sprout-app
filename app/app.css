@@ -91,3 +91,57 @@ body {
 .desktop-hint { display: none; position: fixed; left: 20px; bottom: 20px; z-index: 5; color: #cdd6ea;
   font-size: 12px; gap: 8px; align-items: center; }
 .desktop-hint .k { background: rgba(255,255,255,.1); padding: 4px 10px; border-radius: 8px; }
+
+/* ===== Mobile-banking home ===== */
+/* On home, hide the plain top bar and use an immersive gradient header */
+.app-shell.immersive > .app-top { display: none; }
+
+.home-hero {
+  margin: -15px -16px 0;                                   /* full-bleed, cancels .view padding */
+  padding: calc(16px + env(safe-area-inset-top)) 20px 22px;
+  background: linear-gradient(157deg, #2D6BF0 0%, #1E40AF 100%);
+  color: #fff;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 14px 30px rgba(30,64,175,.28);
+}
+.hh-top { display: flex; align-items: center; justify-content: space-between; }
+.hh-id { display: flex; align-items: center; gap: 11px; }
+.hh-av { width: 42px; height: 42px; border-radius: 14px; background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;
+  font-family: 'Bricolage Grotesque'; font-size: 17px; }
+.hh-hi { font-size: 12px; color: #cfe0ff; line-height: 1.2; }
+.hh-name { font-size: 15.5px; font-weight: 700; }
+.hh-bell { position: relative; width: 42px; height: 42px; border-radius: 14px; border: none;
+  background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.hh-bell svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.hh-bell .nd { position: absolute; top: 9px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); border: 2px solid #2150c8; }
+.hh-label { margin-top: 20px; font-size: 12.5px; color: #cfe0ff; }
+.hh-amount { font-family: 'Bricolage Grotesque'; font-weight: 700; font-size: 42px; line-height: 1.04; margin-top: 3px; letter-spacing: -.01em; }
+.hh-sub { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: #d7e4ff; margin-top: 6px; }
+.hh-sub .pill { background: rgba(255,255,255,.16); padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+.hh-cta { display: flex; gap: 10px; margin-top: 18px; }
+.hh-cta .btn { flex: 1; height: 46px; border-radius: 14px; font-size: 14.5px; }
+.hh-ghost { flex: 1; height: 46px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.4);
+  background: transparent; color: #fff; font-weight: 700; font-family: 'Anuphan'; font-size: 14.5px; cursor: pointer; }
+
+.quick { display: flex; gap: 6px; margin-top: 20px; }
+.qa { flex: 1; background: none; border: none; cursor: pointer; display: flex; flex-direction: column;
+  align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: var(--ink-2); font-family: 'Anuphan'; }
+.qa-ic { width: 54px; height: 54px; border-radius: 19px; background: var(--cobalt-50); color: var(--cobalt);
+  display: flex; align-items: center; justify-content: center; transition: transform .15s; }
+.qa:active .qa-ic { transform: scale(.92); }
+.qa-ic svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.qa.lime .qa-ic { background: #EEF8D2; color: #5a7a13; }
+
+.sec-h { display: flex; align-items: center; justify-content: space-between; margin: 24px 2px 11px; }
+.sec-h b { font-size: 15.5px; }
+.sec-h span { font-size: 12.5px; color: var(--cobalt); font-weight: 600; cursor: pointer; }
+
+.act { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.act:last-child { border-bottom: none; }
+.act-ic { width: 40px; height: 40px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.act-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.act .t { flex: 1; }
+.act .t b { font-size: 13.5px; font-weight: 600; display: block; }
+.act .t span { font-size: 11.5px; color: var(--ink-3); }
+.act .amt { font-size: 13.5px; font-weight: 700; }
