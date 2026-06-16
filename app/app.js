@@ -1,6 +1,6 @@
 /* Sprout app shell — full customer-journey routing, live EIR/DSR calc, PWA registration.
    Flow mirrors the design gallery:
-   onboard → create → otp → login → role → home → estimate → products → calc →
+   onboard → create → otp → login → role → home → products → calc →
    kyc → income → bank → docs → tax → esign → prescreen → status → repay (+ me)            */
 (function () {
   'use strict';
@@ -17,7 +17,6 @@
     login:    null,
     role:     null,
     home:     ['Sprout', 'Transparent lending'],
-    estimate: ['How much can I borrow?', 'Indicative estimate'],
     products: ['Loan products', 'Choose what fits'],
     calc:     ['EIR calculator', 'Personal Loan'],
     kyc:      ['Verify identity', 'Step 1 of 4 · e-KYC'],
@@ -247,51 +246,75 @@
   [amt, term, income, debt].forEach(function (el) { el.addEventListener('input', calc); });
   calc();
 
-  // ---- borrowing estimate (live DSR + power) ----
-  var estIncome = document.getElementById('estIncome');
-  var estDebt = document.getElementById('estDebt');
-  function estimate() {
-    var inc = Math.max(1, +(estIncome.value || 0));
-    var existing = +(estDebt.value || 0);
-    // headroom to the 70% DSR cap, capitalised over a 36-mo @ nominal rate, capped at the ceiling
-    var headroom = Math.max(0, inc * 0.70 - existing);
-    var iM = NOMINAL_ANNUAL / 12, n = 36;
-    var power = headroom * (1 - Math.pow(1 + iM, -n)) / iM;
-    power = Math.min(LIMIT, Math.max(0, Math.round(power / 5000) * 5000));
-    var pmt = power > 0 ? power * iM / (1 - Math.pow(1 + iM, -n)) : 0;
-    var dsrNow = Math.round(existing / inc * 100);
+  // ---- loan products (data-driven; served by the back-office API) -----------
+  // When the Supabase back office is wired up, window.SPROUT_CONFIG.productsApi
+  // points at its REST endpoint and the same render path uses live data; until
+  // then we fall back to this built-in catalogue so the app always works.
+  var CFG = window.SPROUT_CONFIG || {};
+  var PRODUCTS_FALLBACK = [
+    { name: 'Personal Loan', tag: 'Popular', tag_class: 'lime', desc: 'Unsecured · ฿20k–฿2M · 6–60 mo',
+      stat1_label: 'EIR from', stat1_value: '15.99%', stat2_label: 'Max term', stat2_value: '60 mo', featured: true },
+    { name: 'Salaryman Quick', tag: 'Fast', tag_class: 'info', desc: 'For payroll customers · ฿10k–฿300k',
+      stat1_label: 'EIR from', stat1_value: '18.50%', stat2_label: 'Decision', stat2_value: '~1 day' },
+    { name: 'Nano / Micro', tag: 'Reg. capped', tag_class: 'ghost', desc: 'Small ticket · ≤ ฿20,000',
+      stat1_label: 'EIR cap', stat1_value: '33%', stat2_label: 'Term', stat2_value: '≤ 24 mo' }
+  ];
+  var prodList = document.getElementById('prodList');
+  var prodEmpty = document.getElementById('prodEmpty');
+  var prodContinue = document.getElementById('prodContinue');
+  var selectedProduct = null;
 
-    setText('estPower', baht(power));
-    setText('estRepay', power > 0
-      ? 'about ' + baht(Math.round(pmt)) + ' / month over ' + n + ' months'
-      : 'Enter your income to see an estimate');
-
-    // friendly "how comfortable is this?" wording instead of raw DSR jargon
-    var bar = document.getElementById('estDsrBar');
-    if (bar) bar.style.width = Math.min(100, Math.round(dsrNow / 70 * 100)) + '%';
-    var tone, badgeText, titleText, msgTail;
-    if (dsrNow > 70) {
-      tone = 'red'; badgeText = 'Too tight'; titleText = 'This may be a stretch';
-      msgTail = 'that is above the level most lenders allow, so try a smaller amount or a longer term.';
-    } else if (dsrNow > 55) {
-      tone = 'amber'; badgeText = 'A bit tight'; titleText = 'Manageable — keep an eye on it';
-      msgTail = 'that is getting close to the usual 70% limit, so borrow carefully.';
-    } else {
-      tone = 'ok'; badgeText = 'Looks good'; titleText = 'Comfortable to repay';
-      msgTail = 'most lenders are comfortable up to 70%, so you have room to borrow.';
-    }
-    var badge = document.getElementById('estComfortBadge');
-    if (badge) { badge.textContent = badgeText; badge.className = 'badge ' + tone; }
-    setText('estComfortTitle', titleText);
-    if (bar) bar.style.background = tone === 'red'
-      ? 'var(--soft-red)'
-      : tone === 'amber'
-        ? 'linear-gradient(90deg,var(--cobalt),var(--amber))'
-        : 'linear-gradient(90deg,var(--cobalt),var(--lime))';
-    var msg = document.getElementById('estComfortMsg');
-    if (msg) msg.innerHTML = 'Right now about <b>' + dsrNow + '%</b> of your income goes to paying off debt — ' + msgTail;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
   }
-  if (estIncome && estDebt) { [estIncome, estDebt].forEach(function (el) { el.addEventListener('input', estimate); }); estimate(); }
+
+  function selectProduct(i, cards, products) {
+    selectedProduct = products[i];
+    cards.forEach(function (c, j) { c.classList.toggle('sel', j === i); });
+    if (prodContinue) prodContinue.textContent = 'Continue with ' + selectedProduct.name;
+    setText('calcProd', selectedProduct.name + ' · EIR calculator');
+  }
+
+  function renderProducts(products) {
+    if (!prodList) return;
+    var list = (products || []).slice();
+    prodList.innerHTML = '';
+    if (prodEmpty) prodEmpty.hidden = list.length > 0;
+    if (prodContinue) prodContinue.hidden = list.length === 0;
+    var cards = [];
+    list.forEach(function (p, i) {
+      var card = document.createElement('div');
+      card.className = 'card prod' + (i > 0 ? ' flat mt12' : '');
+      card.innerHTML =
+        '<div class="row between"><b>' + esc(p.name) + '</b>' +
+          (p.tag ? '<span class="badge ' + esc(p.tag_class || 'ghost') + '">' + esc(p.tag) + '</span>' : '') + '</div>' +
+        '<div class="tiny muted mt6">' + esc(p.desc) + '</div>' +
+        '<div class="row gap12 mt12">' +
+          '<div><div class="tiny muted">' + esc(p.stat1_label) + '</div><div class="amount" style="font-size:20px' +
+            (p.featured ? ';color:var(--cobalt)' : '') + '">' + esc(p.stat1_value) + '</div></div>' +
+          '<div><div class="tiny muted">' + esc(p.stat2_label) + '</div><div class="amount" style="font-size:20px">' +
+            esc(p.stat2_value) + '</div></div>' +
+        '</div>';
+      card.addEventListener('click', function () { selectProduct(i, cards, list); });
+      prodList.appendChild(card);
+      cards.push(card);
+    });
+    if (list.length) selectProduct(0, cards, list); // default to the first product
+  }
+
+  function loadProducts() {
+    if (CFG.productsApi) {
+      fetch(CFG.productsApi, { headers: CFG.productsHeaders || {} })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function (rows) { renderProducts(rows && rows.length ? rows : PRODUCTS_FALLBACK); })
+        .catch(function () { renderProducts(PRODUCTS_FALLBACK); });
+    } else {
+      renderProducts(PRODUCTS_FALLBACK);
+    }
+  }
+  loadProducts();
 
   // ---- pre-screening animation, then auto-route to status ----
   var psRan = false;

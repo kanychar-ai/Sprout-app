@@ -150,7 +150,7 @@ async function run() {
   // 5 · Home CTAs + quick actions + bottom nav -------------------------------
   group('5 · Home + navigation');
   const homeRoutes = [
-    ['.home-hero [data-go="estimate"]', 'estimate'],
+    ['.home-hero [data-go="products"]', 'products'],
     ['.home-hero [data-go="status"]', 'status'],
     ['.quick [data-go="calc"]', 'calc'],
     ['.quick [data-go="status"]', 'status'],
@@ -169,32 +169,38 @@ async function run() {
     check(`nav tab ${go} highlighted`, a.hasClass(`.app-nav [data-go="${go}"]`, 'on'));
   }
 
-  // 6 · Borrowing estimate fields + friendly wording -------------------------
-  group('6 · Borrowing estimate');
-  a.go('estimate');
-  a.fill('#estIncome', '60000');
-  a.fill('#estDebt', '5000');
-  check('estimate income fillable', a.val('#estIncome') === '60000');
-  check('estimate debt fillable', a.val('#estDebt') === '5000');
-  check('estimate recomputes power', a.text('#estPower') !== '฿0' && a.text('#estPower').startsWith('฿'));
-  check('estimate shows a monthly repayment', /month/.test(a.text('#estRepay')));
-  check('estimate uses plain comfort wording', /income/.test(a.text('#estComfortMsg')));
-  check('estimate avoids "Debt Service Ratio" jargon', !/Debt Service Ratio/.test(a.q('[data-view="estimate"]').textContent));
-  check('estimate comfort badge is friendly', ['Looks good', 'A bit tight', 'Too tight'].includes(a.text('#estComfortBadge')));
-  check('estimate has no SYSTEM·INTERNAL box', a.q('[data-view="estimate"] .sysnote') === null);
-  // a high-debt borrower should be warned, not silently approved
-  a.fill('#estDebt', '50000');
-  check('over-stretched borrower flagged "Too tight"', a.text('#estComfortBadge') === 'Too tight');
-  a.fill('#estDebt', '5000');
-  check('comfortable borrower flagged "Looks good"', a.text('#estComfortBadge') === 'Looks good');
-  a.click('[data-view="estimate"] [data-go="products"]');
-  check('estimate "See my loan options" → products', a.visible('products'));
+  // 6 · Simplified loan request — the estimate screen is gone -----------------
+  group('6 · Simplified loan request');
+  check('estimate screen removed', a.q('[data-view="estimate"]') === null);
+  a.go('home');
+  a.click('.home-hero [data-go="products"]');
+  check('Apply now → products directly (no estimate step)', a.visible('products'));
 
-  // 7 · Products -------------------------------------------------------------
+  // 7 · Products — data-driven, every card selectable, one docked CTA --------
   group('7 · Products');
   a.go('products');
-  a.click('[data-view="products"] [data-go="calc"]');
+  const prodCards = () => a.document.querySelectorAll('#prodList .prod');
+  check('products render from data (3 fallback cards)', prodCards().length === 3);
+  check('first product selected by default', prodCards()[0].classList.contains('sel'));
+  // EVERY product card must be selectable (the reported bug: only the first worked)
+  prodCards().forEach((card, i) => {
+    a.click(card);
+    const cards = prodCards();
+    check(`product card ${i + 1} selectable`, cards[i].classList.contains('sel'));
+    check(`selecting card ${i + 1} deselects the others`,
+      Array.from(cards).filter((c) => c.classList.contains('sel')).length === 1);
+  });
+  check('Continue button reflects the chosen product', /Continue with /.test(a.text('#prodContinue')));
+  check('Continue button is docked to the bottom', a.hasClass('#prodContinue', 'dock'));
+  a.click('#prodContinue');
   check('products Continue → calc', a.visible('calc'));
+  check('calculator header reflects the chosen product', /EIR calculator/.test(a.text('#calcProd')));
+
+  // every primary CTA in the linear loan flow docks to the bottom (consistent layout)
+  for (const v of ['products', 'calc', 'kyc', 'income', 'bank', 'docs', 'tax', 'esign']) {
+    const dock = a.q(`[data-view="${v}"] .btn.dock`);
+    check(`${v} screen has a bottom-docked CTA`, dock !== null);
+  }
 
   // 8 · Calculator — sliders + fields + limit guard --------------------------
   group('8 · Calculator');

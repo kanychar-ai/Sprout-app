@@ -57,8 +57,17 @@ body {
 .app-top h2 { margin: 0; font-size: 18px; }
 .app-top .sub { font-size: 11.5px; color: var(--ink-3); }
 
-.view { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px 16px 20px; }
+.view { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px 16px 20px;
+  display: flex; flex-direction: column; }
 .view[hidden] { display: none; }
+/* one consistent pattern app-wide: the primary CTA docks to the bottom of the
+   screen when content is short, and flows inline (scrolls) when content is long */
+.view > .btn.dock { margin-top: auto; }
+.view > .btn.dock + .btn.dock { margin-top: 10px; }
+
+/* selectable loan-product cards (data-driven, API-ready) */
+.prod { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.prod.sel { border: 2px solid var(--cobalt); box-shadow: 0 0 0 4px var(--cobalt-50); }
 
 /* Modern bottom navigation — SVG line icons + active pill */
 .app-nav { flex: 0 0 auto; display: flex; justify-content: space-around; align-items: stretch; gap: 2px;

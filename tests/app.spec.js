@@ -131,13 +131,13 @@ test.describe('1 · Auth flow — onboarding → create → verify → login', (
 test.describe('2 · Home + bottom navigation', () => {
   test('home hero CTAs and quick actions route correctly', async ({ page }) => {
     const routes = [
-      ['.home-hero [data-go="estimate"]', 'estimate'],
+      ['.home-hero [data-go="products"]', 'products'],
       ['.home-hero [data-go="status"]', 'status'],
       ['.quick [data-go="calc"]', 'calc'],
       ['.quick [data-go="status"]', 'status'],
       ['.quick [data-go="repay"]', 'repay'],
       ['.quick [data-go="products"]', 'products'],
-      ['[data-view="home"] [data-go="estimate"].btn', 'estimate'],
+      ['[data-view="home"] [data-go="products"].btn', 'products'],
     ];
     for (const [sel, view] of routes) {
       await goView(page, 'home');
@@ -162,23 +162,11 @@ test.describe('2 · Home + bottom navigation', () => {
   });
 });
 
-test.describe('3 · Borrowing estimate — friendly, plain-language affordability', () => {
-  test('estIncome / estDebt update power + repayment & comfort, then → products', async ({ page }) => {
-    await goView(page, 'estimate');
-    await page.fill('#estIncome', '60000');
-    await page.fill('#estDebt', '5000');
-    await expect(page.locator('#estPower')).not.toHaveText('฿0');
-    await expect(page.locator('#estRepay')).toContainText('month');
-    await expect(page.locator('#estComfortBadge')).toHaveText('Looks good');
-    await expect(page.locator('[data-view="estimate"]')).not.toContainText('Debt Service Ratio');
-    await expect(page.locator('[data-view="estimate"] .sysnote')).toHaveCount(0);
-
-    // an over-stretched borrower is warned, not silently approved
-    await page.fill('#estDebt', '50000');
-    await expect(page.locator('#estComfortBadge')).toHaveText('Too tight');
-
-    await page.fill('#estDebt', '5000');
-    await page.locator('[data-view="estimate"] [data-go="products"]').click();
+test.describe('3 · Simplified loan request (estimate screen removed)', () => {
+  test('the estimate screen no longer exists; Apply now goes straight to products', async ({ page }) => {
+    await expect(page.locator('[data-view="estimate"]')).toHaveCount(0);
+    await goView(page, 'home');
+    await page.locator('.home-hero [data-go="products"]').click();
     await expectView(page, 'products');
   });
 });
@@ -189,11 +177,31 @@ test.describe('3b · No internal/dev jargon shown to customers', () => {
   });
 });
 
-test.describe('4 · Products', () => {
-  test('Continue with Personal Loan → calculator', async ({ page }) => {
+test.describe('4 · Products — data-driven, every card selectable, one docked CTA', () => {
+  test('all product cards select; chosen product flows to the calculator', async ({ page }) => {
     await goView(page, 'products');
-    await page.locator('[data-view="products"] [data-go="calc"]').click();
+    const cards = page.locator('#prodList .prod');
+    await expect(cards).toHaveCount(3);
+    await expect(cards.nth(0)).toHaveClass(/sel/); // first selected by default
+
+    // every card must be selectable (bug: only the first one worked before)
+    for (let i = 0; i < 3; i++) {
+      await cards.nth(i).click();
+      await expect(cards.nth(i)).toHaveClass(/sel/);
+      await expect(page.locator('#prodList .prod.sel')).toHaveCount(1);
+    }
+
+    await expect(page.locator('#prodContinue')).toContainText('Continue with');
+    await expect(page.locator('#prodContinue')).toHaveClass(/dock/);
+    await page.locator('#prodContinue').click();
     await expectView(page, 'calc');
+    await expect(page.locator('#calcProd')).toContainText('EIR calculator');
+  });
+
+  test('every linear-flow screen docks its primary CTA to the bottom', async ({ page }) => {
+    for (const v of ['products', 'calc', 'kyc', 'income', 'bank', 'docs', 'tax', 'esign']) {
+      await expect(page.locator(`[data-view="${v}"] .btn.dock`)).toHaveCount(1);
+    }
   });
 });
 

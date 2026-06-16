@@ -147,7 +147,7 @@
       <div class="hh-amount">฿180,000</div>
       <div class="hh-sub"><span class="pill">Pre-bureau</span> EIR from 15.99%</div>
       <div class="hh-cta">
-        <button class="btn lime" data-go="estimate">Apply now</button>
+        <button class="btn lime" data-go="products">Apply now</button>
         <button class="hh-ghost" data-go="status">Track status</button>
       </div>
     </header>
@@ -175,7 +175,7 @@
     <div class="card flat" style="padding:15px">
       <div class="steps"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
       <div class="tiny muted mt10">Identity &amp; account done. Verify income &amp; documents to turn your indicative offer into a real one.</div>
-      <button class="btn primary mt12" data-go="estimate">Continue application</button>
+      <button class="btn primary mt12" data-go="products">Continue application</button>
     </div>
 
     <div class="sec-h"><b>Recent activity</b><span>See all</span></div>
@@ -200,51 +200,16 @@
     <div class="note-soft mt16" style="margin-bottom:6px">💡 This is an early estimate. We'll confirm your real offer after a quick ID and income check.</div>
   </section>
 
-  <!-- 2.2 Borrowing estimate -->
-  <section class="view" data-view="estimate" hidden>
-    <div class="card flat">
-      <div class="label">Monthly income</div>
-      <input class="field" id="estIncome" inputmode="numeric" value="45000">
-      <div class="label mt12">Existing monthly debt</div>
-      <input class="field" id="estDebt" inputmode="numeric" value="8500">
-    </div>
-    <div class="card mt14" style="text-align:center;background:var(--navy);color:#fff">
-      <div class="tiny" style="color:#aab8d6">You could borrow up to</div>
-      <div class="amount" id="estPower" style="font-size:36px;color:var(--lime)">฿180,000</div>
-      <div class="tiny" id="estRepay" style="color:#aab8d6;margin-top:4px">about ฿6,300 / month over 36 months</div>
-    </div>
-    <div class="card flat mt12" style="padding:14px">
-      <div class="row between center"><span style="font-weight:600" id="estComfortTitle">Comfortable to repay</span><span class="badge ok" id="estComfortBadge">Looks good</span></div>
-      <div class="track mt8"><div class="track-fill" id="estDsrBar" style="width:27%"></div></div>
-      <div class="tiny muted" id="estComfortMsg" style="margin-top:9px;line-height:1.55">Right now about <b>19%</b> of your income goes to paying off debt — most lenders are comfortable up to 70%, so you have room to borrow.</div>
-    </div>
-    <div class="note-soft mt12">💡 This is an early estimate based on what you told us. Your final amount is confirmed after a quick income check.</div>
-    <button class="btn primary mt14" data-go="products">See my loan options</button>
-  </section>
-
-  <!-- 2.3 Products -->
+  <!-- 2.3 Products — data-driven (loaded from the back office API) -->
   <section class="view" data-view="products" hidden>
-    <div class="card" style="border:2px solid var(--cobalt)">
-      <div class="row between"><b>Personal Loan</b><span class="badge lime">Popular</span></div>
-      <div class="tiny muted mt6">Unsecured · ฿20k–฿2M · 6–60 mo</div>
-      <div class="row gap12 mt12"><div><div class="tiny muted">EIR from</div><div class="amount" style="font-size:20px;color:var(--cobalt)">15.99%</div></div><div><div class="tiny muted">Max term</div><div class="amount" style="font-size:20px">60 mo</div></div></div>
-    </div>
-    <div class="card flat mt12">
-      <div class="row between"><b>Salaryman Quick</b><span class="badge info">Fast</span></div>
-      <div class="tiny muted mt6">For payroll customers · ฿10k–฿300k</div>
-      <div class="row gap12 mt12"><div><div class="tiny muted">EIR from</div><div class="amount" style="font-size:20px">18.50%</div></div><div><div class="tiny muted">Decision</div><div class="amount" style="font-size:20px">~1 day</div></div></div>
-    </div>
-    <div class="card flat mt12">
-      <div class="row between"><b>Nano / Micro</b><span class="badge ghost">Reg. capped</span></div>
-      <div class="tiny muted mt6">Small ticket · ≤ ฿20,000</div>
-      <div class="row gap12 mt12"><div><div class="tiny muted">EIR cap</div><div class="amount" style="font-size:20px">33%</div></div><div><div class="tiny muted">Term</div><div class="amount" style="font-size:20px">≤ 24 mo</div></div></div>
-    </div>
-    <button class="btn primary mt14" data-go="calc">Continue with Personal Loan</button>
+    <div id="prodList"></div>
+    <div class="note-soft mt12" id="prodEmpty" hidden>No loan products are available right now. Please check back soon.</div>
+    <button class="btn primary dock" id="prodContinue" data-go="calc">Continue</button>
   </section>
 
   <!-- 2.4 CALCULATOR (live) -->
   <section class="view" data-view="calc" hidden>
-    <b style="font-size:14px">Personal Loan · EIR calculator</b>
+    <b style="font-size:14px" id="calcProd">Personal Loan · EIR calculator</b>
     <div class="card flat mt12">
       <div class="row between"><span class="label" style="margin:0">Amount</span><b id="amtLabel" style="color:var(--cobalt)">฿150,000</b></div>
       <input class="range mt8" type="range" id="amt" min="20000" max="240000" step="5000" value="150000">
@@ -284,8 +249,8 @@
         <div class="tiny" id="overLimitMsg" style="color:#9a4233;margin-top:4px"></div></div></div>
     </div>
 
-    <button class="btn primary mt14" id="applyBtn" data-go="kyc">Apply · ฿150,000</button>
     <div class="note-soft mt12">💡 <b>EIR</b> is the all-in yearly rate — it already includes fees, so the figure above is what you really pay. You can pay off early anytime with no penalty.</div>
+    <button class="btn primary dock" id="applyBtn" data-go="kyc">Apply · ฿150,000</button>
   </section>
 
   <!-- 2.6 e-KYC ID scan -->
@@ -299,7 +264,7 @@
     </div>
     <div class="row gap8 mt12" style="flex-wrap:wrap"><span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span></div>
     <div class="note-soft mt12">🔒 Your ID is encrypted and the photo is deleted right after we read it (PDPA).</div>
-    <button class="btn primary mt14" data-go="income">📷 Capture</button>
+    <button class="btn primary dock" data-go="income">📷 Capture</button>
   </section>
 
   <!-- 2.8 Income + occupation API -->
@@ -319,7 +284,7 @@
       <div style="flex:1"><div class="label">Monthly income</div><div class="input"><span>฿</span> 45,000</div></div>
       <div style="flex:1"><div class="label">Pay type</div><div class="input">Payroll ▾</div></div>
     </div>
-    <button class="btn primary mt16" data-go="bank">Continue</button>
+    <button class="btn primary dock" data-go="bank">Continue</button>
   </section>
 
   <!-- 2.9 Receiving bank + name match -->
@@ -340,7 +305,7 @@
       <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>"Mr. Somchai Jaidee"</b> matches your verified ID name.</div>
     </div>
     <div class="note-soft mt12">🔒 For your safety, money can only be sent to a bank account in your own name.</div>
-    <button class="btn primary mt14" data-go="docs">Continue</button>
+    <button class="btn primary dock" data-go="docs">Continue</button>
   </section>
 
   <!-- 2.10 Documents -->
@@ -363,7 +328,7 @@
       <button class="btn ghost sm" style="flex:1" data-add="doc">📷 Camera</button>
       <button class="btn ghost sm" style="flex:1" data-add="doc">📁 Files</button>
     </div>
-    <button class="btn primary mt14" data-go="tax">Submit application</button>
+    <button class="btn primary dock" data-go="tax">Submit application</button>
   </section>
 
   <!-- 2.11 Tax & compliance -->
@@ -381,7 +346,7 @@
         <div class="seg toggle" style="width:120px;padding:3px"><button>Yes</button><button class="on">No</button></div></div>
     </div>
     <div class="note-soft mt12">ℹ️ These questions are required by Thai law before we can open your loan. Most people answer "No" to all of them.</div>
-    <button class="btn primary mt14" data-go="esign">Confirm declarations</button>
+    <button class="btn primary dock" data-go="esign">Confirm declarations</button>
   </section>
 
   <!-- 2.12 e-signature -->
@@ -402,7 +367,7 @@
       <div class="ck on"><span>✓</span></div>
       <div class="ctxt tiny">I have read and <b>accept</b> the agreement and EIR disclosure. I agree this acceptance is my electronic signature (Electronic Transactions Act).</div>
     </div>
-    <button class="btn lime mt14" data-go="prescreen">✍️ Accept &amp; sign</button>
+    <button class="btn lime dock" data-go="prescreen">✍️ Accept &amp; sign</button>
   </section>
 
   <!-- 2.13 Pre-screening -->
