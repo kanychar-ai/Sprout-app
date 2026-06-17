@@ -1,0 +1,56 @@
+/* Sprout back office — desktop-friendly admin, reusing the app's design tokens */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper, #f6f7f9); font-family: 'Anuphan', system-ui, sans-serif; color: var(--ink, #16203a); }
+.bo { max-width: 720px; margin: 0 auto; padding: 18px 16px 60px; }
+
+.bo-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.bo-brand { font-weight: 800; font-size: 18px; }
+.bo-brand span { font-weight: 600; color: var(--ink-3, #6b7689); font-size: 13px; margin-left: 4px; }
+.bo-top-actions { display: flex; gap: 8px; }
+
+.bo-card { background: #fff; border: 1px solid var(--line, #e7eaef); border-radius: 18px; padding: 22px; }
+.login { max-width: 380px; margin: 8vh auto 0; }
+.login h2 { margin: 0 0 4px; }
+
+.bo-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+.prow { background: #fff; border: 1px solid var(--line, #e7eaef); border-radius: 16px; padding: 14px 16px;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+.prow.off { opacity: .55; }
+.prow .grip { cursor: default; color: var(--ink-3, #6b7689); font-size: 13px; width: 22px; text-align: center; }
+.prow .meta { flex: 1; min-width: 0; }
+.prow .meta b { font-size: 15px; }
+.prow .meta .sub { font-size: 12.5px; color: var(--ink-3, #6b7689); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .acts { display: flex; gap: 6px; }
+
+.btn.sm { height: 38px; padding: 0 14px; font-size: 13px; }
+.btn.danger { color: #c0392b; border-color: #f0c8c2; }
+
+/* form overlay */
+.bo-overlay { position: fixed; inset: 0; background: rgba(15,27,51,.45); display: flex; align-items: flex-end;
+  justify-content: center; z-index: 50; padding: 0; }
+@media (min-width: 640px) { .bo-overlay { align-items: center; padding: 20px; } }
+.bo-sheet { background: #fff; width: 100%; max-width: 560px; border-radius: 22px 22px 0 0; padding: 20px;
+  max-height: 92vh; overflow-y: auto; }
+@media (min-width: 640px) { .bo-sheet { border-radius: 22px; } }
+.bo-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.bo-x { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink-3, #6b7689); }
+.bo-sheet-foot { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+.bo-sheet-foot .btn { flex: 1; }
+.bo-sheet-foot .btn.danger { flex: 0 0 auto; }
+
+.bo-row { display: flex; gap: 10px; align-items: flex-end; }
+.bo-check { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding-bottom: 12px; white-space: nowrap; }
+.bo-check input { width: 18px; height: 18px; }
+
+.bo-msg { margin-top: 12px; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+.bo-msg.err { background: #fdecea; color: #c0392b; }
+.bo-msg.ok { background: #e7f7ee; color: #1e8e54; }
+
+.toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); background: var(--navy, #16203a);
+  color: #fff; padding: 11px 18px; border-radius: 14px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none;
+  transition: .25s; z-index: 60; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.muted { color: var(--ink-3, #6b7689); }
+.tiny { font-size: 12.5px; }
+.mt12 { margin-top: 12px; } .mt16 { margin-top: 16px; }
