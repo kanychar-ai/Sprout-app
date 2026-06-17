@@ -133,10 +133,12 @@ test.describe('2 · Home + bottom navigation', () => {
     const routes = [
       ['.home-hero [data-go="products"]', 'products'],
       ['.home-hero [data-go="status"]', 'status'],
+      ['.hh-bell', 'alerts'],
       ['.quick [data-go="calc"]', 'calc'],
       ['.quick [data-go="status"]', 'status'],
       ['.quick [data-go="repay"]', 'repay'],
       ['.quick [data-go="products"]', 'products'],
+      ['[data-go="activity"]', 'activity'],
       ['[data-view="home"] [data-go="products"].btn', 'products'],
     ];
     for (const [sel, view] of routes) {
@@ -159,6 +161,32 @@ test.describe('2 · Home + bottom navigation', () => {
       await expectView(page, view);
       await expect(page.locator(sel)).toHaveClass(/on/);
     }
+  });
+});
+
+test.describe('2b · Application progress is aligned across screens', () => {
+  test('home tracker matches the per-screen "Step X of 4" and resumes correctly', async ({ page }) => {
+    await goView(page, 'home');
+    await expect(page.locator('#homeStepsLeft')).toHaveText('3 steps left');
+    await expect(page.locator('#homeSteps i')).toHaveCount(4);
+    await expect(page.locator('#homeSteps i.done')).toHaveCount(1);
+    await expect(page.locator('#homeContinue')).toContainText('Step 2 of 4');
+    await page.locator('#homeContinue').click();
+    await expectView(page, 'income'); // resumes at the current step, not the start
+
+    for (const [v, n] of [['kyc', 1], ['income', 2], ['bank', 3], ['docs', 4]]) {
+      await goView(page, v);
+      await expect(page.locator(`[data-view="${v}"] .step-count`)).toHaveText(`Step ${n} of 4`);
+    }
+  });
+
+  test('bell opens notifications and "See all" opens the activity log', async ({ page }) => {
+    await goView(page, 'home');
+    await page.locator('.hh-bell').click();
+    await expectView(page, 'alerts');
+    await goView(page, 'home');
+    await page.locator('[data-go="activity"]').click();
+    await expectView(page, 'activity');
   });
 });
 

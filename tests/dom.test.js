@@ -152,10 +152,12 @@ async function run() {
   const homeRoutes = [
     ['.home-hero [data-go="products"]', 'products'],
     ['.home-hero [data-go="status"]', 'status'],
+    ['.hh-bell', 'alerts'],                       // the bell is now pressable
     ['.quick [data-go="calc"]', 'calc'],
     ['.quick [data-go="status"]', 'status'],
     ['.quick [data-go="repay"]', 'repay'],
     ['.quick [data-go="products"]', 'products'],
+    ['[data-go="activity"]', 'activity'],         // "See all" is now pressable
   ];
   for (const [sel, view] of homeRoutes) {
     a.go('home');
@@ -168,6 +170,30 @@ async function run() {
     check(`nav tab ${go} → ${view}`, a.visible(view));
     check(`nav tab ${go} highlighted`, a.hasClass(`.app-nav [data-go="${go}"]`, 'on'));
   }
+
+  // 5b · Application progress is internally consistent -----------------------
+  group('5b · Application progress alignment');
+  a.go('home');
+  // home tracker is driven from one source of truth (WIZARD_DONE = 1 → on step 2)
+  check('home shows "3 steps left"', a.text('#homeStepsLeft') === '3 steps left');
+  check('home renders 4 progress dots', a.document.querySelectorAll('#homeSteps i').length === 4);
+  check('home dots: 1 done, 1 on', a.document.querySelectorAll('#homeSteps i.done').length === 1 &&
+    a.document.querySelectorAll('#homeSteps i.on').length === 1);
+  check('home "Continue" says Step 2 of 4', /Step 2 of 4/.test(a.text('#homeContinue')));
+  a.click('#homeContinue');
+  check('home "Continue" resumes at the current step (income)', a.visible('income'));
+  // each verification screen shows an explicit, aligned "Step X of 4"
+  for (const [v, n] of [['kyc', 1], ['income', 2], ['bank', 3], ['docs', 4]]) {
+    const cap = a.q(`[data-view="${v}"] .step-count`);
+    check(`${v} shows "Step ${n} of 4"`, !!cap && cap.textContent.trim() === `Step ${n} of 4`);
+  }
+  // the new notification & activity screens have a working CTA back into the flow
+  a.go('alerts');
+  a.click('[data-view="alerts"] [data-go="income"]');
+  check('notifications CTA → income', a.visible('income'));
+  a.go('activity');
+  a.click('[data-view="activity"] [data-go="income"]');
+  check('activity CTA → income', a.visible('income'));
 
   // 6 · Simplified loan request — the estimate screen is gone -----------------
   group('6 · Simplified loan request');

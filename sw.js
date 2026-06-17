@@ -1,11 +1,12 @@
 /* Sprout LOS — service worker (network-first PWA shell) */
-const CACHE = 'sprout-los-v5';
+const CACHE = 'sprout-los-v6';
 const ASSETS = [
   './',
   './index.html',
   './assets/styles.css',
   './app/index.html',
   './app/app.css',
+  './app/config.js',
   './app/app.js',
   './manifest.webmanifest',
   './assets/icon.svg'

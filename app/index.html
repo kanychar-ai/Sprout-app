@@ -138,7 +138,7 @@
           <div class="hh-av">S</div>
           <div><div class="hh-hi">Good morning</div><div class="hh-name">Somchai Jaidee</div></div>
         </div>
-        <button class="hh-bell" aria-label="Notifications">
+        <button class="hh-bell" data-go="alerts" aria-label="Notifications">
           <svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
           <i class="nd"></i>
         </button>
@@ -171,14 +171,14 @@
       </button>
     </div>
 
-    <div class="sec-h"><b>Your application</b><span class="badge amber" style="cursor:default">2 steps left</span></div>
+    <div class="sec-h"><b>Your application</b><span class="badge amber" id="homeStepsLeft" style="cursor:default">—</span></div>
     <div class="card flat" style="padding:15px">
-      <div class="steps"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
-      <div class="tiny muted mt10">Identity &amp; account done. Verify income &amp; documents to turn your indicative offer into a real one.</div>
-      <button class="btn primary mt12" data-go="products">Continue application</button>
+      <div class="steps" id="homeSteps"></div>
+      <div class="tiny muted mt10" id="homeStepMsg"></div>
+      <button class="btn primary mt12" id="homeContinue" data-go="income">Continue application</button>
     </div>
 
-    <div class="sec-h"><b>Recent activity</b><span>See all</span></div>
+    <div class="sec-h"><b>Recent activity</b><button class="link-btn" data-go="activity">See all</button></div>
     <div class="card flat" style="padding:4px 15px">
       <div class="act">
         <span class="act-ic" style="background:var(--cobalt-50);color:var(--cobalt)"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></span>
@@ -198,6 +198,56 @@
     </div>
 
     <div class="note-soft mt16" style="margin-bottom:6px">💡 This is an early estimate. We'll confirm your real offer after a quick ID and income check.</div>
+  </section>
+
+  <!-- 2.2a Notifications (from the bell) -->
+  <section class="view" data-view="alerts" hidden>
+    <div class="card flat" style="padding:4px 15px">
+      <div class="act">
+        <span class="act-ic" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg></span>
+        <div class="t"><b>Verify your income to continue</b><span>Action needed · today 09:12</span></div>
+        <span class="badge amber" style="cursor:default">New</span>
+      </div>
+      <div class="act">
+        <span class="act-ic" style="background:var(--cobalt-50);color:var(--cobalt)"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></span>
+        <div class="t"><b>Identity verified</b><span>e-KYC approved · today 14:03</span></div>
+        <span class="badge ok" style="cursor:default">Done</span>
+      </div>
+      <div class="act">
+        <span class="act-ic" style="background:var(--lime-bg);color:#5a7a00"><svg viewBox="0 0 24 24"><path d="M3.5 8.5a3 3 0 0 1 3-3h11a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-11a3 3 0 0 1-3-3z"/></svg></span>
+        <div class="t"><b>Your indicative offer is ready</b><span>฿180,000 · EIR from 15.99%</span></div>
+        <span class="badge info" style="cursor:default">Offer</span>
+      </div>
+    </div>
+    <div class="note-soft mt12">🔔 We'll notify you here whenever your application needs attention or your offer changes.</div>
+    <button class="btn primary dock" data-go="income">Verify income now</button>
+  </section>
+
+  <!-- 2.2b Full activity log (from "See all") -->
+  <section class="view" data-view="activity" hidden>
+    <div class="card flat" style="padding:4px 15px">
+      <div class="act">
+        <span class="act-ic" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg></span>
+        <div class="t"><b>Income verification</b><span>Pending your action · now</span></div>
+        <span class="badge amber" style="cursor:default">Next</span>
+      </div>
+      <div class="act">
+        <span class="act-ic" style="background:var(--cobalt-50);color:var(--cobalt)"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></span>
+        <div class="t"><b>Identity verified</b><span>e-KYC · today 14:03</span></div>
+        <span class="badge ok" style="cursor:default">Done</span>
+      </div>
+      <div class="act">
+        <span class="act-ic" style="background:var(--ok-bg);color:var(--ok)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <div class="t"><b>Account created</b><span>somchai.j · yesterday</span></div>
+        <span class="badge ok" style="cursor:default">Done</span>
+      </div>
+      <div class="act">
+        <span class="act-ic" style="background:var(--cobalt-50);color:var(--cobalt)"><svg viewBox="0 0 24 24"><path d="M12 8v8m-4-4h8"/></svg></span>
+        <div class="t"><b>Application started</b><span>Personal Loan · yesterday</span></div>
+        <span class="badge ok" style="cursor:default">Done</span>
+      </div>
+    </div>
+    <button class="btn primary dock" data-go="income">Continue application</button>
   </section>
 
   <!-- 2.3 Products — data-driven (loaded from the back office API) -->
@@ -255,7 +305,7 @@
 
   <!-- 2.6 e-KYC ID scan -->
   <section class="view" data-view="kyc" hidden>
-    <div class="steps mb12"><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="step-head mb12"><div class="steps"><i class="on"></i><i></i><i></i><i></i></div><span class="step-count">Step 1 of 4</span></div>
     <div style="font-size:13px;color:var(--ink-2)">Place your <b>Thai national ID</b> inside the frame. Hold steady.</div>
     <div class="scanframe mt12">
       <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
@@ -269,7 +319,7 @@
 
   <!-- 2.8 Income + occupation API -->
   <section class="view" data-view="income" hidden>
-    <div class="steps mb12"><i class="done"></i><i class="on"></i><i></i><i></i></div>
+    <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="on"></i><i></i><i></i></div><span class="step-count">Step 2 of 4</span></div>
     <div class="label">Occupation</div>
     <div class="input focus" id="occInput"><span>🔎</span><input class="bare" id="occField" value="Engineer" autocomplete="off"></div>
     <div class="card flat" id="occList" style="margin-top:6px;padding:6px">
@@ -289,7 +339,7 @@
 
   <!-- 2.9 Receiving bank + name match -->
   <section class="view" data-view="bank" hidden>
-    <div class="steps mb12"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div>
+    <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div><span class="step-count">Step 3 of 4</span></div>
     <div class="label">Bank</div>
     <div class="row gap8 bankpick" id="bankPick">
       <button class="tile bank on" data-bank="SCB"><span class="bk" style="background:#4e2a84">S</span><div class="tiny mt6" style="font-weight:600">SCB</div></button>
@@ -310,7 +360,7 @@
 
   <!-- 2.10 Documents -->
   <section class="view" data-view="docs" hidden>
-    <div class="steps mb12"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div>
+    <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div><span class="step-count">Step 4 of 4</span></div>
     <div class="row between center"><b style="font-size:14px">Book bank (passbook)</b><span class="badge ok">2 files</span></div>
     <div class="row gap10 mt10">
       <div class="thumb" style="flex:1"><span style="font-size:20px">📘</span>before.jpg<span class="badge ghost tiny" style="padding:2px 7px">cover</span></div>

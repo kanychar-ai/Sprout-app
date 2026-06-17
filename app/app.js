@@ -17,6 +17,8 @@
     login:    null,
     role:     null,
     home:     ['Sprout', 'Transparent lending'],
+    alerts:   ['Notifications', 'Updates on your application'],
+    activity: ['Recent activity', 'Your application timeline'],
     products: ['Loan products', 'Choose what fits'],
     calc:     ['EIR calculator', 'Personal Loan'],
     kyc:      ['Verify identity', 'Step 1 of 4 · e-KYC'],
@@ -315,6 +317,41 @@
     }
   }
   loadProducts();
+
+  // ---- home application tracker (single source of truth) --------------------
+  // The 4-step verification wizard. WIZARD_DONE = how many are completed, so the
+  // home card, the "X steps left" badge and the "Continue" target all stay in
+  // sync with the per-screen "Step X of 4" labels and the activity feed.
+  var WIZARD = [
+    { view: 'kyc',    label: 'Verify identity' },
+    { view: 'income', label: 'Income' },
+    { view: 'bank',   label: 'Receiving account' },
+    { view: 'docs',   label: 'Upload documents' }
+  ];
+  var WIZARD_DONE = 1; // identity verified; customer is now on step 2 (income)
+
+  function renderProgress() {
+    var total = WIZARD.length;
+    var cur = Math.min(WIZARD_DONE, total - 1); // 0-based index of the current step
+    var dotsEl = document.getElementById('homeSteps');
+    if (dotsEl) {
+      var html = '';
+      for (var i = 0; i < total; i++) {
+        html += '<i class="' + (i < WIZARD_DONE ? 'done' : (i === cur ? 'on' : '')) + '"></i>';
+      }
+      dotsEl.innerHTML = html;
+    }
+    var left = total - WIZARD_DONE;
+    setText('homeStepsLeft', left + (left === 1 ? ' step left' : ' steps left'));
+    setText('homeStepMsg', 'Identity verified. Next: ' + WIZARD[cur].label.toLowerCase() +
+      ' (step ' + (cur + 1) + ' of ' + total + ') to turn your indicative offer into a real one.');
+    var btn = document.getElementById('homeContinue');
+    if (btn) {
+      btn.textContent = 'Continue · Step ' + (cur + 1) + ' of ' + total;
+      btn.dataset.go = WIZARD[cur].view;
+    }
+  }
+  renderProgress();
 
   // ---- pre-screening animation, then auto-route to status ----
   var psRan = false;
