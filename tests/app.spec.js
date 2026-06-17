@@ -190,6 +190,38 @@ test.describe('2b · Application progress is aligned across screens', () => {
   });
 });
 
+test.describe('2c · No dead-end screens — every screen has an exit', () => {
+  test('each view offers back / nav / a forward button (or auto-advances)', async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const IMMERSIVE = { home: 1, onboard: 1, login: 1, role: 1, prescreen: 1 };
+      const SHOW_NAV = { home: 1, calc: 1, status: 1, repay: 1, me: 1 };
+      const bad = [];
+      document.querySelectorAll('.view').forEach((sec) => {
+        const v = sec.dataset.view;
+        const ok = !IMMERSIVE[v] || SHOW_NAV[v] ||
+          sec.querySelectorAll('[data-go]').length > 0 || v === 'role' || v === 'prescreen';
+        if (!ok) bad.push(v);
+      });
+      return bad;
+    });
+    expect(result).toEqual([]);
+  });
+
+  test('top-bar avatar reaches profile, and the back arrow chains home', async ({ page }) => {
+    await goView(page, 'products');
+    await page.locator('.app-top .avatar').click();
+    await expectView(page, 'me');
+
+    await goView(page, 'home');
+    await page.locator('.home-hero [data-go="products"]').click();
+    await page.locator('[data-view="products"] [data-go="calc"]').click();
+    await page.locator('#back').click();
+    await expectView(page, 'products');
+    await page.locator('#back').click();
+    await expectView(page, 'home');
+  });
+});
+
 test.describe('3 · Simplified loan request (estimate screen removed)', () => {
   test('the estimate screen no longer exists; Apply now goes straight to products', async ({ page }) => {
     await expect(page.locator('[data-view="estimate"]')).toHaveCount(0);

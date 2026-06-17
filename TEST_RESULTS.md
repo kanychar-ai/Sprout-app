@@ -1,10 +1,10 @@
 # Sprout — Test Results
 
-Run date: 2026-06-17 04:55 UTC
-Scope: simplified loan request, data-driven & selectable products, bottom-docked
-CTAs, aligned application progress (home tracker == per-screen "Step X of 4"),
-and pressable bell / "See all" opening the notifications & activity screens.
-Every button and every fill-in field is exercised.
+Run date: 2026-06-17 12:58 UTC
+Scope: full navigation audit — every screen offers a way to go next, go back,
+or reach home (no dead ends); all buttons are wired; plus the earlier work
+(simplified request, data-driven selectable products, docked CTAs, aligned
+progress, pressable bell / See all). Every button and field is exercised.
 
 ## 1. Browserless DOM suite — `npm test` (always runnable, no browser needed)
 
@@ -36,16 +36,16 @@ Every button and every fill-in field is exercised.
 
 • 10 · Status / Repay / Profile
 
+• 10b · No dead-end screens
+
 • 11 · No internal jargon for customers
 
 ================================================
-  113 passed, 0 failed
+  137 passed, 0 failed
 ================================================
 ```
 
 ## 2. Playwright E2E suite — `npm run test:e2e`
 
-Updated to match: progress alignment, bell → notifications, See all → activity,
-selectable products, docked CTAs. NOT EXECUTED in this container (Chromium download
-is blocked by the network policy); runs in CI / locally. The jsdom suite above is the
-always-runnable equivalent covering the same buttons and fields.
+Mirrors the above incl. the no-dead-end checks. NOT EXECUTED in this container
+(Chromium download blocked by network policy); runs in CI / locally.

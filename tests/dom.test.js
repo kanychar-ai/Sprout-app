@@ -306,6 +306,36 @@ async function run() {
   a.click('[data-view="me"] [data-go="onboard"]');
   check('profile Sign out → onboard', a.visible('onboard'));
 
+  // 10b · No dead ends — every screen offers next / back / home -------------
+  group('10b · No dead-end screens');
+  // mirror the routing rules from app.js
+  const IMMERSIVE = { home: 1, onboard: 1, login: 1, role: 1, prescreen: 1 };
+  const SHOW_NAV = { home: 1, calc: 1, status: 1, repay: 1, me: 1 };
+  const allViews = Array.from(a.document.querySelectorAll('.view')).map((v) => v.dataset.view);
+  for (const v of allViews) {
+    const sec = a.q(`[data-view="${v}"]`);
+    const hasBack = !IMMERSIVE[v];                 // non-immersive screens show the back arrow
+    const hasNav = !!SHOW_NAV[v];                  // these screens show the bottom tab bar
+    const hasGo = sec.querySelectorAll('[data-go]').length > 0;
+    // immersive screens without buttons must auto-advance (role, prescreen)
+    const autoAdvances = v === 'role' || v === 'prescreen';
+    check(`${v} is not a dead end`, hasBack || hasNav || hasGo || autoAdvances);
+  }
+  // the top-bar avatar is a real control on flow screens (→ profile, which has Home)
+  a.go('products');
+  a.click('.app-top .avatar');
+  check('top-bar avatar → profile (reachable from a flow screen)', a.visible('me'));
+  // the back arrow chain always returns toward home
+  a.go('home'); a.click('.home-hero [data-go="products"]'); a.click('[data-view="products"] [data-go="calc"]');
+  a.click('#back');
+  check('back arrow goes one step back (calc → products)', a.visible('products'));
+  a.click('#back');
+  check('back arrow chain reaches home', a.visible('home'));
+  // role auto-advances to home (never a trap)
+  a.go('role');
+  await delay(1600);
+  check('role auto-advances → home', a.visible('home'));
+
   // 11 · Customer-friendly: no internal/dev jargon shown ---------------------
   group('11 · No internal jargon for customers');
   const bodyText = a.document.body.textContent;

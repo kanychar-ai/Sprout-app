@@ -359,7 +359,9 @@
     var ring = document.getElementById('psRing');
     var pct = document.getElementById('psPct');
     var items = document.querySelectorAll('#psList .psitem');
-    if (!ring) return;
+    // safety net: prescreen is an immersive screen with no back arrow, so it must
+    // always move on — route to status even if the animation can't run.
+    if (!ring) { setTimeout(function () { if (location.hash === '#prescreen') show('status'); }, 1200); return; }
     psRan = true;
     var p = 0, steps = items.length, done = 0;
     items.forEach(function (it) { it.querySelector('.dot').style.background = 'rgba(255,255,255,.2)'; it.querySelector('.psck').textContent = '…'; });
