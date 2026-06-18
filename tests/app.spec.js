@@ -263,6 +263,23 @@ test.describe('4 · Products — data-driven, every card selectable, one docked 
       await expect(page.locator(`[data-view="${v}"] .btn.dock`)).toHaveCount(1);
     }
   });
+
+  test('product cards never overlap each other (real layout geometry)', async ({ page }) => {
+    await goView(page, 'products');
+    const cards = page.locator('#prodList .prod');
+    const n = await cards.count();
+    const boxes = [];
+    for (let i = 0; i < n; i++) boxes.push(await cards.nth(i).boundingBox());
+    // each card must sit fully below the previous one (bottom <= next top, with a tolerance)
+    for (let i = 1; i < boxes.length; i++) {
+      const prevBottom = boxes[i - 1].y + boxes[i - 1].height;
+      expect(boxes[i].y).toBeGreaterThanOrEqual(prevBottom - 1);
+    }
+    // and the docked CTA must sit below the last card, not over it
+    const cta = await page.locator('#prodContinue').boundingBox();
+    const last = boxes[boxes.length - 1];
+    expect(cta.y).toBeGreaterThanOrEqual(last.y + last.height - 1);
+  });
 });
 
 test.describe('5 · Calculator — every input drives the live EIR/DSR engine', () => {

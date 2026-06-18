@@ -1,8 +1,8 @@
 # Sprout — Test Results
 
-Run date: 2026-06-18 04:01 UTC
-Scope: cache-busting versioned assets (fixes stale app.js), occupation search,
-pay-type dropdown, e-KYC camera. Every button & field exercised.
+Run date: 2026-06-18 04:18 UTC
+Scope: fix product-card overlap (flex-column compression) + regression tests,
+occupation search, pay-type dropdown, e-KYC camera, cache-busting. All buttons/fields exercised.
 
 ## 1. Browserless DOM suite — `npm test`
 
@@ -28,6 +28,8 @@ pay-type dropdown, e-KYC camera. Every button & field exercised.
 
 • 7 · Products
 
+• 7b · Products layout (no overlapping cards)
+
 • 8 · Calculator
 
 • 9 · Application wizard
@@ -39,6 +41,9 @@ pay-type dropdown, e-KYC camera. Every button & field exercised.
 • 11 · No internal jargon for customers
 
 ================================================
-  158 passed, 0 failed
+  163 passed, 0 failed
 ================================================
 ```
+
+## 2. Playwright E2E suite — `npm run test:e2e`
+Adds a real-geometry check that product cards never overlap. Not executed in-container (Chromium blocked); runs in CI.

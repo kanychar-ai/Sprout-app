@@ -230,6 +230,23 @@ async function run() {
   check('products Continue → calc', a.visible('calc'));
   check('calculator header reflects the chosen product', /EIR calculator/.test(a.text('#calcProd')));
 
+  // 7b · Products layout must never overlap -----------------------------------
+  group('7b · Products layout (no overlapping cards)');
+  a.go('products');
+  // structure that makes overlap impossible: cards are block siblings in #prodList,
+  // and the docked CTA lives OUTSIDE the list so it can't collide with a card
+  check('all product cards are direct children of #prodList',
+    a.count('#prodList > .prod') === 3 && a.count('#prodList > .prod') === a.count('#prodList .prod'));
+  check('every product card is a block <div>',
+    Array.from(a.document.querySelectorAll('#prodList .prod')).every((c) => c.tagName === 'DIV'));
+  check('docked Continue is a sibling of the list, not inside it',
+    a.q('#prodContinue').parentElement.dataset.view === 'products' && !a.q('#prodList').contains(a.q('#prodContinue')));
+  // CSS regression guards for the flex-column compression bug that caused the overlap
+  const appCss = fs.readFileSync(path.join(APP_DIR, 'app.css'), 'utf8');
+  check('CSS forbids flex children from shrinking (.view > * flex-shrink:0)',
+    /\.view\s*>\s*\*\s*\{[^}]*flex-shrink:\s*0/.test(appCss));
+  check('no product/card uses absolute positioning', !/\.(prod|card)[^{]*\{[^}]*position:\s*absolute/.test(appCss));
+
   // every primary CTA in the linear loan flow docks to the bottom AND is sized
   // consistently (full-size .btn, never the smaller .sm variant)
   for (const v of ['products', 'calc', 'kyc', 'income', 'bank', 'docs', 'tax', 'esign']) {

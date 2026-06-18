@@ -60,6 +60,10 @@ body {
 .view { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 15px 16px 20px;
   display: flex; flex-direction: column; }
 .view[hidden] { display: none; }
+/* CRITICAL: never let a flex child compress below its content — otherwise items
+   (e.g. the product cards) can be squeezed and visually overlap their siblings
+   during reflow. Content keeps its natural height and the .view scrolls instead. */
+.view > * { flex-shrink: 0; }
 /* one consistent pattern app-wide: the primary CTA docks to the bottom of the
    screen when content is short, and flows inline (scrolls) when content is long */
 .view > .dock { margin-top: auto; }
