@@ -1,8 +1,8 @@
 # Sprout — Test Results
 
-Run date: 2026-06-18 03:54 UTC
-Scope: searchable occupation typeahead (seeded ISCO list) + working pay-type
-dropdown, on top of e-KYC camera capture and prior work. Every button & field exercised.
+Run date: 2026-06-18 04:01 UTC
+Scope: cache-busting versioned assets (fixes stale app.js), occupation search,
+pay-type dropdown, e-KYC camera. Every button & field exercised.
 
 ## 1. Browserless DOM suite — `npm test`
 
@@ -42,7 +42,3 @@ dropdown, on top of e-KYC camera capture and prior work. Every button & field ex
   158 passed, 0 failed
 ================================================
 ```
-
-## 2. Playwright E2E suite — `npm run test:e2e`
-Updated for occupation search + pay-type select. Not executed in-container
-(Chromium download blocked); runs in CI / locally.

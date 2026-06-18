@@ -24,8 +24,8 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 function boot() {
   let html = fs.readFileSync(path.join(APP_DIR, 'index.html'), 'utf8');
   // Drop the external <script>/<link>; we inject the JS ourselves and skip CSS.
-  html = html.replace(/<script src="(config|id-verify|app|kyc)\.js"><\/script>/g, '')
-             .replace(/<link rel="stylesheet" href="app\.css">/, '');
+  html = html.replace(/<script src="(config|id-verify|app|kyc)\.js(?:\?[^"]*)?"><\/script>/g, '')
+             .replace(/<link rel="stylesheet" href="app\.css(?:\?[^"]*)?">/, '');
   // forward console output, but drop jsdom's "Not implemented: canvas getContext"
   // notice (the verifier handles the missing canvas gracefully in headless jsdom)
   const vc = new VirtualConsole();
