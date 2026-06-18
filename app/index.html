@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
-<link rel="stylesheet" href="app.css?v=11">
+<link rel="stylesheet" href="app.css?v=12">
 </head>
 <body>
 
@@ -380,24 +380,13 @@
   <!-- 2.10 Documents -->
   <section class="view" data-view="docs" hidden>
     <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div><span class="step-count">Step 4 of 4</span></div>
-    <div class="row between center"><b style="font-size:14px">Book bank (passbook)</b><span class="badge ok">2 files</span></div>
-    <div class="row gap10 mt10">
-      <div class="thumb" style="flex:1"><span style="font-size:20px">📘</span>before.jpg<span class="badge ghost tiny" style="padding:2px 7px">cover</span></div>
-      <div class="thumb" style="flex:1;border:1.5px solid var(--cobalt)"><span style="font-size:20px">🧾</span>after.jpg<span class="badge info tiny" style="padding:2px 7px">first page</span></div>
-      <button class="thumb addthumb" data-add="doc" style="flex:1;border-style:dashed;color:var(--cobalt)"><span style="font-size:22px">＋</span>Add</button>
+    <div style="font-size:13px;color:var(--ink-2)">Support your application · PDF/JPG/PNG. <b>Bank docs must be in your name.</b></div>
+    <div id="docReqs" class="mt12"></div>
+    <input type="file" id="docFile" accept="image/*,application/pdf" hidden>
+    <div class="row dock">
+      <button class="btn ghost" id="docDraft">Save draft</button>
+      <button class="btn primary" data-go="tax">Next</button>
     </div>
-    <div class="card flat mt12" style="padding:11px">
-      <b class="tiny">Other documents</b>
-      <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">Payslip_May.pdf · 240KB</div><span class="badge ok tiny">Uploaded</span></div>
-      <div class="li" style="padding:9px 0"><div style="width:30px">📄</div><div style="flex:1" class="tiny">Statement_3mo.pdf · 1.1MB</div><span class="badge amber tiny" id="upPct">62%</span></div>
-      <div class="li" style="padding:9px 0;border:none"><div style="width:30px">📄</div><div style="flex:1" class="tiny">House_reg.jpg · 380KB</div><span class="badge ok tiny">Uploaded</span></div>
-    </div>
-    <div class="row gap10 mt10">
-      <button class="btn ghost sm" style="flex:1" data-add="doc">👁 Preview</button>
-      <button class="btn ghost sm" style="flex:1" data-add="doc">📷 Camera</button>
-      <button class="btn ghost sm" style="flex:1" data-add="doc">📁 Files</button>
-    </div>
-    <button class="btn primary dock" data-go="tax">Submit application</button>
   </section>
 
   <!-- 2.11 Tax & compliance -->
@@ -535,9 +524,10 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="config.js?v=11"></script>
-<script src="id-verify.js?v=11"></script>
-<script src="app.js?v=11"></script>
-<script src="kyc.js?v=11"></script>
+<script src="config.js?v=12"></script>
+<script src="id-verify.js?v=12"></script>
+<script src="app.js?v=12"></script>
+<script src="kyc.js?v=12"></script>
+<script src="docs.js?v=12"></script>
 </body>
 </html>

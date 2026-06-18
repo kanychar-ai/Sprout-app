@@ -1,8 +1,8 @@
 # Sprout — Test Results
 
-Run date: 2026-06-18 04:18 UTC
-Scope: fix product-card overlap (flex-column compression) + regression tests,
-occupation search, pay-type dropdown, e-KYC camera, cache-busting. All buttons/fields exercised.
+Run date: 2026-06-18 04:56 UTC
+Scope: functional Documents step (upload via camera/photos/files, shows file name,
+preview uploaded files) redesigned to the 7.4a layout; plus prior work.
 
 ## 1. Browserless DOM suite — `npm test`
 
@@ -41,9 +41,8 @@ occupation search, pay-type dropdown, e-KYC camera, cache-busting. All buttons/f
 • 11 · No internal jargon for customers
 
 ================================================
-  163 passed, 0 failed
+  169 passed, 0 failed
 ================================================
 ```
 
-## 2. Playwright E2E suite — `npm run test:e2e`
-Adds a real-geometry check that product cards never overlap. Not executed in-container (Chromium blocked); runs in CI.
+## 2. Playwright E2E — `npm run test:e2e` (real browser; not run in-container, Chromium blocked).

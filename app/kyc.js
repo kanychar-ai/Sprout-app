@@ -174,7 +174,7 @@
   if (location.hash === '#kyc') onRoute();
 
   // expose for the test suite (and as a programmatic capture hook)
-  window.SproutKYC = { setSide: setSide, reset: function () {
+  window.SproutKYC = { setSide: setSide, getShot: function (side) { return shots[side]; }, reset: function () {
     shots = { front: null, back: null }; verified = { front: false, back: false };
     current = 'front'; refreshControls();
   } };

@@ -260,7 +260,8 @@ test.describe('4 · Products — data-driven, every card selectable, one docked 
 
   test('every linear-flow screen docks its primary CTA to the bottom', async ({ page }) => {
     for (const v of ['products', 'calc', 'kyc', 'income', 'bank', 'docs', 'tax', 'esign']) {
-      await expect(page.locator(`[data-view="${v}"] .btn.dock`)).toHaveCount(1);
+      // .btn.dock (single CTA) or .row.dock (e.g. docs: Save draft + Next)
+      expect(await page.locator(`[data-view="${v}"] .dock`).count()).toBeGreaterThanOrEqual(1);
     }
   });
 
@@ -357,13 +358,21 @@ test.describe('6 · Application wizard — kyc → income → bank → docs → 
     await expectView(page, 'docs');
   });
 
-  test('docs: add/preview/camera/files buttons toast + Submit → tax', async ({ page }) => {
+  test('docs: requirement rows, functional upload + preview, Next → tax', async ({ page }) => {
     await goView(page, 'docs');
-    const addButtons = page.locator('[data-view="docs"] [data-add="doc"]');
-    const n = await addButtons.count();
-    expect(n).toBeGreaterThan(0);
-    await addButtons.first().click();
-    await expect(page.locator('#toast')).toHaveClass(/show/);
+    // requirement rows render; National ID pre-checked from KYC
+    await expect(page.locator('#docReqs .docrow')).toHaveCount(5);
+    await expect(page.locator('#docReqs .docrow[data-key="id"]')).toHaveClass(/done/);
+    // the upload control opens a picker that allows camera + photos + files
+    await expect(page.locator('#docFile')).toHaveAttribute('accept', /image\/\*.*pdf/);
+    await expect(page.locator('#docReqs .docrow[data-key="payslip"] [data-act="up"]')).toBeVisible();
+
+    // simulate a device file selection -> the file name appears on the row
+    await page.evaluate(() =>
+      window.SproutDocs.addFile('payslip', { name: 'Payslip_May.pdf', size: 240000, type: 'application/pdf' }));
+    await expect(page.locator('#docReqs .docrow[data-key="payslip"]')).toContainText('Payslip_May.pdf');
+    await expect(page.locator('#docReqs .docrow[data-key="payslip"]')).toHaveClass(/done/);
+    await expect(page.locator('#docReqs .docrow[data-key="payslip"] [data-act="del"]')).toBeVisible();
 
     await page.locator('[data-view="docs"] [data-go="tax"]').click();
     await expectView(page, 'tax');

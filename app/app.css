@@ -71,6 +71,23 @@ body {
 .row.dock { display: flex; gap: 10px; }
 .row.dock .btn { flex: 1; }
 
+/* document requirement rows (upload / camera / preview per item) */
+.docrow { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--line-2);
+  border-radius: 16px; padding: 13px 14px; margin-top: 10px; }
+.docrow.done { border-color: var(--cobalt); }
+.docrow-ic { width: 42px; height: 42px; border-radius: 12px; flex: 0 0 auto; background: #f1f4f9;
+  color: var(--ink-3); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.docrow.done .docrow-ic { background: var(--cobalt); color: #fff; }
+.docrow-main { flex: 1; min-width: 0; }
+.docrow.done .docrow-main { cursor: pointer; }
+.docrow-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 7px; }
+.docrow-sub { margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.docrow .req { color: var(--cobalt); font-size: 11px; font-weight: 700; }
+.docrow .opt { color: var(--ink-3); font-size: 11px; font-weight: 600; }
+.docrow-act { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 12px; border: 1.5px solid var(--line-2);
+  background: #fff; cursor: pointer; font-size: 19px; color: var(--cobalt); display: flex; align-items: center; justify-content: center; }
+.docrow-act.del { color: var(--ink-3); font-size: 16px; }
+
 /* native dropdown styled to match the .input boxes (e.g. Pay type) */
 .sel { width: 100%; height: 52px; border: 1.5px solid var(--line-2); border-radius: 14px;
   padding: 0 12px; font-size: 15px; font-family: 'Anuphan'; color: var(--ink); background: #fff;

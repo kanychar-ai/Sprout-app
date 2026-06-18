@@ -24,7 +24,7 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 function boot() {
   let html = fs.readFileSync(path.join(APP_DIR, 'index.html'), 'utf8');
   // Drop the external <script>/<link>; we inject the JS ourselves and skip CSS.
-  html = html.replace(/<script src="(config|id-verify|app|kyc)\.js(?:\?[^"]*)?"><\/script>/g, '')
+  html = html.replace(/<script src="(config|id-verify|app|kyc|docs)\.js(?:\?[^"]*)?"><\/script>/g, '')
              .replace(/<link rel="stylesheet" href="app\.css(?:\?[^"]*)?">/, '');
   // forward console output, but drop jsdom's "Not implemented: canvas getContext"
   // notice (the verifier handles the missing canvas gracefully in headless jsdom)
@@ -38,7 +38,7 @@ function boot() {
     virtualConsole: vc,
   });
   // load modules in the same order as the page: id-verify → app → kyc
-  ['id-verify.js', 'app.js', 'kyc.js'].forEach((f) => {
+  ['id-verify.js', 'app.js', 'kyc.js', 'docs.js'].forEach((f) => {
     dom.window.eval(fs.readFileSync(path.join(APP_DIR, f), 'utf8'));
   });
   return dom;
@@ -250,11 +250,13 @@ async function run() {
   // every primary CTA in the linear loan flow docks to the bottom AND is sized
   // consistently (full-size .btn, never the smaller .sm variant)
   for (const v of ['products', 'calc', 'kyc', 'income', 'bank', 'docs', 'tax', 'esign']) {
-    const dock = a.q(`[data-view="${v}"] .btn.dock`);
-    check(`${v} screen has a bottom-docked CTA`, dock !== null);
+    const dockEl = a.q(`[data-view="${v}"] .dock`); // .btn.dock OR a .row.dock of buttons
+    check(`${v} screen has a bottom-docked CTA`, dockEl !== null);
+    const cta = dockEl && (dockEl.classList.contains('btn') ? dockEl
+      : dockEl.querySelector('.btn.primary, .btn.lime'));
     check(`${v} CTA is uniform size (primary/lime, not .sm)`,
-      !!dock && dock.classList.contains('btn') && !dock.classList.contains('sm') &&
-      (dock.classList.contains('primary') || dock.classList.contains('lime')));
+      !!cta && cta.classList.contains('btn') && !cta.classList.contains('sm') &&
+      (cta.classList.contains('primary') || cta.classList.contains('lime')));
   }
 
   // 8 · Calculator — sliders + fields + limit guard --------------------------
@@ -323,11 +325,21 @@ async function run() {
   a.click('[data-view="bank"] [data-go="docs"]');
   check('bank Continue → docs', a.visible('docs'));
 
-  check('docs has add buttons', a.count('[data-view="docs"] [data-add="doc"]') > 0);
-  a.click('[data-view="docs"] [data-add="doc"]');
-  check('docs add shows toast', a.hasClass('#toast', 'show'));
+  // documents: requirement rows + functional upload (camera/photos/files) + preview
+  check('docs renders requirement rows', a.count('#docReqs .docrow') >= 4);
+  check('National ID is pre-added (checked from KYC)', a.hasClass('#docReqs .docrow[data-key="id"]', 'done'));
+  check('upload input accepts camera + files (image + pdf)',
+    /image\/\*/.test(a.q('#docFile').accept) && /pdf/.test(a.q('#docFile').accept));
+  check('each requirement row has an upload control before upload',
+    !!a.q('#docReqs .docrow[data-key="payslip"] [data-act="up"]'));
+  // simulate picking a file from the device
+  dom.window.SproutDocs.addFile('payslip', { name: 'Payslip_May.pdf', size: 240000, type: 'application/pdf' });
+  check('uploaded file name shows on the row', /Payslip_May\.pdf/.test(a.text('#docReqs .docrow[data-key="payslip"]')));
+  check('uploaded row marked done', a.hasClass('#docReqs .docrow[data-key="payslip"]', 'done'));
+  check('uploaded row offers preview (tap) + remove', !!a.q('#docReqs .docrow[data-key="payslip"] [data-act="del"]'));
+  check('Save draft button present', !!a.q('#docDraft'));
   a.click('[data-view="docs"] [data-go="tax"]');
-  check('docs Submit → tax', a.visible('tax'));
+  check('docs Next → tax', a.visible('tax'));
 
   const segs = a.document.querySelectorAll('[data-view="tax"] .seg.toggle');
   check('tax has Yes/No segments', segs.length > 0);
