@@ -448,10 +448,16 @@
   var start = location.hash.replace('#', '');
   show(views[start] ? start : 'onboard', false);
 
-  // PWA service worker (works in browser; ignored harmlessly inside WebView)
+  // Service worker DISABLED — a previous SW caused stale builds to stick. We now
+  // actively unregister any existing SW and clear its caches so every visit loads
+  // the live build. (Asset URLs are versioned too.) Re-introduce a network-first
+  // SW later only if offline support is needed.
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('../sw.js').catch(function () {});
-    });
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (r) { r.unregister(); });
+    }).catch(function () {});
+  }
+  if (window.caches && caches.keys) {
+    caches.keys().then(function (keys) { keys.forEach(function (k) { caches.delete(k); }); }).catch(function () {});
   }
 })();

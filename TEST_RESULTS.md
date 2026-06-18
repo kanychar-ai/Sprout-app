@@ -1,10 +1,10 @@
 # Sprout — Test Results
 
-Run date: 2026-06-18 04:56 UTC
-Scope: functional Documents step (upload via camera/photos/files, shows file name,
-preview uploaded files) redesigned to the 7.4a layout; plus prior work.
+Run date: 2026-06-18 05:49 UTC
+Scope: kill stale-cache (self-destruct SW; app no longer registers one); the
+product-overlap fix + its regression tests ship for real now.
 
-## 1. Browserless DOM suite — `npm test`
+## 1. Browserless DOM suite — npm test
 
 ```
 
@@ -44,5 +44,3 @@ preview uploaded files) redesigned to the 7.4a layout; plus prior work.
   169 passed, 0 failed
 ================================================
 ```
-
-## 2. Playwright E2E — `npm run test:e2e` (real browser; not run in-container, Chromium blocked).

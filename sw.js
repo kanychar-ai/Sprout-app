@@ -1,43 +1,24 @@
-/* Sprout LOS — service worker (network-first PWA shell) */
-const CACHE = 'sprout-los-v12';
-const ASSETS = [
-  './',
-  './index.html',
-  './assets/styles.css',
-  './app/index.html',
-  './app/app.css',
-  './app/config.js',
-  './app/id-verify.js',
-  './app/app.js',
-  './app/kyc.js',
-  './app/docs.js',
-  './manifest.webmanifest',
-  './assets/icon.svg'
-];
+/* Sprout — self-destructing service worker.
+ *
+ * A previous caching SW left some devices stuck on stale builds. This version
+ * unregisters itself, deletes all caches, and reloads open tabs so everyone drops
+ * to the live network build. It does NO caching (pass-through fetch). The app no
+ * longer registers a SW, so this runs once to clean up and then disappears. */
+self.addEventListener('install', function () { self.skipWaiting(); });
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+self.addEventListener('activate', function (event) {
+  event.waitUntil((async function () {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      await self.clients.claim();
+      const clients = await self.clients.matchAll({ type: 'window' });
+      clients.forEach(function (c) { try { c.navigate(c.url); } catch (e) {} });
+    } finally {
+      await self.registration.unregister();
+    }
+  })());
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
-
-/* Network-first: always try the live build, fall back to cache only when offline.
-   This guarantees a fresh app shell after every deploy (no more stale renders). */
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-      return res;
-    }).catch(() =>
-      caches.match(e.request).then((cached) => cached || caches.match('./index.html'))
-    )
-  );
-});
+// pass-through: never serve from cache
+self.addEventListener('fetch', function () {});
