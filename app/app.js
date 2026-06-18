@@ -136,15 +136,58 @@
     });
   });
 
-  // ---- occupation typeahead (income step) ----
+  // ---- occupation typeahead (income step) — searchable, ISCO-08 ----
+  var OCCUPATIONS = [
+    { name: 'Engineer', isco: 'ISCO 2140' },
+    { name: 'Civil Engineer', isco: 'ISCO 2142' },
+    { name: 'Electrical Engineer', isco: 'ISCO 2151' },
+    { name: 'Software Developer', isco: 'ISCO 2512' },
+    { name: 'Teacher', isco: 'ISCO 2330' },
+    { name: 'Nurse', isco: 'ISCO 2221' },
+    { name: 'Doctor', isco: 'ISCO 2211' },
+    { name: 'Accountant', isco: 'ISCO 2411' },
+    { name: 'Sales Representative', isco: 'ISCO 3322' },
+    { name: 'Government Officer', isco: 'ISCO 3343' },
+    { name: 'Business Owner', isco: 'ISCO 1120' },
+    { name: 'Student', isco: 'ISCO —' },
+    { name: 'Driver', isco: 'ISCO 8322' },
+    { name: 'Farmer', isco: 'ISCO 6111' },
+    { name: 'Police Officer', isco: 'ISCO 5412' }
+  ];
   var occList = document.getElementById('occList');
-  if (occList) {
+  var occField = document.getElementById('occField');
+  if (occList && occField) {
+    var renderOcc = function () {
+      var q = (occField.value || '').trim().toLowerCase();
+      var matches = OCCUPATIONS.filter(function (o) { return o.name.toLowerCase().indexOf(q) !== -1; });
+      occList.innerHTML = '';
+      if (!matches.length) {
+        occList.innerHTML = '<div class="tiny muted" style="padding:8px 10px">No match — type to search, or pick "Other".</div>';
+        return;
+      }
+      matches.forEach(function (o) {
+        var row = document.createElement('div');
+        var on = o.name.toLowerCase() === q;
+        row.className = 'occ' + (on ? ' on' : '');
+        row.dataset.occ = o.name;
+        row.innerHTML = '<b class="tiny"' + (on ? ' style="color:var(--cobalt)"' : '') + '>' + o.name + '</b>' +
+          '<div class="tiny muted">' + o.isco + '</div>';
+        occList.appendChild(row);
+      });
+      var foot = document.createElement('div');
+      foot.className = 'tiny muted';
+      foot.style.padding = '6px 10px 2px';
+      foot.textContent = '↑ from Occupation API · ISCO-08';
+      occList.appendChild(foot);
+    };
+    occField.addEventListener('input', renderOcc);
+    occField.addEventListener('focus', renderOcc);
     occList.addEventListener('click', function (e) {
       var o = e.target.closest('.occ'); if (!o) return;
-      occList.querySelectorAll('.occ').forEach(function (x) { x.classList.remove('on'); });
-      o.classList.add('on');
-      document.getElementById('occField').value = o.dataset.occ;
+      occField.value = o.dataset.occ;
+      renderOcc();
     });
+    renderOcc(); // initial list (all occupations)
   }
 
   // ---- bank picker (receiving account step) ----

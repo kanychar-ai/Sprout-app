@@ -335,18 +335,23 @@
   <section class="view" data-view="income" hidden>
     <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="on"></i><i></i><i></i></div><span class="step-count">Step 2 of 4</span></div>
     <div class="label">Occupation</div>
-    <div class="input focus" id="occInput"><span>🔎</span><input class="bare" id="occField" value="Engineer" autocomplete="off"></div>
-    <div class="card flat" id="occList" style="margin-top:6px;padding:6px">
-      <div class="occ on" data-occ="Engineer"><b class="tiny" style="color:var(--cobalt)">Engineer</b><div class="tiny muted">Salaried · ISCO 2140</div></div>
-      <div class="occ" data-occ="Civil Engineer"><b class="tiny">Civil Engineer</b></div>
-      <div class="occ" data-occ="Electrical Engineer"><b class="tiny">Electrical Engineer</b></div>
-      <div class="tiny muted" style="padding:6px 10px 2px">↑ from Occupation API · ISCO-08</div>
-    </div>
+    <div class="input focus" id="occInput"><span>🔎</span><input class="bare" id="occField" autocomplete="off" placeholder="Search your occupation"></div>
+    <div class="card flat" id="occList" style="margin-top:6px;padding:6px"></div>
     <div class="label mt12">Employer</div>
     <div class="input"><span>🏢</span> SCG Co., Ltd.</div>
     <div class="row gap10 mt12">
       <div style="flex:1"><div class="label">Monthly income</div><div class="input"><span>฿</span> 45,000</div></div>
-      <div style="flex:1"><div class="label">Pay type</div><div class="input">Payroll ▾</div></div>
+      <div style="flex:1"><div class="label">Pay type</div>
+        <select class="sel" id="payType">
+          <option value="Payroll">Payroll</option>
+          <option value="Self-employed">Self-employed</option>
+          <option value="Freelance">Freelance</option>
+          <option value="Business owner">Business owner</option>
+          <option value="Daily wage">Daily wage</option>
+          <option value="Commission">Commission</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
     </div>
     <button class="btn primary dock" data-go="bank">Continue</button>
   </section>

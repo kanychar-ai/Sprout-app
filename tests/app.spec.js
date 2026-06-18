@@ -308,15 +308,23 @@ test.describe('6 · Application wizard — kyc → income → bank → docs → 
     await expectView(page, 'income');
   });
 
-  test('income: occupation field + typeahead pick + Continue → bank', async ({ page }) => {
+  test('income: searchable occupation + working pay-type dropdown + Continue → bank', async ({ page }) => {
     await goView(page, 'income');
-    await page.fill('#occField', 'Engineer');
-    await expect(page.locator('#occField')).toHaveValue('Engineer');
+    // seeded list, then real search
+    await expect(page.locator('#occList .occ').first()).toBeVisible();
+    await page.fill('#occField', 'student');
+    await expect(page.locator('.occ[data-occ="Student"]')).toBeVisible();
+    await expect(page.locator('#occList .occ')).toHaveCount(1);
 
     // Picking a suggestion fills the field.
+    await page.fill('#occField', 'Engineer');
     await page.locator('.occ[data-occ="Civil Engineer"]').click();
     await expect(page.locator('#occField')).toHaveValue('Civil Engineer');
     await expect(page.locator('.occ[data-occ="Civil Engineer"]')).toHaveClass(/on/);
+
+    // Pay type is a real, selectable dropdown.
+    await page.selectOption('#payType', 'Freelance');
+    await expect(page.locator('#payType')).toHaveValue('Freelance');
 
     await page.locator('[data-view="income"] [data-go="bank"]').click();
     await expectView(page, 'bank');

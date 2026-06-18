@@ -276,11 +276,26 @@ async function run() {
   a.click('#kycContinue');
   check('kyc → income after both sides captured', a.visible('income'));
 
+  // occupation: seeded list + real search/typeahead
+  check('occupation list seeds many options', a.count('#occList .occ') >= 8);
+  a.fill('#occField', 'engine');
+  check('typing filters the list', a.count('#occList .occ') === 3); // Engineer, Civil/Electrical Engineer
+  a.fill('#occField', 'student');
+  check('search finds "Student"', a.count('#occList .occ') === 1 && !!a.q('.occ[data-occ="Student"]'));
+  a.fill('#occField', 'zzzz');
+  check('no match shows a hint, no rows', a.count('#occList .occ') === 0);
   a.fill('#occField', 'Engineer');
   check('occupation fillable', a.val('#occField') === 'Engineer');
   a.click('.occ[data-occ="Civil Engineer"]');
   check('occupation pick fills field', a.val('#occField') === 'Civil Engineer');
   check('occupation pick highlighted', a.hasClass('.occ[data-occ="Civil Engineer"]', 'on'));
+  // pay type is a working dropdown
+  check('pay type is a real <select>', a.q('#payType') && a.q('#payType').tagName === 'SELECT');
+  check('pay type has multiple options', a.count('#payType option') >= 5);
+  const paySel = a.q('#payType');
+  paySel.value = 'Freelance';
+  paySel.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+  check('pay type is selectable', a.val('#payType') === 'Freelance');
   a.click('[data-view="income"] [data-go="bank"]');
   check('income Continue → bank', a.visible('bank'));
 

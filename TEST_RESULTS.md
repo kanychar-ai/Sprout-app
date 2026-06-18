@@ -1,11 +1,10 @@
 # Sprout — Test Results
 
-Run date: 2026-06-18 02:42 UTC
-Scope: real-camera e-KYC (capture + verify front & back, view photos),
-pluggable ID-format verification API, consistent button sizing/position,
-plus prior work. Every button and field is exercised.
+Run date: 2026-06-18 03:54 UTC
+Scope: searchable occupation typeahead (seeded ISCO list) + working pay-type
+dropdown, on top of e-KYC camera capture and prior work. Every button & field exercised.
 
-## 1. Browserless DOM suite — `npm test` (always runnable, no browser needed)
+## 1. Browserless DOM suite — `npm test`
 
 ```
 
@@ -40,11 +39,10 @@ plus prior work. Every button and field is exercised.
 • 11 · No internal jargon for customers
 
 ================================================
-  151 passed, 0 failed
+  158 passed, 0 failed
 ================================================
 ```
 
 ## 2. Playwright E2E suite — `npm run test:e2e`
-
-Updated for the new e-KYC capture flow. NOT EXECUTED in this container
-(Chromium download blocked by network policy); runs in CI / locally.
+Updated for occupation search + pay-type select. Not executed in-container
+(Chromium download blocked); runs in CI / locally.
