@@ -1,10 +1,9 @@
 # Sprout — Test Results
 
-Run date: 2026-06-17 12:58 UTC
-Scope: full navigation audit — every screen offers a way to go next, go back,
-or reach home (no dead ends); all buttons are wired; plus the earlier work
-(simplified request, data-driven selectable products, docked CTAs, aligned
-progress, pressable bell / See all). Every button and field is exercised.
+Run date: 2026-06-18 02:42 UTC
+Scope: real-camera e-KYC (capture + verify front & back, view photos),
+pluggable ID-format verification API, consistent button sizing/position,
+plus prior work. Every button and field is exercised.
 
 ## 1. Browserless DOM suite — `npm test` (always runnable, no browser needed)
 
@@ -41,11 +40,11 @@ progress, pressable bell / See all). Every button and field is exercised.
 • 11 · No internal jargon for customers
 
 ================================================
-  137 passed, 0 failed
+  151 passed, 0 failed
 ================================================
 ```
 
 ## 2. Playwright E2E suite — `npm run test:e2e`
 
-Mirrors the above incl. the no-dead-end checks. NOT EXECUTED in this container
+Updated for the new e-KYC capture flow. NOT EXECUTED in this container
 (Chromium download blocked by network policy); runs in CI / locally.

@@ -6,7 +6,7 @@
  * `npm run test:e2e`) — this file is the always-runnable equivalent. */
 const fs = require('fs');
 const path = require('path');
-const { JSDOM } = require('jsdom');
+const { JSDOM, VirtualConsole } = require('jsdom');
 
 const APP_DIR = path.join(__dirname, '..', 'app');
 
@@ -24,15 +24,23 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 function boot() {
   let html = fs.readFileSync(path.join(APP_DIR, 'index.html'), 'utf8');
   // Drop the external <script>/<link>; we inject the JS ourselves and skip CSS.
-  html = html.replace(/<script src="app\.js"><\/script>/, '')
+  html = html.replace(/<script src="(config|id-verify|app|kyc)\.js"><\/script>/g, '')
              .replace(/<link rel="stylesheet" href="app\.css">/, '');
+  // forward console output, but drop jsdom's "Not implemented: canvas getContext"
+  // notice (the verifier handles the missing canvas gracefully in headless jsdom)
+  const vc = new VirtualConsole();
+  vc.sendTo(console, { omitJSDOMErrors: true });
+  vc.on('jsdomError', (e) => { if (!/Not implemented/.test(e.message)) console.error(e.message); });
   const dom = new JSDOM(html, {
     url: 'http://localhost/app/index.html',
     runScripts: 'dangerously',
     pretendToBeVisual: true,
+    virtualConsole: vc,
   });
-  const js = fs.readFileSync(path.join(APP_DIR, 'app.js'), 'utf8');
-  dom.window.eval(js);
+  // load modules in the same order as the page: id-verify → app → kyc
+  ['id-verify.js', 'app.js', 'kyc.js'].forEach((f) => {
+    dom.window.eval(fs.readFileSync(path.join(APP_DIR, f), 'utf8'));
+  });
   return dom;
 }
 
@@ -222,10 +230,14 @@ async function run() {
   check('products Continue → calc', a.visible('calc'));
   check('calculator header reflects the chosen product', /EIR calculator/.test(a.text('#calcProd')));
 
-  // every primary CTA in the linear loan flow docks to the bottom (consistent layout)
+  // every primary CTA in the linear loan flow docks to the bottom AND is sized
+  // consistently (full-size .btn, never the smaller .sm variant)
   for (const v of ['products', 'calc', 'kyc', 'income', 'bank', 'docs', 'tax', 'esign']) {
     const dock = a.q(`[data-view="${v}"] .btn.dock`);
     check(`${v} screen has a bottom-docked CTA`, dock !== null);
+    check(`${v} CTA is uniform size (primary/lime, not .sm)`,
+      !!dock && dock.classList.contains('btn') && !dock.classList.contains('sm') &&
+      (dock.classList.contains('primary') || dock.classList.contains('lime')));
   }
 
   // 8 · Calculator — sliders + fields + limit guard --------------------------
@@ -250,8 +262,19 @@ async function run() {
   // 9 · Wizard: kyc → income → bank → docs → tax → esign ---------------------
   group('9 · Application wizard');
   a.go('kyc');
-  a.click('[data-view="kyc"] [data-go="income"]');
-  check('kyc Capture → income', a.visible('income'));
+  // e-KYC now captures front AND back, each verified before you can continue
+  check('kyc Continue disabled until both sides captured', a.q('#kycContinue').disabled === true);
+  check('kyc has front & back capture slots', a.count('#kycSlots .idslot') === 2);
+  const idImg = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+  const rFront = await dom.window.SproutKYC.setSide('front', idImg);
+  const rBack = await dom.window.SproutKYC.setSide('back', idImg);
+  check('verify returns a result with ok/side/confidence', rFront.ok === true && rFront.side === 'front' && 'confidence' in rFront);
+  check('front slot marked verified', a.hasClass('#slotFront', 'done'));
+  check('back slot marked verified', a.hasClass('#slotBack', 'done'));
+  check('kyc Continue enabled after both sides verified', a.q('#kycContinue').disabled === false);
+  void rBack;
+  a.click('#kycContinue');
+  check('kyc → income after both sides captured', a.visible('income'));
 
   a.fill('#occField', 'Engineer');
   check('occupation fillable', a.val('#occField') === 'Engineer');

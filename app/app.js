@@ -392,6 +392,7 @@
     clearTimeout(showToast._t);
     showToast._t = setTimeout(function () { toast.classList.remove('show'); }, 2200);
   }
+  window.SproutToast = showToast;   // shared with kyc.js and other modules
   var paid = document.getElementById('paidBtn');
   if (paid) paid.addEventListener('click', function () { showToast('✓ Payment received — instalment 3 marked paid'); });
   var forgot = document.getElementById('liForgot');

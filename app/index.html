@@ -306,15 +306,29 @@
   <!-- 2.6 e-KYC ID scan -->
   <section class="view" data-view="kyc" hidden>
     <div class="step-head mb12"><div class="steps"><i class="on"></i><i></i><i></i><i></i></div><span class="step-count">Step 1 of 4</span></div>
-    <div style="font-size:13px;color:var(--ink-2)">Place your <b>Thai national ID</b> inside the frame. Hold steady.</div>
-    <div class="scanframe mt12">
+    <div style="font-size:13px;color:var(--ink-2)" id="kycHint">Place the <b>front</b> of your Thai national ID inside the frame. Hold steady.</div>
+    <div class="scanframe mt12" id="kycStage">
+      <video id="kycVideo" playsinline muted autoplay></video>
+      <img id="kycShot" alt="Captured ID photo" hidden>
       <div class="corner c-tl"></div><div class="corner c-tr"></div><div class="corner c-bl"></div><div class="corner c-br"></div>
-      <div style="position:absolute;inset:46px 30px;border-radius:10px;background:linear-gradient(135deg,#2b3a5e,#1a2540);display:flex;align-items:center;justify-content:center;color:#7e8db0;font-size:12px">Thai National ID</div>
-      <div class="scanline"></div>
+      <div class="scanline" id="kycScanline"></div>
+      <div class="cam-msg" id="kycCamMsg">Starting camera…</div>
     </div>
-    <div class="row gap8 mt12" style="flex-wrap:wrap"><span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span></div>
+    <input type="file" id="kycFile" accept="image/*" capture="environment" hidden>
+    <div class="row gap8 mt12" style="flex-wrap:wrap" id="kycChecks" hidden>
+      <span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span>
+    </div>
+    <div class="row gap10 mt12" id="kycSlots">
+      <div class="idslot" id="slotFront" role="button" tabindex="0"><div class="idslot-th">🪪</div><div class="idslot-lbl">Front</div><span class="badge ghost tiny idslot-st">Required</span></div>
+      <div class="idslot" id="slotBack" role="button" tabindex="0"><div class="idslot-th">🪪</div><div class="idslot-lbl">Back</div><span class="badge ghost tiny idslot-st">Required</span></div>
+    </div>
     <div class="note-soft mt12">🔒 Your ID is encrypted and the photo is deleted right after we read it (PDPA).</div>
-    <button class="btn primary dock" data-go="income">📷 Capture</button>
+    <button class="btn primary dock" id="kycCapture">📷 Capture front</button>
+    <div class="row dock" id="kycReview" hidden>
+      <button class="btn ghost" id="kycRetake">Retake</button>
+      <button class="btn primary" id="kycUse">Use photo</button>
+    </div>
+    <button class="btn primary dock" id="kycContinue" data-go="income" hidden disabled>Continue</button>
   </section>
 
   <!-- 2.8 Income + occupation API -->
@@ -517,6 +531,8 @@
 </div>
 
 <script src="config.js"></script>
+<script src="id-verify.js"></script>
 <script src="app.js"></script>
+<script src="kyc.js"></script>
 </body>
 </html>

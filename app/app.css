@@ -62,8 +62,10 @@ body {
 .view[hidden] { display: none; }
 /* one consistent pattern app-wide: the primary CTA docks to the bottom of the
    screen when content is short, and flows inline (scrolls) when content is long */
-.view > .btn.dock { margin-top: auto; }
-.view > .btn.dock + .btn.dock { margin-top: 10px; }
+.view > .dock { margin-top: auto; }
+.view > .dock + .dock { margin-top: 10px; }
+.row.dock { display: flex; gap: 10px; }
+.row.dock .btn { flex: 1; }
 
 /* step header: progress dots + an explicit "Step X of 4" caption */
 .step-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -283,6 +285,31 @@ body {
   display: flex; align-items: center; justify-content: center; font-weight: 800; }
 
 /* scan line animation for e-KYC */
+/* live camera + captured-photo review inside the scan frame */
+#kycVideo, #kycShot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  background: #0b1222; }
+#kycShot { object-fit: contain; }
+.cam-msg { position: absolute; left: 12px; right: 12px; bottom: 12px; text-align: center;
+  color: #aab8d6; font-size: 12px; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+
+/* front / back capture slots */
+.idslot { flex: 1; background: #fff; border: 1.5px solid var(--line-2); border-radius: 14px;
+  padding: 10px; text-align: center; cursor: pointer; transition: border-color .15s; }
+.idslot.done { border-color: var(--ok); }
+.idslot.bad  { border-color: var(--soft-red); }
+.idslot-th { height: 52px; border-radius: 10px; background: #eef1f6 center/cover no-repeat;
+  display: flex; align-items: center; justify-content: center; color: #9aa6bd; font-size: 20px; margin-bottom: 6px; }
+.idslot-lbl { font-size: 12.5px; font-weight: 700; }
+
+/* full-screen photo viewer (review after capture) */
+.id-lightbox { position: fixed; inset: 0; background: rgba(7,16,31,.92); z-index: 70;
+  display: flex; align-items: center; justify-content: center; padding: 22px; }
+.id-lightbox img { max-width: 100%; max-height: 78%; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.id-lightbox .lb-close { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px;
+  border-radius: 50%; border: none; background: rgba(255,255,255,.16); color: #fff; font-size: 20px; cursor: pointer; }
+.id-lightbox .lb-cap { position: absolute; bottom: 26px; left: 0; right: 0; text-align: center;
+  color: #cdd6ea; font-size: 13px; }
+
 .scanline { position: absolute; left: 30px; right: 30px; top: 12%; height: 2px;
   background: var(--lime); box-shadow: 0 0 12px var(--lime); animation: scan 2.2s ease-in-out infinite; }
 @keyframes scan { 0%,100% { top: 14%; } 50% { top: 78%; } }

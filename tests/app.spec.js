@@ -294,9 +294,17 @@ test.describe('5 · Calculator — every input drives the live EIR/DSR engine', 
 });
 
 test.describe('6 · Application wizard — kyc → income → bank → docs → tax → esign', () => {
-  test('e-KYC capture → income', async ({ page }) => {
+  test('e-KYC captures & verifies front + back, then → income', async ({ page }) => {
     await goView(page, 'kyc');
-    await page.locator('[data-view="kyc"] [data-go="income"]').click();
+    await expect(page.locator('#kycSlots .idslot')).toHaveCount(2);
+    await expect(page.locator('#kycContinue')).toBeDisabled();
+    const idImg = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+    await page.evaluate((img) => window.SproutKYC.setSide('front', img), idImg);
+    await page.evaluate((img) => window.SproutKYC.setSide('back', img), idImg);
+    await expect(page.locator('#slotFront')).toHaveClass(/done/);
+    await expect(page.locator('#slotBack')).toHaveClass(/done/);
+    await expect(page.locator('#kycContinue')).toBeEnabled();
+    await page.locator('#kycContinue').click();
     await expectView(page, 'income');
   });
 
