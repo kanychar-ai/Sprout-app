@@ -331,7 +331,7 @@
     var cards = [];
     list.forEach(function (p, i) {
       var card = document.createElement('div');
-      card.className = 'card prod' + (i > 0 ? ' flat mt12' : '');
+      card.className = 'card prod' + (i > 0 ? ' flat' : ''); // spacing via #prodList gap
       card.innerHTML =
         '<div class="row between"><b>' + esc(p.name) + '</b>' +
           (p.tag ? '<span class="badge ' + esc(p.tag_class || 'ghost') + '">' + esc(p.tag) + '</span>' : '') + '</div>' +

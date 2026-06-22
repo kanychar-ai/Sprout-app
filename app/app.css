@@ -104,12 +104,14 @@ body {
   color: var(--cobalt); font-weight: 600; font-size: 13px; }
 
 /* selectable loan-product cards (data-driven, API-ready) */
-/* render the list as a non-shrinking flex column so cards keep their natural
-   height and can NEVER overlap, regardless of reflow/cache state */
-#prodList { display: flex; flex-direction: column; }
-#prodList > * { flex-shrink: 0; }
-.prod { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
-.prod.sel { border: 2px solid var(--cobalt); box-shadow: 0 0 0 4px var(--cobalt-50); }
+/* deterministic, overlap-proof: flex column with a fixed gap, children never
+   shrink and carry no vertical margin (no margin/flex interaction can collapse) */
+#prodList { display: flex; flex-direction: column; gap: 12px; }
+#prodList > * { flex-shrink: 0; margin-top: 0 !important; }
+.prod { cursor: pointer; transition: outline-color .15s, box-shadow .15s; }
+/* use OUTLINE (zero layout impact) for the selected ring — a border would change
+   box height and was suspected in the overlap reports */
+.prod.sel { outline: 2px solid var(--cobalt); outline-offset: -2px; box-shadow: 0 0 0 4px var(--cobalt-50); }
 
 /* Modern bottom navigation — SVG line icons + active pill */
 .app-nav { flex: 0 0 auto; display: flex; justify-content: space-around; align-items: stretch; gap: 2px;
