@@ -104,6 +104,10 @@ body {
   color: var(--cobalt); font-weight: 600; font-size: 13px; }
 
 /* selectable loan-product cards (data-driven, API-ready) */
+/* render the list as a non-shrinking flex column so cards keep their natural
+   height and can NEVER overlap, regardless of reflow/cache state */
+#prodList { display: flex; flex-direction: column; }
+#prodList > * { flex-shrink: 0; }
 .prod { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
 .prod.sel { border: 2px solid var(--cobalt); box-shadow: 0 0 0 4px var(--cobalt-50); }
 
