@@ -104,13 +104,16 @@ body {
   color: var(--cobalt); font-weight: 600; font-size: 13px; }
 
 /* selectable loan-product cards (data-driven, API-ready) */
-/* deterministic, overlap-proof: flex column with a fixed gap, children never
-   shrink and carry no vertical margin (no margin/flex interaction can collapse) */
-#prodList { display: flex; flex-direction: column; gap: 12px; }
-#prodList > * { flex-shrink: 0; margin-top: 0 !important; }
+/* IMPORTANT: keep #prodList in normal BLOCK flow. When it was a flex column the
+   cards became flex items, and WebKit/Safari miscomputes the intrinsic height of
+   a flex item that contains nested flex content (the .row stat blocks), collapsing
+   the selected card so its stats overflowed onto the next card. Block flow sizes
+   every card to its real content height and siblings can never overlap. */
+#prodList { display: block; }
+#prodList > .prod { margin: 0; }
+#prodList > .prod + .prod { margin-top: 12px; }
 .prod { cursor: pointer; transition: outline-color .15s, box-shadow .15s; }
-/* use OUTLINE (zero layout impact) for the selected ring — a border would change
-   box height and was suspected in the overlap reports */
+/* OUTLINE (zero layout impact) for the selected ring — a border would change box height */
 .prod.sel { outline: 2px solid var(--cobalt); outline-offset: -2px; box-shadow: 0 0 0 4px var(--cobalt-50); }
 
 /* Modern bottom navigation — SVG line icons + active pill */

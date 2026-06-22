@@ -246,6 +246,11 @@ async function run() {
   check('CSS forbids flex children from shrinking (.view > * flex-shrink:0)',
     /\.view\s*>\s*\*\s*\{[^}]*flex-shrink:\s*0/.test(appCss));
   check('no product/card uses absolute positioning', !/\.(prod|card)[^{]*\{[^}]*position:\s*absolute/.test(appCss));
+  // #prodList must stay in block flow: as a flex column the cards became flex items
+  // and WebKit collapsed the selected card (nested flex), overlapping the next card
+  check('#prodList is block flow (not flex)', /#prodList\s*\{[^}]*display:\s*block/.test(appCss));
+  check('#prodList is not a flex container', !/#prodList\s*\{[^}]*display:\s*flex/.test(appCss));
+  check('selection uses outline, not a layout-shifting border', /\.prod\.sel\s*\{[^}]*outline:/.test(appCss));
 
   // every primary CTA in the linear loan flow docks to the bottom AND is sized
   // consistently (full-size .btn, never the smaller .sm variant)
