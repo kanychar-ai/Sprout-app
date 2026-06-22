@@ -112,9 +112,11 @@ body {
 #prodList { display: block; }
 #prodList > .prod { margin: 0; }
 #prodList > .prod + .prod { margin-top: 12px; }
-.prod { cursor: pointer; transition: outline-color .15s, box-shadow .15s; }
-/* OUTLINE (zero layout impact) for the selected ring — a border would change box height */
-.prod.sel { outline: 2px solid var(--cobalt); outline-offset: -2px; box-shadow: 0 0 0 4px var(--cobalt-50); }
+.prod { cursor: pointer; transition: background .15s; }
+/* indicate selection with a BACKGROUND TINT only — outline/box-shadow promoted the
+   card to a compositing layer on iOS Safari that was sized before the web font
+   loaded, leaving the stat row overflowing. Background has zero layout/layer impact. */
+.prod.sel { background: var(--cobalt-50); }
 
 /* Modern bottom navigation — SVG line icons + active pill */
 .app-nav { flex: 0 0 auto; display: flex; justify-content: space-around; align-items: stretch; gap: 2px;

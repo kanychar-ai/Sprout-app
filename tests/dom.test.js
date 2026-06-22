@@ -250,7 +250,9 @@ async function run() {
   // and WebKit collapsed the selected card (nested flex), overlapping the next card
   check('#prodList is block flow (not flex)', /#prodList\s*\{[^}]*display:\s*block/.test(appCss));
   check('#prodList is not a flex container', !/#prodList\s*\{[^}]*display:\s*flex/.test(appCss));
-  check('selection uses outline, not a layout-shifting border', /\.prod\.sel\s*\{[^}]*outline:/.test(appCss));
+  check('selection avoids layout/compositing triggers (no border/box-shadow on .prod.sel)',
+    /\.prod\.sel\s*\{[^}]*background:/.test(appCss) &&
+    !/\.prod\.sel\s*\{[^}]*(border:|box-shadow:)/.test(appCss));
 
   // every primary CTA in the linear loan flow docks to the bottom AND is sized
   // consistently (full-size .btn, never the smaller .sm variant)
