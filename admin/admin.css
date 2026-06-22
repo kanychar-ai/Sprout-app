@@ -1,5 +1,9 @@
 /* Sprout back office — desktop-friendly admin, reusing the app's design tokens */
 * { box-sizing: border-box; }
+/* author display rules below (e.g. .bo-overlay{display:flex}) would otherwise
+   defeat the `hidden` attribute, so the edit form / logged-in actions showed even
+   when they should be hidden. Force `hidden` to win. */
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--paper, #f6f7f9); font-family: 'Anuphan', system-ui, sans-serif; color: var(--ink, #16203a); }
 .bo { max-width: 720px; margin: 0 auto; padding: 18px 16px 60px; }
 
@@ -39,7 +43,7 @@ body { margin: 0; background: var(--paper, #f6f7f9); font-family: 'Anuphan', sys
 .bo-sheet-foot .btn { flex: 1; }
 .bo-sheet-foot .btn.danger { flex: 0 0 auto; }
 
-.bo-row { display: flex; gap: 10px; align-items: flex-end; }
+.bo-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
 .bo-check { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding-bottom: 12px; white-space: nowrap; }
 .bo-check input { width: 18px; height: 18px; }
 
