@@ -626,31 +626,57 @@
   var forgot = document.getElementById('liForgot');
   if (forgot) forgot.addEventListener('click', function () { showToast('📩 Reset link sent to your registered number'); });
 
-  // ---- login: detect role from the email and route to the right app ---------
-  // staff (reviewer/approver) → officer app, admin → back office, else customer.
-  function routeByRole(ident) {
+  // ---- real login: route staff by role, authenticate customers ---------------
+  function loginSubmit() {
     var cfg = window.SPROUT_CONFIG || {};
-    if (cfg.supabaseUrl && ident.indexOf('@') !== -1) {
-      showToast('Checking your account…');
-      fetch(cfg.supabaseUrl + '/rest/v1/staff_roles?select=role&email=eq.' + encodeURIComponent(ident),
-        { headers: { apikey: cfg.supabaseKey } })
-        .then(function (r) { return r.ok ? r.json() : []; })
-        .then(function (rows) {
-          var role = rows && rows[0] && rows[0].role;
-          var q = '?email=' + encodeURIComponent(ident);
-          if (role === 'admin') { location.href = '../admin/' + q; return; }
-          if (role === 'reviewer' || role === 'approver') { location.href = '../staff/' + q; return; }
-          show('role'); // not staff → customer
-        })
-        .catch(function () { show('role'); });
-    } else {
-      show('role'); // username (mock customer)
-    }
+    if (!cfg.supabaseUrl) { show('role'); return; } // demo/offline fallback (no backend)
+    var email = ((document.getElementById('liUser') || {}).value || '').trim();
+    var pass = (document.getElementById('liPass') || {}).value || '';
+    if (email.indexOf('@') === -1) { showToast('Please log in with your email address'); return; }
+    showToast('Signing in…');
+    // 1) is this a staff account? (reviewer/approver/admin) → route to their app
+    fetch(cfg.supabaseUrl + '/rest/v1/staff_roles?select=role&email=eq.' + encodeURIComponent(email), { headers: { apikey: cfg.supabaseKey } })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var role = rows && rows[0] && rows[0].role, q = '?email=' + encodeURIComponent(email);
+        if (role === 'admin') { location.href = '../admin/' + q; return; }
+        if (role === 'reviewer' || role === 'approver') { location.href = '../staff/' + q; return; }
+        // 2) otherwise authenticate as a customer against Supabase Auth
+        fetch(cfg.supabaseUrl + '/auth/v1/token?grant_type=password', {
+          method: 'POST', headers: { apikey: cfg.supabaseKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: pass })
+        }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            if (res.ok && res.j.access_token) { show('role'); }
+            else { showToast('⚠️ Invalid email or password'); }
+          });
+      })
+      .catch(function () { showToast('Network error — please try again'); });
   }
   var liSubmit = document.getElementById('liSubmit');
-  if (liSubmit) liSubmit.addEventListener('click', function () {
-    routeByRole(((document.getElementById('liUser') || {}).value || '').trim());
-  });
+  if (liSubmit) liSubmit.addEventListener('click', loginSubmit);
+  var liPassEl = document.getElementById('liPass');
+  if (liPassEl) liPassEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') loginSubmit(); });
+
+  // ---- real sign-up (create account) -----------------------------------------
+  function signupSubmit() {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.supabaseUrl) { show('otp'); return; } // demo fallback
+    var email = ((document.getElementById('suUser') || {}).value || '').trim();
+    var pass = (document.getElementById('suPass') || {}).value || '';
+    if (email.indexOf('@') === -1) { showToast('Please sign up with your email address'); return; }
+    showToast('Creating your account…');
+    fetch(cfg.supabaseUrl + '/auth/v1/signup', {
+      method: 'POST', headers: { apikey: cfg.supabaseKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (res.ok) { showToast('Account created ✓'); show('otp'); }
+        else { showToast('⚠️ ' + (res.j.msg || res.j.error_description || 'Could not create account')); }
+      }).catch(function () { showToast('Network error — please try again'); });
+  }
+  var suSubmit = document.getElementById('suSubmit');
+  if (suSubmit) suSubmit.addEventListener('click', signupSubmit);
   document.getElementById('applyBtn').addEventListener('click', function () {
     if (!this.disabled) showToast('✓ Application started — verifying your identity');
   });
