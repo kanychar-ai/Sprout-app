@@ -112,10 +112,10 @@ body {
 #prodList { display: block; }
 #prodList > .prod { margin: 0; }
 #prodList > .prod + .prod { margin-top: 12px; }
-.prod { cursor: pointer; transition: background .15s; }
-/* indicate selection with a BACKGROUND TINT only — outline/box-shadow promoted the
-   card to a compositing layer on iOS Safari that was sized before the web font
-   loaded, leaving the stat row overflowing. Background has zero layout/layer impact. */
+/* no transition (ruling out a relayout glitch during font swap) */
+.prod { cursor: pointer; }
+/* DIAGNOSTIC v18: red outline marks each card's real box (outline = zero layout). */
+.prod { outline: 2px solid red; }
 .prod.sel { background: var(--cobalt-50); }
 
 /* Modern bottom navigation — SVG line icons + active pill */
