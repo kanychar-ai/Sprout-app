@@ -396,6 +396,40 @@
   }
   renderProgress();
 
+  // ---- pre-screening checklist driven by back-office rules -----------------
+  // customer-friendly wording for each enabled rule; falls back to the static
+  // list in the HTML if the rules can't be loaded.
+  var PS_LABELS = {
+    age: 'Confirming your age', gender: 'Checking eligibility',
+    occupation: 'Reviewing your occupation', paytype: 'Reviewing your income type',
+    documents: 'Checking your documents', fatca: 'Tax declaration (FATCA / CRS)',
+    credit_score: 'Checking your credit history', income: 'Verifying your income',
+    dsr: "Making sure it's affordable", nationality: 'Confirming residency'
+  };
+  function renderPrescreenList(rules) {
+    var host = document.getElementById('psList');
+    if (!host || !rules || !rules.length) return; // keep the static fallback
+    host.innerHTML = '';
+    rules.forEach(function (r) {
+      var label = String(PS_LABELS[r.key] || r.label || r.key).replace(/[<>&]/g, '');
+      var div = document.createElement('div');
+      div.className = 'row gap10 psitem';
+      div.style.fontSize = '13px';
+      div.innerHTML = '<span class="dot"></span> ' + label + ' <span class="psck">…</span>';
+      host.appendChild(div);
+    });
+  }
+  function loadPrescreenRules() {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.prescreenApi) return;
+    fetch(cfg.prescreenApi, { headers: cfg.prescreenHeaders || {} })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (rows) { renderPrescreenList(rows); })
+      .catch(function () {}); // keep static fallback on any failure
+  }
+  loadPrescreenRules();
+  window.SproutPrescreen = { render: renderPrescreenList }; // test hook
+
   // ---- pre-screening animation, then auto-route to status ----
   var psRan = false;
   function runPrescreen() {

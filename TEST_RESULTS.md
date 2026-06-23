@@ -1,8 +1,8 @@
 # Sprout — Test Results
 
-Run date: 2026-06-18 05:49 UTC
-Scope: kill stale-cache (self-destruct SW; app no longer registers one); the
-product-overlap fix + its regression tests ship for real now.
+Run date: 2026-06-23 07:05 UTC
+Scope: back-office Pre-screening Rules (toggle each rule + set criteria), customer
+screening checklist driven by enabled rules; products overlap fixed (.sel collision).
 
 ## 1. Browserless DOM suite — npm test
 
@@ -41,6 +41,6 @@ product-overlap fix + its regression tests ship for real now.
 • 11 · No internal jargon for customers
 
 ================================================
-  169 passed, 0 failed
+  177 passed, 0 failed
 ================================================
 ```

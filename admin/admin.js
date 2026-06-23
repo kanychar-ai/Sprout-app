@@ -27,7 +27,7 @@ async function refresh() {
   $('loginView').hidden = signedIn;
   $('managerView').hidden = !signedIn;
   $('topActions').hidden = !signedIn;
-  if (signedIn) loadProducts();
+  if (signedIn) { loadProducts(); loadRules(); }
 }
 
 $('loginBtn').addEventListener('click', async () => {
@@ -128,5 +128,120 @@ $('deleteBtn').addEventListener('click', async () => {
   if (error) { msg($('formMsg'), error.message); return; }
   closeForm(); toast('Deleted'); loadProducts();
 });
+
+// ---- tabs ------------------------------------------------------------------
+document.querySelectorAll('.bo-tab').forEach((t) => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.bo-tab').forEach((x) => x.classList.toggle('on', x === t));
+    document.querySelectorAll('.bo-panel').forEach((p) => { p.hidden = p.dataset.panel !== t.dataset.tab; });
+  });
+});
+
+// ---- pre-screening rules ---------------------------------------------------
+// these option lists mirror the customer application dropdowns (income step)
+const OCCUPATIONS = ['Engineer', 'Civil Engineer', 'Electrical Engineer', 'Software Developer',
+  'Teacher', 'Nurse', 'Doctor', 'Accountant', 'Sales Representative', 'Government Officer',
+  'Business Owner', 'Student', 'Driver', 'Farmer', 'Police Officer'];
+const PAY_TYPES = ['Payroll', 'Self-employed', 'Freelance', 'Business owner', 'Daily wage', 'Commission', 'Other'];
+
+// editor metadata per rule key (the DB stores only key/label/enabled/config/sort)
+const RULE_META = {
+  age:          { type: 'range',  unit: 'years' },
+  gender:       { type: 'multi',  options: ['male', 'female'] },
+  occupation:   { type: 'multi',  options: OCCUPATIONS },
+  paytype:      { type: 'multi',  options: PAY_TYPES },
+  documents:    { type: 'toggle', note: 'Pass only when every required document has been uploaded.' },
+  fatca:        { type: 'toggle', note: 'Pass only when the FATCA / CRS question has been answered (Yes or No).' },
+  credit_score: { type: 'number', field: 'min_score', label: 'Minimum score' },
+  income:       { type: 'number', field: 'min_income', label: 'Minimum monthly income (THB)' },
+  dsr:          { type: 'number', field: 'max_dsr', label: 'Maximum DSR (%)' },
+  nationality:  { type: 'toggle', note: 'Pass only Thai nationals / residents.' }
+};
+
+let rulesCache = [];
+
+async function loadRules() {
+  msg($('rulesMsg'), '', 'err');
+  const { data, error } = await sb.from('prescreen_rules').select('*').order('sort', { ascending: true });
+  if (error) {
+    msg($('rulesMsg'), 'Could not load rules: ' + error.message + ' — have you run supabase/prescreen.sql?');
+    $('rulesList').innerHTML = '';
+    return;
+  }
+  rulesCache = data || [];
+  renderRules();
+}
+
+function renderRules() {
+  const host = $('rulesList');
+  host.innerHTML = '';
+  if (!rulesCache.length) {
+    host.innerHTML = '<div class="muted tiny">No rules yet — run supabase/prescreen.sql to seed them.</div>';
+    return;
+  }
+  rulesCache.forEach((r) => {
+    const meta = RULE_META[r.key] || { type: 'toggle' };
+    const cfg = r.config || {};
+    const card = document.createElement('div');
+    card.className = 'rule' + (r.enabled ? '' : ' off');
+    card.dataset.key = r.key;
+
+    let editor = '';
+    if (meta.type === 'range') {
+      editor = '<label class="label">Allowed range (' + (meta.unit || '') + ')</label>' +
+        '<div class="rule-opts"><label>Min <input class="field rule-num" data-cfg="min" type="number" value="' + (cfg.min ?? '') + '"></label>' +
+        '<label>Max <input class="field rule-num" data-cfg="max" type="number" value="' + (cfg.max ?? '') + '"></label></div>';
+    } else if (meta.type === 'number') {
+      editor = '<label class="label">' + esc(meta.label || 'Value') + '</label>' +
+        '<input class="field rule-num" data-cfg="' + meta.field + '" type="number" value="' + (cfg[meta.field] ?? '') + '">';
+    } else if (meta.type === 'multi') {
+      const allowed = Array.isArray(cfg.allowed) ? cfg.allowed : [];
+      editor = '<label class="label">Allowed values (only these pass)</label><div class="rule-opts">' +
+        meta.options.map((o) =>
+          '<label><input type="checkbox" data-opt="' + esc(o) + '"' + (allowed.indexOf(o) !== -1 ? ' checked' : '') + '> ' + esc(o) + '</label>'
+        ).join('') + '</div>';
+    } else {
+      editor = '<div class="tiny muted">' + esc(meta.note || 'No extra settings.') + '</div>';
+    }
+
+    card.innerHTML =
+      '<div class="rule-head">' +
+        '<label class="bo-switch"><input type="checkbox" class="rule-on"' + (r.enabled ? ' checked' : '') + '><span class="track"></span></label>' +
+        '<b>' + esc(r.label) + '</b><span class="tiny muted">' + esc(r.key) + '</span>' +
+      '</div><div class="rule-cfg">' + editor + '</div>';
+
+    card.querySelector('.rule-on').addEventListener('change', (e) => {
+      card.classList.toggle('off', !e.target.checked);
+    });
+    host.appendChild(card);
+  });
+}
+
+async function saveRules() {
+  const rows = [];
+  document.querySelectorAll('#rulesList .rule').forEach((card) => {
+    const key = card.dataset.key;
+    const src = rulesCache.find((x) => x.key === key) || {};
+    const meta = RULE_META[key] || { type: 'toggle' };
+    const enabled = card.querySelector('.rule-on').checked;
+    let config = {};
+    if (meta.type === 'range') {
+      config = { min: numOrNull(card.querySelector('[data-cfg="min"]').value), max: numOrNull(card.querySelector('[data-cfg="max"]').value) };
+    } else if (meta.type === 'number') {
+      config = {}; config[meta.field] = numOrNull(card.querySelector('[data-cfg="' + meta.field + '"]').value);
+    } else if (meta.type === 'multi') {
+      config = { allowed: Array.from(card.querySelectorAll('[data-opt]:checked')).map((c) => c.dataset.opt) };
+    }
+    rows.push({ key: key, label: src.label, enabled: enabled, config: config, sort: src.sort });
+  });
+  $('rulesSave').disabled = true;
+  const { error } = await sb.from('prescreen_rules').upsert(rows, { onConflict: 'key' });
+  $('rulesSave').disabled = false;
+  if (error) { msg($('rulesMsg'), 'Save failed: ' + error.message); return; }
+  toast('Pre-screening rules saved'); loadRules();
+}
+function numOrNull(v) { return v === '' || v == null ? null : (parseInt(v, 10) || 0); }
+
+$('rulesSave').addEventListener('click', saveRules);
 
 refresh();

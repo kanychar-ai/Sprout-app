@@ -370,6 +370,15 @@ async function run() {
   check('esign consent toggles', !a.hasClass('[data-view="esign"] [data-toggle="esign"] .ck', 'on'));
   a.click('[data-view="esign"] [data-go="prescreen"]');
   check('esign Accept & sign → prescreen', a.visible('prescreen'));
+  // pre-screening checklist is driven by the back-office rules (with static fallback)
+  check('prescreen has a checklist (static fallback works offline)', a.count('#psList .psitem') >= 1);
+  dom.window.SproutPrescreen.render([
+    { key: 'age', label: 'Age within range' },
+    { key: 'credit_score', label: 'Minimum credit bureau score' },
+    { key: 'documents', label: 'All required documents uploaded' }
+  ]);
+  check('enabled rules render as checklist items', a.count('#psList .psitem') === 3);
+  check('rules use customer-friendly wording', /credit history/.test(a.q('#psList').textContent));
   await delay(3200);
   check('prescreen auto-advances → status', a.visible('status'));
 

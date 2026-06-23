@@ -11,7 +11,12 @@ window.SPROUT_CONFIG = {
   productsApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/products' +
     '?select=name,tag,tag_class,desc:description,stat1_label,stat1_value,stat2_label,stat2_value,featured' +
     '&active=eq.true&order=sort.asc',
-  productsHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
+  productsHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' },
+
+  // enabled pre-screening rules the customer's screening step reads (back-office controlled)
+  prescreenApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/prescreen_rules' +
+    '?select=key,label,enabled,config&enabled=eq.true&order=sort.asc',
+  prescreenHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
 
   // ── ID-card verification (e-KYC) ──────────────────────────────────────────
   // Leave unset to use the built-in local format-check stub. To plug in a real
