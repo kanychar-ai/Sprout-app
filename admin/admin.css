@@ -36,6 +36,18 @@ body { margin: 0; background: var(--paper, #f6f7f9); font-family: 'Anuphan', sys
 .rule-opts label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
 .rule-num { width: 110px; }
 
+/* document-requirement rows */
+.drow { background: #fff; border: 1.5px solid var(--line, #e7eaef); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
+.drow.off { opacity: .6; }
+.drow-top { display: flex; align-items: center; gap: 10px; }
+.drow-top .bo-switch { margin-left: auto; }
+.drow .field { height: 42px; }
+.drow-grid { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 8px; align-items: flex-end; }
+.drow-grid > div { flex: 1; min-width: 120px; }
+.seg-req { display: inline-flex; background: #eef1f6; border-radius: 10px; padding: 3px; }
+.seg-req button { border: none; background: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-3, #6b7689); }
+.seg-req button.on { background: #fff; color: var(--cobalt, #2563EB); box-shadow: 0 1px 3px rgba(15,27,51,.1); }
+
 /* iOS-style switch */
 .bo-switch { position: relative; width: 46px; height: 27px; flex: 0 0 auto; }
 .bo-switch input { opacity: 0; width: 0; height: 0; }

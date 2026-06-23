@@ -27,7 +27,7 @@ async function refresh() {
   $('loginView').hidden = signedIn;
   $('managerView').hidden = !signedIn;
   $('topActions').hidden = !signedIn;
-  if (signedIn) { loadProducts(); loadRules(); }
+  if (signedIn) { loadProducts(); loadRules(); loadDocReqs(); }
 }
 
 $('loginBtn').addEventListener('click', async () => {
@@ -243,5 +243,98 @@ async function saveRules() {
 function numOrNull(v) { return v === '' || v == null ? null : (parseInt(v, 10) || 0); }
 
 $('rulesSave').addEventListener('click', saveRules);
+
+// ---- document requirements -------------------------------------------------
+let docsCache = [];
+let docsDeleted = [];
+
+async function loadDocReqs() {
+  msg($('docsMsg'), '', 'err');
+  const { data, error } = await sb.from('doc_requirements').select('*').order('sort', { ascending: true });
+  if (error) {
+    msg($('docsMsg'), 'Could not load: ' + error.message + ' — have you run supabase/documents.sql?');
+    $('docReqList').innerHTML = '';
+    return;
+  }
+  docsCache = data || [];
+  docsDeleted = [];
+  renderDocReqs();
+}
+
+function renderDocReqs() {
+  const host = $('docReqList');
+  host.innerHTML = '';
+  if (!docsCache.length) {
+    host.innerHTML = '<div class="muted tiny">No documents yet — run supabase/documents.sql, or add one.</div>';
+    return;
+  }
+  docsCache.forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'drow' + (d.active === false ? ' off' : '');
+    card.dataset.i = i;
+    const req = d.requirement || 'required';
+    card.innerHTML =
+      '<div class="drow-top">' +
+        '<input class="field d-label" placeholder="Document name" value="' + esc(d.label || '') + '" style="flex:1">' +
+        '<label class="bo-switch"><input type="checkbox" class="d-active"' + (d.active === false ? '' : ' checked') + '><span class="track"></span></label>' +
+      '</div>' +
+      '<div class="drow-grid">' +
+        '<div style="flex:2"><input class="field d-desc" placeholder="Short description" value="' + esc(d.description || '') + '"></div>' +
+        '<div style="flex:0 0 auto"><div class="seg-req">' +
+          '<button type="button" data-req="required" class="' + (req === 'required' ? 'on' : '') + '">Required</button>' +
+          '<button type="button" data-req="optional" class="' + (req === 'optional' ? 'on' : '') + '">Optional</button>' +
+        '</div></div>' +
+        '<div style="flex:0 0 auto"><button type="button" class="btn ghost sm danger d-del">Delete</button></div>' +
+      '</div>';
+    // requirement segmented control
+    card.querySelectorAll('.seg-req button').forEach((b) => b.addEventListener('click', () => {
+      card.querySelectorAll('.seg-req button').forEach((x) => x.classList.toggle('on', x === b));
+    }));
+    card.querySelector('.d-active').addEventListener('change', (e) => card.classList.toggle('off', !e.target.checked));
+    card.querySelector('.d-del').addEventListener('click', () => {
+      if (d.key) docsDeleted.push(d.key);
+      docsCache.splice(i, 1); renderDocReqs();
+    });
+    host.appendChild(card);
+  });
+}
+
+function slugKey(label) {
+  return (label || 'doc').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'doc';
+}
+
+async function saveDocReqs() {
+  const cards = Array.from(document.querySelectorAll('#docReqList .drow'));
+  const rows = cards.map((card, i) => {
+    const src = docsCache[i] || {};
+    const label = card.querySelector('.d-label').value.trim() || 'Document';
+    const reqBtn = card.querySelector('.seg-req button.on');
+    return {
+      key: src.key || (slugKey(label) + '_' + Date.now().toString(36)),
+      label: label,
+      description: card.querySelector('.d-desc').value.trim() || null,
+      icon: src.icon || '📄',
+      requirement: reqBtn ? reqBtn.dataset.req : 'required',
+      source: src.source || 'upload',
+      active: card.querySelector('.d-active').checked,
+      sort: i + 1
+    };
+  });
+  $('docsSave').disabled = true;
+  if (docsDeleted.length) {
+    const { error: delErr } = await sb.from('doc_requirements').delete().in('key', docsDeleted);
+    if (delErr) { $('docsSave').disabled = false; msg($('docsMsg'), 'Delete failed: ' + delErr.message); return; }
+  }
+  const { error } = await sb.from('doc_requirements').upsert(rows, { onConflict: 'key' });
+  $('docsSave').disabled = false;
+  if (error) { msg($('docsMsg'), 'Save failed: ' + error.message); return; }
+  toast('Document requirements saved'); loadDocReqs();
+}
+
+$('docAdd').addEventListener('click', () => {
+  docsCache.push({ key: '', label: '', description: '', requirement: 'required', source: 'upload', active: true, sort: docsCache.length + 1 });
+  renderDocReqs();
+});
+$('docsSave').addEventListener('click', saveDocReqs);
 
 refresh();

@@ -1,8 +1,8 @@
 # Sprout — Test Results
 
-Run date: 2026-06-23 07:05 UTC
-Scope: back-office Pre-screening Rules (toggle each rule + set criteria), customer
-screening checklist driven by enabled rules; products overlap fixed (.sel collision).
+Run date: 2026-06-23 07:44 UTC
+Scope: back-office Document requirements (required/optional, active, add/delete);
+app upload step reads them; plus pre-screening rules and prior work.
 
 ## 1. Browserless DOM suite — npm test
 

@@ -9,14 +9,32 @@
   var fileInput = document.getElementById('docFile');
   var draftBtn = document.getElementById('docDraft');
 
-  // requirement catalogue (matches the design): National ID comes from e-KYC
-  var DOCS = [
+  // requirement catalogue — loaded from the back office (doc_requirements); this
+  // built-in list is the offline fallback. National ID comes from e-KYC.
+  var DOCS_FALLBACK = [
     { key: 'id', name: 'National ID card', tag: '', sub: 'Added from your KYC scan', icon: '🪪', preset: true },
     { key: 'payslip', name: 'Payslip', tag: 'Required', sub: 'Most recent month', icon: '📄' },
     { key: 'statement', name: 'Bank statement', tag: 'Required', sub: 'Last 3 months', icon: '📄' },
     { key: 'passbook', name: 'Book bank', tag: 'Required', sub: 'Passbook cover · name page', icon: '📑' },
     { key: 'address', name: 'Proof of address', tag: 'Optional', sub: 'Utility bill or lease', icon: '🏠' }
   ];
+  var DOCS = DOCS_FALLBACK;
+
+  function mapDoc(r) {
+    return {
+      key: r.key, name: r.label, sub: r.description, icon: r.icon || '📄',
+      tag: r.requirement === 'required' ? 'Required' : (r.requirement === 'optional' ? 'Optional' : ''),
+      preset: r.source === 'kyc'
+    };
+  }
+  function loadDocs() {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.docsApi) return;
+    fetch(cfg.docsApi, { headers: cfg.docsHeaders || {} })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (rows) { if (rows && rows.length) { DOCS = rows.map(mapDoc); render(); } })
+      .catch(function () {}); // keep the fallback list
+  }
   var files = {};   // key -> { name, size, type, url, isImg }
   var currentKey = null;
 
@@ -123,5 +141,6 @@
   if (draftBtn) draftBtn.addEventListener('click', function () { toast('💾 Draft saved — resume anytime'); });
 
   render();
+  loadDocs(); // override the fallback with the back-office list when available
   window.SproutDocs = { addFile: addFile, files: files }; // test/programmatic hook
 })();
