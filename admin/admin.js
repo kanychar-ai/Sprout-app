@@ -151,7 +151,7 @@ const RULE_META = {
   occupation:   { type: 'multi',  options: OCCUPATIONS },
   paytype:      { type: 'multi',  options: PAY_TYPES },
   documents:    { type: 'toggle', note: 'Pass only when every required document has been uploaded.' },
-  fatca:        { type: 'toggle', note: 'Pass only when the FATCA / CRS question has been answered (Yes or No).' },
+  fatca:        { type: 'multi',  options: ['Yes', 'No'] },
   credit_score: { type: 'number', field: 'min_score', label: 'Minimum score' },
   income:       { type: 'number', field: 'min_income', label: 'Minimum monthly income (THB)' },
   dsr:          { type: 'number', field: 'max_dsr', label: 'Maximum DSR (%)' },
