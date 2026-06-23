@@ -625,6 +625,32 @@
   if (paid) paid.addEventListener('click', function () { showToast('✓ Payment received — instalment 3 marked paid'); });
   var forgot = document.getElementById('liForgot');
   if (forgot) forgot.addEventListener('click', function () { showToast('📩 Reset link sent to your registered number'); });
+
+  // ---- login: detect role from the email and route to the right app ---------
+  // staff (reviewer/approver) → officer app, admin → back office, else customer.
+  function routeByRole(ident) {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (cfg.supabaseUrl && ident.indexOf('@') !== -1) {
+      showToast('Checking your account…');
+      fetch(cfg.supabaseUrl + '/rest/v1/staff_roles?select=role&email=eq.' + encodeURIComponent(ident),
+        { headers: { apikey: cfg.supabaseKey } })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (rows) {
+          var role = rows && rows[0] && rows[0].role;
+          var q = '?email=' + encodeURIComponent(ident);
+          if (role === 'admin') { location.href = '../admin/' + q; return; }
+          if (role === 'reviewer' || role === 'approver') { location.href = '../staff/' + q; return; }
+          show('role'); // not staff → customer
+        })
+        .catch(function () { show('role'); });
+    } else {
+      show('role'); // username (mock customer)
+    }
+  }
+  var liSubmit = document.getElementById('liSubmit');
+  if (liSubmit) liSubmit.addEventListener('click', function () {
+    routeByRole(((document.getElementById('liUser') || {}).value || '').trim());
+  });
   document.getElementById('applyBtn').addEventListener('click', function () {
     if (!this.disabled) showToast('✓ Application started — verifying your identity');
   });

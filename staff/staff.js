@@ -337,4 +337,5 @@ document.body.addEventListener('click', (e) => {
   const t = e.target.closest('[data-go]'); if (t && current && RENDER[t.dataset.go]) RENDER[t.dataset.go]();
 });
 
+try { const em = new URLSearchParams(location.search).get('email'); if (em && $('email')) $('email').value = em; } catch (e) {}
 boot();
