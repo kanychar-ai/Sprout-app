@@ -1,8 +1,8 @@
 # Sprout — Test Results
 
-Run date: 2026-06-23 07:44 UTC
-Scope: back-office Document requirements (required/optional, active, add/delete);
-app upload step reads them; plus pre-screening rules and prior work.
+Run date: 2026-06-23 08:28 UTC
+Scope: pre-screening evaluation engine — customer answers are checked against the
+enabled rules; result is Approved only if all pass, else Under review (with reasons).
 
 ## 1. Browserless DOM suite — npm test
 
@@ -34,6 +34,8 @@ app upload step reads them; plus pre-screening rules and prior work.
 
 • 9 · Application wizard
 
+• 9b · Pre-screening evaluation
+
 • 10 · Status / Repay / Profile
 
 • 10b · No dead-end screens
@@ -41,6 +43,6 @@ app upload step reads them; plus pre-screening rules and prior work.
 • 11 · No internal jargon for customers
 
 ================================================
-  177 passed, 0 failed
+  183 passed, 0 failed
 ================================================
 ```

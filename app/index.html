@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
-<link rel="stylesheet" href="app.css?v=21">
+<link rel="stylesheet" href="app.css?v=22">
 </head>
 <body>
 
@@ -449,17 +449,18 @@
 
   <!-- 2.14 STATUS -->
   <section class="view" data-view="status" hidden>
-    <div class="card" style="background:var(--ok-bg);border:1.5px solid var(--ok)">
-      <div class="row between center"><b style="color:var(--ok)">🎉 Approved</b><span class="badge ok">Offer ready</span></div>
+    <div class="card" id="statusCard" style="background:var(--ok-bg);border:1.5px solid var(--ok)">
+      <div class="row between center"><b id="statusHead" style="color:var(--ok)">🎉 Approved</b><span class="badge ok" id="statusBadge">Offer ready</span></div>
       <div class="amount mt8" id="statusAmt" style="font-size:30px;color:var(--navy)">฿150,000</div>
       <div class="tiny muted" id="statusTerms">EIR 16.9% · ฿5,270 / mo · 36 mo</div>
-      <button class="btn lime sm mt12" data-go="repay">Accept &amp; continue</button>
+      <div class="tiny" id="statusReasons" hidden style="margin-top:9px;line-height:1.6"></div>
+      <button class="btn lime sm mt12" id="statusCta" data-go="repay">Accept &amp; continue</button>
     </div>
     <div class="card flat mt12" style="padding:12px">
       <b class="tiny">Timeline</b>
       <div class="li" style="padding:8px 0"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Submitted · 14:02</div></div>
       <div class="li" style="padding:8px 0"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Pre-screened · 14:03</div></div>
-      <div class="li" style="padding:8px 0;border:none"><span class="dot" style="background:var(--ok)"></span><div style="flex:1" class="tiny">Approved · 15:40</div></div>
+      <div class="li" style="padding:8px 0;border:none"><span class="dot" id="statusDot" style="background:var(--ok)"></span><div style="flex:1" class="tiny" id="statusStep">Approved · 15:40</div></div>
     </div>
     <div class="card flat mt12" style="padding:12px">
       <div class="tiny muted">Other possible outcomes</div>
@@ -524,10 +525,10 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="config.js?v=21"></script>
-<script src="id-verify.js?v=21"></script>
-<script src="app.js?v=21"></script>
-<script src="kyc.js?v=21"></script>
-<script src="docs.js?v=21"></script>
+<script src="config.js?v=22"></script>
+<script src="id-verify.js?v=22"></script>
+<script src="app.js?v=22"></script>
+<script src="kyc.js?v=22"></script>
+<script src="docs.js?v=22"></script>
 </body>
 </html>

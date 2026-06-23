@@ -73,6 +73,7 @@
     views[name].scrollTop = 0;
 
     if (name === 'prescreen') runPrescreen();
+    if (name === 'status' && typeof renderStatusOutcome === 'function') renderStatusOutcome();
     if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home'); }, 1400);
   }
 
@@ -406,6 +407,7 @@
     credit_score: 'Checking your credit history', income: 'Verifying your income',
     dsr: "Making sure it's affordable", nationality: 'Confirming residency'
   };
+  var prescreenRules = [];   // enabled rules (with config) loaded from the back office
   function renderPrescreenList(rules) {
     var host = document.getElementById('psList');
     if (!host || !rules || !rules.length) return; // keep the static fallback
@@ -424,11 +426,93 @@
     if (!cfg.prescreenApi) return;
     fetch(cfg.prescreenApi, { headers: cfg.prescreenHeaders || {} })
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
-      .then(function (rows) { renderPrescreenList(rows); })
+      .then(function (rows) { prescreenRules = rows || []; renderPrescreenList(rows); })
       .catch(function () {}); // keep static fallback on any failure
   }
   loadPrescreenRules();
-  window.SproutPrescreen = { render: renderPrescreenList }; // test hook
+  window.SproutPrescreen = { render: renderPrescreenList, evaluate: evaluateApplication,
+    setRules: function (r) { prescreenRules = r || []; } }; // test hook
+
+  // ---- evaluation: check the customer's answers against the enabled rules ----
+  // Real inputs are read live (FATCA/CRS answers, occupation, pay type); the rest
+  // use a sensible mock profile so the demo only flips to "Under review" when an
+  // actual answer breaks a rule.
+  function complianceAnswers() {
+    var out = [];
+    document.querySelectorAll('[data-view="tax"] .seg.toggle').forEach(function (seg) {
+      var on = seg.querySelector('button.on');
+      out.push(on ? on.textContent.trim() : 'No');
+    });
+    return out; // [US person, tax resident outside TH, PEP]
+  }
+  function buildProfile() {
+    var occ = (document.getElementById('occField') || {}).value || 'Engineer';
+    var pay = (document.getElementById('payType') || {}).value || 'Payroll';
+    return {
+      age: 32, gender: 'male', occupation: occ, paytype: pay, docsComplete: true,
+      compliance: complianceAnswers(), credit_score: 720, income: 45000, dsr: 19, thai: true
+    };
+  }
+  function hasList(c) { return c && Array.isArray(c.allowed) && c.allowed.length; }
+  function ruleFails(rule, p) {
+    var c = rule.config || {};
+    switch (rule.key) {
+      case 'age':          return !(p.age >= (c.min || 0) && p.age <= (c.max || 999));
+      case 'gender':       return hasList(c) ? c.allowed.indexOf(p.gender) === -1 : false;
+      case 'occupation':   return hasList(c) ? c.allowed.indexOf(p.occupation) === -1 : false;
+      case 'paytype':      return hasList(c) ? c.allowed.indexOf(p.paytype) === -1 : false;
+      case 'documents':    return !p.docsComplete;
+      // every compliance declaration must be an allowed answer (e.g. all "Yes")
+      case 'fatca':        return hasList(c) ? !p.compliance.every(function (a) { return c.allowed.indexOf(a) !== -1; }) : false;
+      case 'credit_score': return c.min_score ? p.credit_score < c.min_score : false;
+      case 'income':       return c.min_income ? p.income < c.min_income : false;
+      case 'dsr':          return c.max_dsr ? p.dsr > c.max_dsr : false;
+      case 'nationality':  return !p.thai;
+      default:             return false;
+    }
+  }
+  function evaluateApplication() {
+    if (!prescreenRules || !prescreenRules.length) return { ok: true, fails: [] };
+    var p = buildProfile();
+    var fails = prescreenRules.filter(function (r) { return ruleFails(r, p); });
+    return { ok: fails.length === 0, fails: fails };
+  }
+
+  // paint the status screen from the evaluation outcome
+  function renderStatusOutcome() {
+    var card = document.getElementById('statusCard');
+    if (!card) return;
+    var res = evaluateApplication();
+    var head = document.getElementById('statusHead');
+    var badge = document.getElementById('statusBadge');
+    var amt = document.getElementById('statusAmt');
+    var terms = document.getElementById('statusTerms');
+    var reasons = document.getElementById('statusReasons');
+    var cta = document.getElementById('statusCta');
+    var step = document.getElementById('statusStep');
+    var dot = document.getElementById('statusDot');
+    if (res.ok) {
+      card.style.background = 'var(--ok-bg)'; card.style.borderColor = 'var(--ok)';
+      head.textContent = '🎉 Approved'; head.style.color = 'var(--ok)';
+      badge.textContent = 'Offer ready'; badge.className = 'badge ok';
+      amt.hidden = false; terms.hidden = false; reasons.hidden = true;
+      cta.textContent = 'Accept & continue'; cta.className = 'btn lime sm mt12'; cta.dataset.go = 'repay';
+      if (step) step.textContent = 'Approved · 15:40';
+      if (dot) dot.style.background = 'var(--ok)';
+    } else {
+      card.style.background = 'var(--amber-bg)'; card.style.borderColor = 'var(--amber)';
+      head.textContent = '⏳ Under review'; head.style.color = 'var(--amber)';
+      badge.textContent = 'In review'; badge.className = 'badge amber';
+      amt.hidden = true;
+      terms.hidden = false; terms.textContent = "A few things need a closer look — an officer will review your application and we'll notify you within 1 business day.";
+      var names = res.fails.map(function (r) { return PS_LABELS[r.key] || r.label || r.key; });
+      reasons.hidden = false;
+      reasons.innerHTML = '<b>Being reviewed:</b> ' + names.map(function (n) { return String(n).replace(/[<>&]/g, ''); }).join(', ');
+      cta.textContent = 'Back to home'; cta.className = 'btn ghost sm mt12'; cta.dataset.go = 'home';
+      if (step) step.textContent = 'Under review · 14:05';
+      if (dot) dot.style.background = 'var(--amber)';
+    }
+  }
 
   // ---- pre-screening animation, then auto-route to status ----
   var psRan = false;

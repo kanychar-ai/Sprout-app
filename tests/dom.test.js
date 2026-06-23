@@ -382,6 +382,30 @@ async function run() {
   await delay(3200);
   check('prescreen auto-advances → status', a.visible('status'));
 
+  // 9b · Rule evaluation drives the result (Approved vs Under review) ---------
+  group('9b · Pre-screening evaluation');
+  const setCompliance = (answer) => {
+    a.document.querySelectorAll('[data-view="tax"] .seg.toggle').forEach((seg) => {
+      const b = Array.from(seg.querySelectorAll('button')).find((x) => x.textContent.trim() === answer);
+      b.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+    });
+  };
+  // FATCA rule requires "Yes"; make the customer answer "No" → should NOT auto-approve
+  dom.window.SproutPrescreen.setRules([{ key: 'fatca', label: 'Tax declaration (FATCA / CRS)', config: { allowed: ['Yes'] } }]);
+  a.go('tax'); setCompliance('No');
+  a.go('home'); a.go('status');
+  check('unmet rule → Under review (not Approved)', /Under review/.test(a.text('#statusHead')));
+  check('review shows the reasons', a.q('#statusReasons').hidden === false && /FATCA/.test(a.text('#statusReasons')));
+  check('review hides the offer amount', a.q('#statusAmt').hidden === true);
+  check('review CTA is not "accept" (routes home, no dead end)', a.q('#statusCta').dataset.go === 'home');
+  // satisfy the rule: set every compliance toggle to "Yes"
+  a.go('tax'); setCompliance('Yes');
+  a.go('home'); a.go('status');
+  check('all answers satisfy the rule → Approved', /Approved/.test(a.text('#statusHead')));
+  check('approved offer amount visible + accept routes to repay',
+    a.q('#statusAmt').hidden === false && a.q('#statusCta').dataset.go === 'repay');
+  dom.window.SproutPrescreen.setRules([]); // reset for later tests
+
   // 10 · Status / Repay / Profile --------------------------------------------
   group('10 · Status / Repay / Profile');
   a.go('status');
