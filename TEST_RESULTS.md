@@ -1,8 +1,9 @@
 # Sprout — Test Results
 
-Run date: 2026-06-23 08:28 UTC
-Scope: pre-screening evaluation engine — customer answers are checked against the
-enabled rules; result is Approved only if all pass, else Under review (with reasons).
+Run date: 2026-06-23 09:05 UTC
+Scope: customer ↔ officer integration — submitting an application creates a case;
+the customer result screen shows the real officer decision (Approved / Not approved
++ reason / Under review / Disbursed).
 
 ## 1. Browserless DOM suite — npm test
 

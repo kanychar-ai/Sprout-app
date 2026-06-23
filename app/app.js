@@ -72,7 +72,7 @@
     if (location.hash !== '#' + name) location.hash = name;
     views[name].scrollTop = 0;
 
-    if (name === 'prescreen') runPrescreen();
+    if (name === 'prescreen') { if (typeof submitCase === 'function') submitCase(); runPrescreen(); }
     if (name === 'status' && typeof renderStatusOutcome === 'function') renderStatusOutcome();
     if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home'); }, 1400);
   }
@@ -478,41 +478,108 @@
     return { ok: fails.length === 0, fails: fails };
   }
 
-  // paint the status screen from the evaluation outcome
-  function renderStatusOutcome() {
-    var card = document.getElementById('statusCard');
-    if (!card) return;
-    var res = evaluateApplication();
-    var head = document.getElementById('statusHead');
-    var badge = document.getElementById('statusBadge');
-    var amt = document.getElementById('statusAmt');
-    var terms = document.getElementById('statusTerms');
-    var reasons = document.getElementById('statusReasons');
-    var cta = document.getElementById('statusCta');
-    var step = document.getElementById('statusStep');
-    var dot = document.getElementById('statusDot');
-    if (res.ok) {
+  // paint the status card in one of four states
+  function paintStatus(kind, opts) {
+    opts = opts || {};
+    var card = document.getElementById('statusCard'); if (!card) return;
+    var head = document.getElementById('statusHead'), badge = document.getElementById('statusBadge');
+    var amt = document.getElementById('statusAmt'), terms = document.getElementById('statusTerms');
+    var reasons = document.getElementById('statusReasons'), cta = document.getElementById('statusCta');
+    var step = document.getElementById('statusStep'), dot = document.getElementById('statusDot');
+    reasons.hidden = true; amt.hidden = false; terms.hidden = false;
+    if (kind === 'approved') {
       card.style.background = 'var(--ok-bg)'; card.style.borderColor = 'var(--ok)';
       head.textContent = '🎉 Approved'; head.style.color = 'var(--ok)';
       badge.textContent = 'Offer ready'; badge.className = 'badge ok';
-      amt.hidden = false; terms.hidden = false; reasons.hidden = true;
       cta.textContent = 'Accept & continue'; cta.className = 'btn lime sm mt12'; cta.dataset.go = 'repay';
-      if (step) step.textContent = 'Approved · 15:40';
-      if (dot) dot.style.background = 'var(--ok)';
-    } else {
+      step.textContent = 'Approved · 15:40'; dot.style.background = 'var(--ok)';
+    } else if (kind === 'disbursed') {
+      card.style.background = 'var(--ok-bg)'; card.style.borderColor = 'var(--ok)';
+      head.textContent = '💸 Funds on the way'; head.style.color = 'var(--ok)';
+      badge.textContent = 'Disbursed'; badge.className = 'badge ok';
+      terms.textContent = 'Your loan has been disbursed to your bank account.';
+      cta.textContent = 'Back to home'; cta.className = 'btn ghost sm mt12'; cta.dataset.go = 'home';
+      step.textContent = 'Disbursed'; dot.style.background = 'var(--ok)';
+    } else if (kind === 'declined') {
+      card.style.background = 'var(--soft-red-bg)'; card.style.borderColor = 'var(--soft-red)';
+      head.textContent = '✕ Not approved'; head.style.color = 'var(--soft-red)';
+      badge.textContent = 'Declined'; badge.className = 'badge red';
+      amt.hidden = true; terms.textContent = "We're unable to approve this application right now.";
+      reasons.hidden = false; reasons.innerHTML = '<b>Reason:</b> ' + String(opts.reason || 'Did not meet our current lending criteria.').replace(/[<>&]/g, '');
+      cta.textContent = 'Back to home'; cta.className = 'btn ghost sm mt12'; cta.dataset.go = 'home';
+      step.textContent = 'Not approved · 15:40'; dot.style.background = 'var(--soft-red)';
+    } else { // review
       card.style.background = 'var(--amber-bg)'; card.style.borderColor = 'var(--amber)';
       head.textContent = '⏳ Under review'; head.style.color = 'var(--amber)';
       badge.textContent = 'In review'; badge.className = 'badge amber';
-      amt.hidden = true;
-      terms.hidden = false; terms.textContent = "A few things need a closer look — an officer will review your application and we'll notify you within 1 business day.";
-      var names = res.fails.map(function (r) { return PS_LABELS[r.key] || r.label || r.key; });
-      reasons.hidden = false;
-      reasons.innerHTML = '<b>Being reviewed:</b> ' + names.map(function (n) { return String(n).replace(/[<>&]/g, ''); }).join(', ');
-      cta.textContent = 'Back to home'; cta.className = 'btn ghost sm mt12'; cta.dataset.go = 'home';
-      if (step) step.textContent = 'Under review · 14:05';
-      if (dot) dot.style.background = 'var(--amber)';
+      amt.hidden = true; terms.textContent = "An officer is reviewing your application — we'll notify you when there's a decision.";
+      if (opts.reasons && opts.reasons.length) {
+        reasons.hidden = false;
+        reasons.innerHTML = '<b>Being reviewed:</b> ' + opts.reasons.map(function (n) { return String(n).replace(/[<>&]/g, ''); }).join(', ');
+      }
+      cta.textContent = 'Refresh status'; cta.className = 'btn ghost sm mt12'; cta.removeAttribute('data-go'); cta.dataset.refresh = '1';
+      step.textContent = 'Under review · 14:05'; dot.style.background = 'var(--amber)';
     }
   }
+
+  // read the real case from the back office (officer decision), else fall back to
+  // the local rule evaluation
+  function fetchCase() {
+    var cfg = window.SPROUT_CONFIG || {};
+    var id = null;
+    try { id = window.localStorage && localStorage.getItem('sprout_case'); } catch (e) {}
+    if (!cfg.casesApi || !id) return Promise.resolve(null);
+    return fetch(cfg.casesApi + '?id=eq.' + encodeURIComponent(id) + '&select=status,decision_reason', { headers: cfg.casesHeaders || {} })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { return (rows && rows[0]) || null; })
+      .catch(function () { return null; });
+  }
+  function renderStatusOutcome() {
+    if (!document.getElementById('statusCard')) return;
+    // 1) paint immediately from the local rule evaluation (instant, works offline)
+    var res = evaluateApplication();
+    if (res.ok) paintStatus('approved');
+    else paintStatus('review', { reasons: res.fails.map(function (r) { return PS_LABELS[r.key] || r.label || r.key; }) });
+    // 2) then override with the real officer decision from the back office when it loads
+    fetchCase().then(function (c) {
+      if (!c || !c.status) return;
+      if (c.status === 'approved') paintStatus('approved');
+      else if (c.status === 'rejected') paintStatus('declined', { reason: c.decision_reason });
+      else if (c.status === 'disbursed') paintStatus('disbursed');
+      else paintStatus('review', { reasons: ['Officer review in progress'] });
+    });
+  }
+
+  // create the application case in the back office when the customer submits
+  var caseSubmitted = false;
+  function submitCase() {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.casesApi || caseSubmitted) return;
+    caseSubmitted = true;
+    var id = 'SV' + String(Date.now()).slice(-6);
+    var amount = +((document.getElementById('amt') || {}).value || 150000);
+    var term = +((document.getElementById('term') || {}).value || 36);
+    var occ = (document.getElementById('occField') || {}).value || 'Engineer';
+    var pay = (document.getElementById('payType') || {}).value || 'Payroll';
+    var prod = (typeof selectedProduct !== 'undefined' && selectedProduct) ? selectedProduct.name : 'Personal Loan';
+    var body = {
+      id: id, customer_name: 'Somchai Jaidee', product: prod, amount: amount, term: term,
+      monthly: Math.round(amount / Math.max(1, term)), purpose: 'Personal',
+      occupation: occ, employer: 'SCG Co., Ltd.', income: 45000, existing_debt: 8500,
+      phone: '081-234-5678', national_id: '1-1037-xxxxx-12-3',
+      score: 72, dsr: 28, ncb: 'clear', status: 'to_review'
+    };
+    var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
+    var extra = cfg.casesHeaders || {};
+    Object.keys(extra).forEach(function (k) { headers[k] = extra[k]; });
+    fetch(cfg.casesApi, { method: 'POST', headers: headers, body: JSON.stringify(body) })
+      .then(function (r) { if (r.ok) { try { localStorage.setItem('sprout_case', id); } catch (e) {} } })
+      .catch(function () {});
+  }
+  window.SproutCase = { submit: submitCase }; // hook
+  document.body.addEventListener('click', function (e) {
+    if (e.target.closest('[data-refresh]')) renderStatusOutcome();
+  });
 
   // ---- pre-screening animation, then auto-route to status ----
   var psRan = false;

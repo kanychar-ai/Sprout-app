@@ -397,7 +397,7 @@ async function run() {
   check('unmet rule → Under review (not Approved)', /Under review/.test(a.text('#statusHead')));
   check('review shows the reasons', a.q('#statusReasons').hidden === false && /FATCA/.test(a.text('#statusReasons')));
   check('review hides the offer amount', a.q('#statusAmt').hidden === true);
-  check('review CTA is not "accept" (routes home, no dead end)', a.q('#statusCta').dataset.go === 'home');
+  check('review CTA is not the accept/offer button', a.q('#statusCta').dataset.go !== 'repay' && /Refresh/.test(a.text('#statusCta')));
   // satisfy the rule: set every compliance toggle to "Yes"
   a.go('tax'); setCompliance('Yes');
   a.go('home'); a.go('status');

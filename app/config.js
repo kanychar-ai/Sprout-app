@@ -21,7 +21,11 @@ window.SPROUT_CONFIG = {
   // active document requirements the upload step reads (back-office controlled)
   docsApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/doc_requirements' +
     '?select=key,label,description,icon,requirement,source&active=eq.true&order=sort.asc',
-  docsHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
+  docsHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' },
+
+  // customer application case (created on submit, status read back on the result screen)
+  casesApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/cases',
+  casesHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
 
   // ── ID-card verification (e-KYC) ──────────────────────────────────────────
   // Leave unset to use the built-in local format-check stub. To plug in a real
