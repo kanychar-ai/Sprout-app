@@ -36,6 +36,7 @@
       <button class="bo-tab on" data-tab="products">Loan products</button>
       <button class="bo-tab" data-tab="prescreen">Pre-screening rules</button>
       <button class="bo-tab" data-tab="documents">Documents</button>
+      <button class="bo-tab" data-tab="staff">Staff</button>
     </div>
 
     <!-- Products panel -->
@@ -66,6 +67,17 @@
       </div>
       <div class="bo-msg" id="docsMsg" hidden></div>
       <div id="docReqList"></div>
+    </div>
+
+    <!-- Staff roles panel -->
+    <div class="bo-panel" data-panel="staff" hidden>
+      <div class="bo-bar">
+        <div><b>Staff &amp; roles</b><div class="tiny muted">Assign reviewer / approver / admin by email. The login routes each person by their role; anyone not listed here is a customer.</div></div>
+        <div class="bo-top-actions"><button class="btn ghost sm" id="staffAdd">+ Add</button><button class="btn primary sm" id="staffSave">Save</button></div>
+      </div>
+      <div class="note-soft" style="margin-bottom:12px">ℹ️ The login account (email + password) must also exist in <b>Supabase → Authentication → Users</b>. This list only sets each person's role.</div>
+      <div class="bo-msg" id="staffMsg" hidden></div>
+      <div id="staffList"></div>
     </div>
   </section>
 
@@ -123,6 +135,6 @@
 </div>
 
 <script src="../app/config.js?v=19"></script>
-<script type="module" src="admin.js?v=5"></script>
+<script type="module" src="admin.js?v=6"></script>
 </body>
 </html>

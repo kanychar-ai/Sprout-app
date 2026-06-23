@@ -90,7 +90,10 @@ async function loadTasks() {
   const host = $('taskList'); host.innerHTML = '<div class="tiny muted">Loading…</div>';
   let q = sb.from('cases').select('*').order('created_at', { ascending: true });
   if (taskFilter === 'mine') {
-    q = me.role === 'approver' ? q.eq('status', 'pending_approval') : q.in('status', ['to_review', 'awaiting_docs']);
+    // reviewers see cases to assess; approvers can both assess AND decide
+    q = (me.role === 'reviewer')
+      ? q.in('status', ['to_review', 'awaiting_docs'])
+      : q.in('status', ['to_review', 'awaiting_docs', 'pending_approval']);
   }
   const { data, error } = await q;
   if (error) { host.innerHTML = '<div class="note-soft">Could not load cases: ' + esc(error.message) + ' — run supabase/staff.sql.</div>'; return; }
@@ -139,15 +142,15 @@ function link(go, ic, title, sub, right) {
 function actionFor(c) {
   // maker–checker gating
   if (c.status === 'to_review' || c.status === 'awaiting_docs') {
-    if (me.role === 'reviewer' || me.role === 'admin')
-      return '<button class="btn primary mt14" data-go="review">Review &amp; recommend</button>';
-    return '<div class="note-soft mt14">Waiting for a reviewer to assess this case.</div>';
+    // reviewer OR approver (or admin) may assess/recommend
+    return '<button class="btn primary mt14" data-go="review">Review &amp; recommend</button>';
   }
   if (c.status === 'pending_approval') {
     if (me.role !== 'approver' && me.role !== 'admin')
       return '<div class="note-soft mt14">Recommended ' + esc(c.recommendation) + ' — waiting for an approver.</div>';
+    // segregation of duties: the person who reviewed cannot approve the same case
     if (c.reviewer_email === me.email)
-      return '<div class="note-soft mt14">🔒 You reviewed this case — a different approver must decide (maker–checker).</div>';
+      return '<div class="note-soft mt14">🔒 You reviewed this case — a different approver must make the decision (maker–checker).</div>';
     if (+c.amount > TIER1_LIMIT && me.tier < 2)
       return '<div class="note-soft mt14">🔒 ' + baht(c.amount) + ' needs a senior approver (tier 2).</div>';
     return '<button class="btn primary mt14" data-go="decide">Make decision</button>';

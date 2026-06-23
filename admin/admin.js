@@ -27,7 +27,7 @@ async function refresh() {
   $('loginView').hidden = signedIn;
   $('managerView').hidden = !signedIn;
   $('topActions').hidden = !signedIn;
-  if (signedIn) { loadProducts(); loadRules(); loadDocReqs(); }
+  if (signedIn) { loadProducts(); loadRules(); loadDocReqs(); loadStaff(); }
 }
 
 $('loginBtn').addEventListener('click', async () => {
@@ -336,5 +336,63 @@ $('docAdd').addEventListener('click', () => {
   renderDocReqs();
 });
 $('docsSave').addEventListener('click', saveDocReqs);
+
+// ---- staff roles -----------------------------------------------------------
+let staffCache = [];
+let staffDeleted = [];
+const ROLE_COLOR = { reviewer: 'info', approver: 'lime', admin: 'amber' };
+
+async function loadStaff() {
+  msg($('staffMsg'), '', 'err');
+  const { data, error } = await sb.from('staff_roles').select('*').order('role');
+  if (error) { msg($('staffMsg'), 'Could not load: ' + error.message + ' — run supabase/staff.sql + staff_admin.sql'); $('staffList').innerHTML = ''; return; }
+  staffCache = data || []; staffDeleted = [];
+  renderStaff();
+}
+function renderStaff() {
+  const host = $('staffList'); host.innerHTML = '';
+  if (!staffCache.length) { host.innerHTML = '<div class="muted tiny">No staff yet — add a reviewer or approver.</div>'; return; }
+  staffCache.forEach((s, i) => {
+    const card = document.createElement('div'); card.className = 'srow'; card.dataset.i = i;
+    card.innerHTML =
+      '<div style="flex:1.4"><label class="label">Email (login)</label><input class="field s-email" type="email" value="' + esc(s.email || '') + '" placeholder="person@company.com"></div>' +
+      '<div style="flex:1.2"><label class="label">Name</label><input class="field s-name" value="' + esc(s.name || '') + '"></div>' +
+      '<div style="flex:0 0 130px"><label class="label">Role</label><select class="field s-role">' +
+        ['reviewer', 'approver', 'admin'].map((r) => '<option value="' + r + '"' + (s.role === r ? ' selected' : '') + '>' + r + '</option>').join('') + '</select></div>' +
+      '<div style="flex:0 0 80px"><label class="label">Tier</label><input class="field s-tier" type="number" min="1" max="5" value="' + (s.tier || 1) + '"></div>' +
+      '<div style="flex:0 0 auto"><button type="button" class="btn ghost sm danger s-del">Delete</button></div>';
+    card.querySelector('.s-del').addEventListener('click', () => {
+      if (s.email) staffDeleted.push(s.email);
+      staffCache.splice(i, 1); renderStaff();
+    });
+    host.appendChild(card);
+  });
+}
+async function saveStaff() {
+  const rows = [];
+  let bad = false;
+  document.querySelectorAll('#staffList .srow').forEach((card) => {
+    const email = card.querySelector('.s-email').value.trim().toLowerCase();
+    if (!email) return;
+    if (email.indexOf('@') === -1) bad = true;
+    rows.push({
+      email: email, name: card.querySelector('.s-name').value.trim() || null,
+      role: card.querySelector('.s-role').value,
+      tier: parseInt(card.querySelector('.s-tier').value, 10) || 1
+    });
+  });
+  if (bad) { msg($('staffMsg'), 'Each staff member needs a valid email.'); return; }
+  $('staffSave').disabled = true;
+  if (staffDeleted.length) {
+    const { error: de } = await sb.from('staff_roles').delete().in('email', staffDeleted);
+    if (de) { $('staffSave').disabled = false; msg($('staffMsg'), 'Delete failed: ' + de.message); return; }
+  }
+  const { error } = await sb.from('staff_roles').upsert(rows, { onConflict: 'email' });
+  $('staffSave').disabled = false;
+  if (error) { msg($('staffMsg'), 'Save failed: ' + error.message); return; }
+  toast('Staff roles saved'); loadStaff();
+}
+$('staffAdd').addEventListener('click', () => { staffCache.push({ email: '', name: '', role: 'reviewer', tier: 1 }); renderStaff(); });
+$('staffSave').addEventListener('click', saveStaff);
 
 refresh();
