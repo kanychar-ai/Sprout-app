@@ -250,9 +250,14 @@ async function run() {
   // and WebKit collapsed the selected card (nested flex), overlapping the next card
   check('#prodList is block flow (not flex)', /#prodList\s*\{[^}]*display:\s*block/.test(appCss));
   check('#prodList is not a flex container', !/#prodList\s*\{[^}]*display:\s*flex/.test(appCss));
-  check('selection avoids layout/compositing triggers (no border/box-shadow on .prod.sel)',
-    /\.prod\.sel\s*\{[^}]*background:/.test(appCss) &&
-    !/\.prod\.sel\s*\{[^}]*(border:|box-shadow:)/.test(appCss));
+  // ROOT CAUSE of the overlap: a generic ".sel { height:52px }" (pay-type dropdown)
+  // collided with the product card's ".prod.sel" selected state, forcing selected
+  // cards to 52px and clipping their stats. Guard the class name can't collide again.
+  check('no bare ".sel" rule (would collide with .prod.sel and clamp card height)',
+    !/(^|[\s,}])\.sel\s*[:{]/.test(appCss));
+  check('pay-type dropdown renamed to .selectbox', /\.selectbox\s*\{/.test(appCss));
+  check('product selection uses a non-sizing ring (outline)',
+    /\.prod\.sel\s*\{[^}]*outline:/.test(appCss) && !/\.prod\.sel\s*\{[^}]*height:/.test(appCss));
 
   // every primary CTA in the linear loan flow docks to the bottom AND is sized
   // consistently (full-size .btn, never the smaller .sm variant)
