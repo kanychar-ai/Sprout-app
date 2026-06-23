@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="robots" content="noindex">
+<title>Sprout · Officer</title>
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../app/app.css?v=23">
+<link rel="stylesheet" href="staff.css?v=1">
+</head>
+<body>
+<div class="app-shell" id="shell">
+
+  <div class="app-top">
+    <button class="back" id="back" aria-label="Back" hidden>‹</button>
+    <div style="flex:1"><h2 id="title">Sprout Officer</h2><div class="sub" id="subtitle">Case review</div></div>
+    <span class="badge ghost" id="roleBadge" hidden>—</span>
+    <button class="back" id="logout" title="Log out" hidden style="margin-left:6px">⎋</button>
+  </div>
+
+  <!-- Login -->
+  <section class="view" data-view="login">
+    <h2 style="margin:6px 0 2px">Officer sign in</h2>
+    <p class="tiny muted">Use the reviewer or approver account created in Supabase → Authentication.</p>
+    <div class="label mt12">Email</div>
+    <div class="input"><span>👤</span><input class="bare" id="email" type="email" autocomplete="username" placeholder="officer@company.com"></div>
+    <div class="label mt12">Password</div>
+    <div class="input"><span>🔒</span><input class="bare" id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <button class="btn primary mt16" id="loginBtn">Sign in</button>
+    <div class="note-soft mt12" id="loginMsg" hidden></div>
+  </section>
+
+  <!-- My tasks -->
+  <section class="view" data-view="tasks" hidden>
+    <div class="row between center"><div><div class="tiny muted">Signed in as</div><b id="whoName">—</b></div>
+      <button class="btn ghost sm" data-go="search">🔎 Search</button></div>
+    <div class="seg toggle mt12" id="taskTabs" style="width:100%"><button class="on" data-tab="mine">My queue</button><button data-tab="all">All cases</button></div>
+    <div id="taskList" class="mt12"></div>
+    <div class="note-soft mt12">🔒 You can review and approve — but never the same case (maker–checker).</div>
+  </section>
+
+  <!-- Search -->
+  <section class="view" data-view="search" hidden>
+    <div class="input focus"><span>🔎</span><input class="bare" id="searchInput" placeholder="Loan no., name, phone or ID"></div>
+    <div class="tiny muted mt6" id="searchHint">Matches by loan no., name or phone.</div>
+    <div id="searchResults" class="mt12"></div>
+  </section>
+
+  <!-- Case hub -->
+  <section class="view" data-view="case" hidden><div id="caseHub"></div></section>
+
+  <!-- Detail screens (rendered by JS) -->
+  <section class="view" data-view="data" hidden><div id="dataView"></div></section>
+  <section class="view" data-view="score" hidden><div id="scoreView"></div></section>
+  <section class="view" data-view="docs" hidden><div id="docsView"></div></section>
+  <section class="view" data-view="compliance" hidden><div id="complianceView"></div></section>
+  <section class="view" data-view="chat" hidden><div id="chatView"></div></section>
+
+  <!-- Reviewer: recommend -->
+  <section class="view" data-view="review" hidden><div id="reviewView"></div></section>
+  <!-- Approver: decide -->
+  <section class="view" data-view="decide" hidden><div id="decideView"></div></section>
+  <!-- Disbursement -->
+  <section class="view" data-view="disburse" hidden><div id="disburseView"></div></section>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="../app/config.js?v=23"></script>
+<script type="module" src="staff.js?v=1"></script>
+</body>
+</html>

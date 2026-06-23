@@ -1,0 +1,37 @@
+/* Sprout officer app — case review surfaces (reuses app.css tokens) */
+.case-row { background:#fff; border:1px solid var(--line); border-radius:16px; padding:14px 15px; margin-bottom:10px; cursor:pointer; }
+.case-row .row1 { display:flex; align-items:center; gap:8px; }
+.case-row b { font-size:15px; }
+.case-row .sub { font-size:12.5px; color:var(--ink-3); margin-top:4px; }
+.case-row .meta { margin-left:auto; text-align:right; }
+
+.hub-head { background:#fff; border:1px solid var(--line); border-radius:18px; padding:16px; }
+.hub-av { width:46px; height:46px; border-radius:14px; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; }
+
+.hub-link { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-top:10px; cursor:pointer; }
+.hub-link .ic { width:34px; height:34px; border-radius:10px; background:var(--cobalt-50); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:16px; flex:0 0 auto; }
+.hub-link .t { flex:1; }
+.hub-link .t b { font-size:14px; }
+.hub-link .t span { font-size:12px; color:var(--ink-3); }
+.hub-link .chev { color:var(--ink-3); }
+
+.kv { display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+.kv:last-child { border-bottom:none; }
+.kv .v { font-weight:700; }
+
+.score-bar { height:8px; border-radius:6px; background:var(--line-2); overflow:hidden; margin-top:6px; }
+.score-bar > i { display:block; height:100%; background:linear-gradient(90deg,var(--cobalt),var(--lime)); }
+
+.doc-row { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; }
+.doc-row .t { flex:1; min-width:0; } .doc-row .t b{ font-size:13.5px; } .doc-row .t span{ font-size:12px; color:var(--ink-3); }
+
+.seg-status { display:inline-flex; background:#eef1f6; border-radius:10px; padding:3px; }
+.seg-status button { border:none; background:none; padding:7px 12px; border-radius:8px; cursor:pointer; font:inherit; font-size:12.5px; font-weight:600; color:var(--ink-3); }
+.seg-status button.on { background:#fff; color:var(--cobalt); box-shadow:0 1px 3px rgba(15,27,51,.1); }
+
+.bubble { max-width:78%; padding:10px 13px; border-radius:16px; font-size:13.5px; margin-bottom:8px; }
+.bubble.me { background:var(--cobalt); color:#fff; margin-left:auto; border-bottom-right-radius:5px; }
+.bubble.them { background:#eef1f6; color:var(--ink); border-bottom-left-radius:5px; }
+
+.evt { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+.evt:last-child{ border-bottom:none; } .evt .when{ color:var(--ink-3); margin-left:auto; white-space:nowrap; }
