@@ -63,6 +63,6 @@ insert into public.cases (id,customer_name,product,amount,term,monthly,purpose,o
 select * from (values
   ('SV0234','Mintra Jaidee','Starter Cash',30000,12,2650,'Home repair','Marketer','ACME Co., Ltd.',35000,2150,'081-234-5678','1-1037-xxxxx-12-3',72,28,'clear','to_review'),
   ('SV0231','Thana Suk','Flex Line',80000,24,4100,'Working capital','Engineer','SCG',55000,9000,'089-111-2222','1-2002-xxxxx-44-1',66,41,'clear','to_review'),
-  ('SV0228','Meen Shop','Stock Boost',50000,18,3200,'Inventory','Business owner','Meen Shop','—',60000,12000,'082-333-4444','1-3003-xxxxx-55-2',61,38,'1 late','to_review')
+  ('SV0228','Meen Shop','Stock Boost',50000,18,3200,'Inventory','Business owner','Meen Shop',60000,12000,'082-333-4444','1-3003-xxxxx-55-2',61,38,'1 late','to_review')
 ) as v(id,customer_name,product,amount,term,monthly,purpose,occupation,employer,income,existing_debt,phone,national_id,score,dsr,ncb,status)
 where not exists (select 1 from public.cases);
