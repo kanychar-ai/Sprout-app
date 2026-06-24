@@ -664,15 +664,27 @@
     if (!cfg.supabaseUrl) { show('otp'); return; } // demo fallback
     var email = ((document.getElementById('suUser') || {}).value || '').trim();
     var pass = (document.getElementById('suPass') || {}).value || '';
-    if (email.indexOf('@') === -1) { showToast('Please sign up with your email address'); return; }
+    if (email.indexOf('@') === -1) { showToast('Please enter a valid email address'); return; }
+    if (pass.length < 6) { showToast('Password must be at least 6 characters'); return; }
     showToast('Creating your account…');
     fetch(cfg.supabaseUrl + '/auth/v1/signup', {
       method: 'POST', headers: { apikey: cfg.supabaseKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, password: pass })
     }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
-        if (res.ok) { showToast('Account created ✓'); show('otp'); }
-        else { showToast('⚠️ ' + (res.j.msg || res.j.error_description || 'Could not create account')); }
+        if (!res.ok) {
+          var m = (res.j.msg || res.j.error_description || res.j.error || '').toLowerCase();
+          if (m.indexOf('already') !== -1 || m.indexOf('registered') !== -1) showToast('⚠️ This email is already registered — please log in');
+          else if (m.indexOf('rate limit') !== -1) showToast('⚠️ Too many sign-up emails — try again later (or ask us to turn off email confirmation)');
+          else showToast('⚠️ ' + (res.j.msg || 'Could not create account'));
+          return;
+        }
+        // Supabase returns identities:[] when the email already exists (even with confirm on)
+        var user = res.j.user || res.j;
+        if (user && Array.isArray(user.identities) && user.identities.length === 0) {
+          showToast('⚠️ This email is already registered — please log in'); return;
+        }
+        showToast('Account created ✓'); show('otp');
       }).catch(function () { showToast('Network error — please try again'); });
   }
   var suSubmit = document.getElementById('suSubmit');

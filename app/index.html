@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
-<link rel="stylesheet" href="app.css?v=27">
+<link rel="stylesheet" href="app.css?v=28">
 </head>
 <body>
 
@@ -49,13 +49,13 @@
   <!-- 1.2 Create account -->
   <section class="view" data-view="create" hidden>
     <div class="label">Full name</div>
-    <div class="input"><input class="bare" id="suName" value="Mintra Jaidee" autocomplete="name" placeholder="Your full name"></div>
+    <div class="input"><input class="bare" id="suName" autocomplete="name" placeholder="Your full name"></div>
     <div class="label mt12">Email <span class="label-hint">· you'll log in with this</span></div>
-    <div class="input"><span>📧</span><input class="bare" id="suUser" type="email" value="mintra@sprout.test" autocomplete="email" placeholder="you@email.com"></div>
+    <div class="input"><span>📧</span><input class="bare" id="suUser" type="email" autocomplete="email" placeholder="you@email.com"></div>
     <div class="label mt12">Mobile number</div>
-    <div class="input"><span>📱</span><input class="bare" id="suMobile" inputmode="tel" value="081-234-5678" autocomplete="tel" placeholder="08X-XXX-XXXX"></div>
+    <div class="input"><span>📱</span><input class="bare" id="suMobile" inputmode="tel" autocomplete="tel" placeholder="08X-XXX-XXXX"></div>
     <div class="label mt12">Create password</div>
-    <div class="input"><span>🔒</span><input class="bare" id="suPass" type="password" value="Sprout123!" autocomplete="new-password" placeholder="Create a password"><button class="eye" id="suEye" type="button" aria-label="Show password" data-eye="suPass">👁</button></div>
+    <div class="input"><span>🔒</span><input class="bare" id="suPass" type="password" autocomplete="new-password" placeholder="Create a password"><button class="eye" id="suEye" type="button" aria-label="Show password" data-eye="suPass">👁</button></div>
     <div class="row gap6 mt8"><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar"></i></div>
     <div class="help">Strong · 8+ chars, number &amp; symbol</div>
     <div class="tile mt14 consent" data-toggle="consent">
@@ -96,9 +96,9 @@
         <h1 class="flow-h1" style="margin-top:18px">Welcome back</h1>
         <p class="flow-sub">Log in to continue your application.</p>
         <div class="label">Email</div>
-        <div class="input"><span>📧</span><input class="bare" id="liUser" type="email" value="mintra@sprout.test" autocomplete="email" placeholder="you@email.com"></div>
+        <div class="input"><span>📧</span><input class="bare" id="liUser" type="email" autocomplete="email" placeholder="you@email.com"></div>
         <div class="label mt12">Password</div>
-        <div class="input"><span>🔒</span><input class="bare" id="liPass" type="password" value="Sprout123!" autocomplete="current-password" placeholder="Your password"><button class="eye" id="liEye" type="button" aria-label="Show password" data-eye="liPass">👁</button></div>
+        <div class="input"><span>🔒</span><input class="bare" id="liPass" type="password" autocomplete="current-password" placeholder="Your password"><button class="eye" id="liEye" type="button" aria-label="Show password" data-eye="liPass">👁</button></div>
         <div style="text-align:right;margin-top:10px"><b class="link" style="font-size:12.5px;color:var(--cobalt)" id="liForgot">Forgot password?</b></div>
         <button class="btn primary mt16" id="liSubmit">Log in</button>
         <div class="row center gap10 mt16"><div class="divider" style="flex:1;margin:0"></div><span class="tiny muted">or</span><div class="divider" style="flex:1;margin:0"></div></div>
@@ -520,10 +520,10 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="config.js?v=27"></script>
-<script src="id-verify.js?v=27"></script>
-<script src="app.js?v=27"></script>
-<script src="kyc.js?v=27"></script>
-<script src="docs.js?v=27"></script>
+<script src="config.js?v=28"></script>
+<script src="id-verify.js?v=28"></script>
+<script src="app.js?v=28"></script>
+<script src="kyc.js?v=28"></script>
+<script src="docs.js?v=28"></script>
 </body>
 </html>
