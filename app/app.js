@@ -640,7 +640,7 @@
       .then(function (rows) {
         var role = rows && rows[0] && rows[0].role, q = '?email=' + encodeURIComponent(email);
         if (role === 'admin') { location.href = '../admin/' + q; return; }
-        if (role === 'reviewer' || role === 'approver') { location.href = '../staff/' + q; return; }
+        if (role) { location.href = '../staff/' + q; return; } // any staff role → officer app
         // 2) otherwise authenticate as a customer against Supabase Auth
         fetch(cfg.supabaseUrl + '/auth/v1/token?grant_type=password', {
           method: 'POST', headers: { apikey: cfg.supabaseKey, 'Content-Type': 'application/json' },

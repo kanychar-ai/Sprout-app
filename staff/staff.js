@@ -5,7 +5,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const C = window.SPROUT_CONFIG || {};
 const sb = createClient(C.supabaseUrl, C.supabaseKey);
-const TIER1_LIMIT = 50000; // amounts above this need an approver of tier >= 2
+const SPECIAL_LIMIT = 50000; // amounts above this are "special" → need a manager to approve
 
 const $ = (id) => document.getElementById(id);
 const views = {};
@@ -48,8 +48,8 @@ function initials(name) { return (name || '?').split(' ').map((w) => w[0]).join(
 
 const STATUS = {
   to_review: ['To review', 'amber'], awaiting_docs: ['Awaiting docs', 'amber'],
-  pending_approval: ['Pending approval', 'info'], approved: ['Approved', 'ok'],
-  rejected: ['Not approved', 'red'], disbursed: ['Disbursed', 'ok']
+  pending_approval: ['Pending approval', 'info'], pending_manager: ['Awaiting manager', 'amber'],
+  approved: ['Approved', 'ok'], rejected: ['Not approved', 'red'], disbursed: ['Disbursed', 'ok']
 };
 function statusBadge(s) { const x = STATUS[s] || [s, 'ghost']; return '<span class="badge ' + x[1] + '">' + x[0] + '</span>'; }
 
@@ -65,7 +65,7 @@ async function loadMe(email) {
             : { email, name: email, role: 'reviewer', tier: 1 };
   $('whoName').textContent = me.name;
   $('roleBadge').textContent = me.role + (me.tier > 1 ? ' · T' + me.tier : '');
-  $('roleBadge').className = 'badge ' + (me.role === 'approver' ? 'lime' : 'info');
+  $('roleBadge').className = 'badge ' + (me.role === 'manager' ? 'amber' : (me.role === 'approver' || me.role === 'officer' ? 'lime' : 'info'));
 }
 $('loginBtn').addEventListener('click', async () => {
   const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
@@ -80,6 +80,19 @@ function logEvent(caseId, action, detail) {
   return sb.from('case_events').insert({ case_id: caseId, actor_email: me.email, actor_name: me.name, action, detail });
 }
 
+// ---- role capabilities -----------------------------------------------------
+// officer  → review + approve NORMAL cases  ·  manager → also approve SPECIAL cases
+// reviewer → review only  ·  approver → approve normal only  ·  admin → everything
+function can(action) {
+  const r = me.role;
+  if (r === 'admin') return true;
+  if (action === 'review') return r === 'officer' || r === 'manager' || r === 'reviewer';
+  if (action === 'approveNormal') return r === 'officer' || r === 'manager' || r === 'approver';
+  if (action === 'approveSpecial') return r === 'manager';
+  return false;
+}
+function isSpecial(c) { return +c.amount > SPECIAL_LIMIT; }
+
 // ---- My tasks --------------------------------------------------------------
 let taskFilter = 'mine';
 document.querySelectorAll('#taskTabs button').forEach((b) => b.addEventListener('click', () => {
@@ -90,10 +103,9 @@ async function loadTasks() {
   const host = $('taskList'); host.innerHTML = '<div class="tiny muted">Loading…</div>';
   let q = sb.from('cases').select('*').order('created_at', { ascending: true });
   if (taskFilter === 'mine') {
-    // reviewers see cases to assess; approvers can both assess AND decide
-    q = (me.role === 'reviewer')
-      ? q.in('status', ['to_review', 'awaiting_docs'])
-      : q.in('status', ['to_review', 'awaiting_docs', 'pending_approval']);
+    if (me.role === 'reviewer') q = q.in('status', ['to_review', 'awaiting_docs']);
+    else if (me.role === 'manager' || me.role === 'admin') q = q.in('status', ['to_review', 'awaiting_docs', 'pending_approval', 'pending_manager']);
+    else q = q.in('status', ['to_review', 'awaiting_docs', 'pending_approval']); // officer / approver
   }
   const { data, error } = await q;
   if (error) { host.innerHTML = '<div class="note-soft">Could not load cases: ' + esc(error.message) + ' — run supabase/staff.sql.</div>'; return; }
@@ -141,19 +153,28 @@ function link(go, ic, title, sub, right) {
 }
 function actionFor(c) {
   // maker–checker gating
+  const sod = '<div class="note-soft mt14">🔒 You reviewed this case — a different officer must make the decision (segregation of duties).</div>';
+  const special = isSpecial(c)
+    ? '<div class="tiny" style="color:var(--amber);margin-top:8px">⚑ Special case · ' + baht(c.amount) + ' — needs a manager to approve.</div>' : '';
   if (c.status === 'to_review' || c.status === 'awaiting_docs') {
-    // reviewer OR approver (or admin) may assess/recommend
+    if (!can('review')) return '<div class="note-soft mt14">Waiting for an officer to review.</div>';
     return '<button class="btn primary mt14" data-go="review">Review &amp; recommend</button>';
   }
   if (c.status === 'pending_approval') {
-    if (me.role !== 'approver' && me.role !== 'admin')
-      return '<div class="note-soft mt14">Recommended ' + esc(c.recommendation) + ' — waiting for an approver.</div>';
-    // segregation of duties: the person who reviewed cannot approve the same case
-    if (c.reviewer_email === me.email)
-      return '<div class="note-soft mt14">🔒 You reviewed this case — a different approver must make the decision (maker–checker).</div>';
-    if (+c.amount > TIER1_LIMIT && me.tier < 2)
-      return '<div class="note-soft mt14">🔒 ' + baht(c.amount) + ' needs a senior approver (tier 2).</div>';
-    return '<button class="btn primary mt14" data-go="decide">Make decision</button>';
+    if (c.reviewer_email === me.email) return special + sod;
+    if (isSpecial(c)) {
+      if (can('approveSpecial')) return special + '<button class="btn primary mt14" data-go="decide">Make decision</button>';
+      if (can('approveNormal')) return special + '<button class="btn primary mt14" data-act="escalate">→ Send to manager</button>';
+      return special + '<div class="note-soft mt14">Waiting for an approver.</div>';
+    }
+    if (!can('approveNormal')) return '<div class="note-soft mt14">Recommended ' + esc(c.recommendation) + ' — waiting for an officer to decide.</div>';
+    return '<button class="btn primary mt14" data-go="decide">Make decision</button>' +
+      '<button class="btn ghost mt10" data-act="escalate">→ Send to manager</button>';
+  }
+  if (c.status === 'pending_manager') {
+    if (c.reviewer_email === me.email) return sod;
+    if (can('approveSpecial')) return '<div class="tiny" style="color:var(--amber);margin-top:8px">⚑ Escalated for manager approval</div><button class="btn primary mt14" data-go="decide">Make decision</button>';
+    return '<div class="note-soft mt14">⚑ Escalated — awaiting a manager decision.</div>';
   }
   if (c.status === 'approved')
     return '<button class="btn primary mt14" data-go="disburse">Update status → Disburse</button>';
@@ -306,8 +327,8 @@ function renderDecide() {
 }
 async function decide(outcome) {
   const c = current;
-  if (c.reviewer_email === me.email) { toast('You reviewed this — another approver must decide'); return; }
-  if (+c.amount > TIER1_LIMIT && me.tier < 2) { toast('Needs a tier-2 approver'); return; }
+  if (c.reviewer_email === me.email) { toast('You reviewed this — another officer must decide'); return; }
+  if (isSpecial(c) && !can('approveSpecial')) { toast('Special case — needs a manager'); return; }
   const reason = $('decReason').value.trim();
   if (outcome === 'rejected' && !reason) { toast('Add a reason for the customer'); return; }
   const { error } = await sb.from('cases').update({
@@ -334,10 +355,19 @@ function renderDisburse() {
   });
 }
 
+// escalate a special case to a manager (from the case hub)
+async function escalate() {
+  const c = current; if (!c) return;
+  await sb.from('cases').update({ status: 'pending_manager' }).eq('id', c.id);
+  await logEvent(c.id, 'escalated', 'Sent to a manager for special-case approval (' + baht(c.amount) + ')');
+  toast('Sent to manager'); show('tasks', false); loadTasks();
+}
+
 // render detail/action views when navigated to (after show() makes them visible)
 const RENDER = { data: renderData, score: renderScore, docs: renderDocs, compliance: renderCompliance, chat: renderChat, review: renderReview, decide: renderDecide, disburse: renderDisburse };
 document.body.addEventListener('click', (e) => {
   const t = e.target.closest('[data-go]'); if (t && current && RENDER[t.dataset.go]) RENDER[t.dataset.go]();
+  const a = e.target.closest('[data-act="escalate"]'); if (a) escalate();
 });
 
 try { const em = new URLSearchParams(location.search).get('email'); if (em && $('email')) $('email').value = em; } catch (e) {}
