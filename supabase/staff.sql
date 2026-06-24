@@ -5,8 +5,7 @@
 create table if not exists public.staff_roles (
   email text primary key,
   name  text,
-  role  text not null check (role in ('officer','manager')),
-  tier  int  not null default 1   -- informational; manager role approves special (large) cases
+  role  text not null check (role in ('officer','manager'))
 );
 alter table public.staff_roles enable row level security;
 drop policy if exists "staff read roles" on public.staff_roles;

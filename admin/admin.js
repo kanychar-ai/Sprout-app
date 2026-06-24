@@ -357,9 +357,8 @@ function renderStaff() {
     card.innerHTML =
       '<div style="flex:1.4"><label class="label">Email (login)</label><input class="field s-email" type="email" value="' + esc(s.email || '') + '" placeholder="person@company.com"></div>' +
       '<div style="flex:1.2"><label class="label">Name</label><input class="field s-name" value="' + esc(s.name || '') + '"></div>' +
-      '<div style="flex:0 0 140px"><label class="label">Role</label><select class="field s-role">' +
+      '<div style="flex:0 0 150px"><label class="label">Role</label><select class="field s-role">' +
         ['officer', 'manager'].map((r) => '<option value="' + r + '"' + (s.role === r ? ' selected' : '') + '>' + r + '</option>').join('') + '</select></div>' +
-      '<div style="flex:0 0 80px"><label class="label">Tier</label><input class="field s-tier" type="number" min="1" max="5" value="' + (s.tier || 1) + '"></div>' +
       '<div style="flex:0 0 auto"><button type="button" class="btn ghost sm danger s-del">Delete</button></div>';
     card.querySelector('.s-del').addEventListener('click', () => {
       if (s.email) staffDeleted.push(s.email);
@@ -377,8 +376,7 @@ async function saveStaff() {
     if (email.indexOf('@') === -1) bad = true;
     rows.push({
       email: email, name: card.querySelector('.s-name').value.trim() || null,
-      role: card.querySelector('.s-role').value,
-      tier: parseInt(card.querySelector('.s-tier').value, 10) || 1
+      role: card.querySelector('.s-role').value
     });
   });
   if (bad) { msg($('staffMsg'), 'Each staff member needs a valid email.'); return; }
@@ -392,7 +390,7 @@ async function saveStaff() {
   if (error) { msg($('staffMsg'), 'Save failed: ' + error.message); return; }
   toast('Staff roles saved'); loadStaff();
 }
-$('staffAdd').addEventListener('click', () => { staffCache.push({ email: '', name: '', role: 'officer', tier: 1 }); renderStaff(); });
+$('staffAdd').addEventListener('click', () => { staffCache.push({ email: '', name: '', role: 'officer' }); renderStaff(); });
 $('staffSave').addEventListener('click', saveStaff);
 
 refresh();

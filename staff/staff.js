@@ -1,17 +1,15 @@
 /* Sprout — Officer app: maker–checker case review.
  * Reviewer (maker) recommends; a different Approver (checker) decides; every
- * action is logged; segregation of duties + an approval tier are enforced. */
+ * action is logged; segregation of duties are enforced. */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const C = window.SPROUT_CONFIG || {};
 const sb = createClient(C.supabaseUrl, C.supabaseKey);
-const SPECIAL_LIMIT = 50000; // amounts above this are "special" → need a manager to approve
-
 const $ = (id) => document.getElementById(id);
 const views = {};
 document.querySelectorAll('.view').forEach((v) => { views[v.dataset.view] = v; });
 const history = ['login'];
-let me = null;       // { email, name, role, tier }
+let me = null;       // { email, name, role }
 let current = null;  // current case object
 
 const TITLES = {
@@ -61,11 +59,11 @@ async function boot() {
 }
 async function loadMe(email) {
   const { data } = await sb.from('staff_roles').select('*').eq('email', email).maybeSingle();
-  me = data ? { email, name: data.name || email, role: data.role, tier: data.tier || 1 }
-            : { email, name: email, role: 'officer', tier: 1 };
+  me = data ? { email, name: data.name || email, role: data.role }
+            : { email, name: email, role: 'officer' };
   $('whoName').textContent = me.name;
-  $('roleBadge').textContent = me.role + (me.tier > 1 ? ' · T' + me.tier : '');
-  $('roleBadge').className = 'badge ' + (me.role === 'manager' ? 'amber' : (me.role === 'approver' || me.role === 'officer' ? 'lime' : 'info'));
+  $('roleBadge').textContent = me.role;
+  $('roleBadge').className = 'badge ' + (me.role === 'manager' ? 'amber' : 'lime');
 }
 $('loginBtn').addEventListener('click', async () => {
   const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });
@@ -81,17 +79,15 @@ function logEvent(caseId, action, detail) {
 }
 
 // ---- role capabilities -----------------------------------------------------
-// officer  → review + approve NORMAL cases  ·  manager → also approve SPECIAL cases
-// reviewer → review only  ·  approver → approve normal only  ·  admin → everything
+// officer  → review + approve normal cases (or send a case to a manager)
+// manager  → decide cases an officer has escalated  ·  admin → everything
 function can(action) {
   const r = me.role;
   if (r === 'admin') return true;
-  if (action === 'review') return r === 'officer' || r === 'manager' || r === 'reviewer';
-  if (action === 'approveNormal') return r === 'officer' || r === 'manager' || r === 'approver';
-  if (action === 'approveSpecial') return r === 'manager';
+  if (action === 'review' || action === 'approveNormal') return r === 'officer' || r === 'manager';
+  if (action === 'approveManager') return r === 'manager';
   return false;
 }
-function isSpecial(c) { return +c.amount > SPECIAL_LIMIT; }
 
 // ---- My tasks --------------------------------------------------------------
 let taskFilter = 'mine';
@@ -154,27 +150,21 @@ function link(go, ic, title, sub, right) {
 function actionFor(c) {
   // maker–checker gating
   const sod = '<div class="note-soft mt14">🔒 You reviewed this case — a different officer must make the decision (segregation of duties).</div>';
-  const special = isSpecial(c)
-    ? '<div class="tiny" style="color:var(--amber);margin-top:8px">⚑ Special case · ' + baht(c.amount) + ' — needs a manager to approve.</div>' : '';
   if (c.status === 'to_review' || c.status === 'awaiting_docs') {
     if (!can('review')) return '<div class="note-soft mt14">Waiting for an officer to review.</div>';
     return '<button class="btn primary mt14" data-go="review">Review &amp; recommend</button>';
   }
   if (c.status === 'pending_approval') {
-    if (c.reviewer_email === me.email) return special + sod;
-    if (isSpecial(c)) {
-      if (can('approveSpecial')) return special + '<button class="btn primary mt14" data-go="decide">Make decision</button>';
-      if (can('approveNormal')) return special + '<button class="btn primary mt14" data-act="escalate">→ Send to manager</button>';
-      return special + '<div class="note-soft mt14">Waiting for an approver.</div>';
-    }
+    if (c.reviewer_email === me.email) return sod;
     if (!can('approveNormal')) return '<div class="note-soft mt14">Recommended ' + esc(c.recommendation) + ' — waiting for an officer to decide.</div>';
+    // officer can decide it, OR send it to a manager to decide
     return '<button class="btn primary mt14" data-go="decide">Make decision</button>' +
-      '<button class="btn ghost mt10" data-act="escalate">→ Send to manager</button>';
+      '<button class="btn ghost mt10" data-act="escalate">→ Send to a manager</button>';
   }
   if (c.status === 'pending_manager') {
     if (c.reviewer_email === me.email) return sod;
-    if (can('approveSpecial')) return '<div class="tiny" style="color:var(--amber);margin-top:8px">⚑ Escalated for manager approval</div><button class="btn primary mt14" data-go="decide">Make decision</button>';
-    return '<div class="note-soft mt14">⚑ Escalated — awaiting a manager decision.</div>';
+    if (can('approveManager')) return '<div class="tiny" style="color:var(--amber);margin-top:8px">⚑ Escalated for a manager decision</div><button class="btn primary mt14" data-go="decide">Make decision</button>';
+    return '<div class="note-soft mt14">⚑ Sent to a manager — awaiting their decision.</div>';
   }
   if (c.status === 'approved')
     return '<button class="btn primary mt14" data-go="disburse">Update status → Disburse</button>';
@@ -328,7 +318,6 @@ function renderDecide() {
 async function decide(outcome) {
   const c = current;
   if (c.reviewer_email === me.email) { toast('You reviewed this — another officer must decide'); return; }
-  if (isSpecial(c) && !can('approveSpecial')) { toast('Special case — needs a manager'); return; }
   const reason = $('decReason').value.trim();
   if (outcome === 'rejected' && !reason) { toast('Add a reason for the customer'); return; }
   const { error } = await sb.from('cases').update({
