@@ -54,6 +54,9 @@
 
   function show(name, push) {
     if (!views[name]) name = 'home';
+    var prev = history[history.length - 1];
+    // starting a brand-new loan request from home → reset the application/case id
+    if (name === 'products' && prev === 'home' && typeof resetApplication === 'function') resetApplication();
     Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
 
     var immersive = !!IMMERSIVE[name];
@@ -562,6 +565,11 @@
     return id;
   }
   window.SproutCaseId = getCaseId;
+  // begin a fresh application: drop the previous case id so a new one is generated
+  function resetApplication() {
+    caseSubmitted = false;
+    try { if (window.localStorage) localStorage.removeItem('sprout_case'); } catch (e) {}
+  }
 
   // create the application case in the back office when the customer submits
   var caseSubmitted = false;
