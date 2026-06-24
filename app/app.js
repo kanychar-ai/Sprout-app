@@ -536,6 +536,9 @@
   }
   function renderStatusOutcome() {
     if (!document.getElementById('statusCard')) return;
+    // show the real case number (matches what the officer sees)
+    var cid; try { cid = window.localStorage && localStorage.getItem('sprout_case'); } catch (e) {}
+    if (cid) { var st = document.getElementById('subtitle'); if (st) st.textContent = '#' + cid; }
     // 1) paint immediately from the local rule evaluation (instant, works offline)
     var res = evaluateApplication();
     if (res.ok) paintStatus('approved');
