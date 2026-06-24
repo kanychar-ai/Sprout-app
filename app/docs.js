@@ -125,13 +125,14 @@
       headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'x-upsert': 'true', 'Content-Type': file.type || 'application/octet-stream' },
       body: file
     }).then(function (r) {
-      if (!r.ok) return;
+      if (!r.ok) { toast('⚠️ Upload failed (' + r.status + ') — has documents_storage.sql been run?'); return; }
       fetch(cfg.caseDocsApi, {
         method: 'POST',
         headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
         body: JSON.stringify({ case_id: caseId, doc_key: key, label: labelFor(key), filename: file.name, path: path, status: 'review' })
-      }).catch(function () {});
-    }).catch(function () {});
+      }).then(function (r2) { if (!r2.ok) toast('⚠️ Saving file info failed (' + r2.status + ')'); })
+        .catch(function () { toast('⚠️ Network error saving file info'); });
+    }).catch(function () { toast('⚠️ Network error uploading file'); });
   }
 
   fileInput.addEventListener('change', function () {

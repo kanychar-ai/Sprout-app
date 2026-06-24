@@ -225,6 +225,15 @@ function renderScore() {
       factors.map((f) => '<div style="margin-top:12px"><div class="row between"><span class="tiny">' + f[0] + '</span><b class="tiny" style="color:var(--cobalt)">+' + f[1] + '</b></div><div class="score-bar"><i style="width:' + (f[1] / 30 * 100) + '%"></i></div></div>').join('') +
     '</div>';
 }
+// open an uploaded file — images inline (lightbox), PDFs/others in a new tab
+function viewFile(url, name) {
+  const isImg = /\.(png|jpe?g|gif|webp|bmp|heic)$/i.test(name || '') || /\.(png|jpe?g|gif|webp)(\?|$)/i.test(url || '');
+  if (!isImg) { window.open(url, '_blank', 'noopener'); return; }
+  const lb = document.createElement('div'); lb.className = 'id-lightbox';
+  lb.innerHTML = '<button class="lb-close" aria-label="Close">✕</button><img src="' + url + '" alt="' + esc(name || '') + '"><div class="lb-cap">' + esc(name || '') + ' — tap ✕ to close</div>';
+  lb.addEventListener('click', (e) => { if (e.target === lb || e.target.classList.contains('lb-close')) lb.remove(); });
+  document.body.appendChild(lb);
+}
 const DOC_STATUSES = [['verified', 'Verified ✓', 'ok'], ['review', 'Needs review', 'amber'], ['re_request', 'Re-request', 'red'], ['waiting', 'Waiting', 'ghost']];
 function statusMeta(s) { return DOC_STATUSES.find((x) => x[0] === s) || ['waiting', 'Waiting', 'ghost']; }
 async function renderDocs() {
@@ -253,13 +262,15 @@ async function renderDocs() {
       host.appendChild(row); return;
     }
     const m = statusMeta(up.status);
+    const fileUrl = pub + encodeURI(up.path || '');
     row.innerHTML =
       '<div class="row gap10 center"><span style="font-size:20px">📎</span>' +
       '<div class="t"><b>' + esc(req.label) + '</b><br><span>' + esc(up.filename || '') + '</span></div>' +
-      '<a class="btn ghost sm" target="_blank" rel="noopener" href="' + pub + encodeURI(up.path || '') + '">View</a></div>' +
+      '<button class="btn ghost sm doc-view">👁 View</button></div>' +
       '<div class="seg-status mt10" data-key="' + esc(up.doc_key) + '">' +
         DOC_STATUSES.slice(0, 3).map((s) => '<button data-s="' + s[0] + '"' + (up.status === s[0] ? ' class="on"' : '') + '>' + s[1].replace(' ✓', '') + '</button>').join('') +
       '</div>';
+    row.querySelector('.doc-view').addEventListener('click', () => viewFile(fileUrl, up.filename));
     row.querySelectorAll('.seg-status button').forEach((b) => b.addEventListener('click', async () => {
       const ns = b.dataset.s;
       row.querySelectorAll('.seg-status button').forEach((x) => x.classList.toggle('on', x === b));
