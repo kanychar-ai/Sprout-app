@@ -25,7 +25,12 @@ window.SPROUT_CONFIG = {
 
   // customer application case (created on submit, status read back on the result screen)
   casesApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/cases',
-  casesHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
+  casesHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' },
+
+  // customer document uploads → Supabase Storage (bucket: case-docs) + metadata table
+  storageUploadUrl: 'https://luhnjwfpiwnldcsulyex.supabase.co/storage/v1/object/case-docs/',
+  storagePublicUrl: 'https://luhnjwfpiwnldcsulyex.supabase.co/storage/v1/object/public/case-docs/',
+  caseDocsApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/case_documents'
 
   // ── ID-card verification (e-KYC) ──────────────────────────────────────────
   // Leave unset to use the built-in local format-check stub. To plug in a real

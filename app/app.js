@@ -550,13 +550,23 @@
     });
   }
 
+  // stable id for this application — shared by document uploads (docs step) and
+  // the case created at submit, so the officer's docs link to the right case
+  function getCaseId() {
+    var id = null;
+    try { id = window.localStorage && localStorage.getItem('sprout_case'); } catch (e) {}
+    if (!id) { id = 'SV' + String(Date.now()).slice(-6); try { localStorage.setItem('sprout_case', id); } catch (e) {} }
+    return id;
+  }
+  window.SproutCaseId = getCaseId;
+
   // create the application case in the back office when the customer submits
   var caseSubmitted = false;
   function submitCase() {
     var cfg = window.SPROUT_CONFIG || {};
     if (!cfg.casesApi || caseSubmitted) return;
     caseSubmitted = true;
-    var id = 'SV' + String(Date.now()).slice(-6);
+    var id = getCaseId();
     var amount = +((document.getElementById('amt') || {}).value || 150000);
     var term = +((document.getElementById('term') || {}).value || 36);
     var occ = (document.getElementById('occField') || {}).value || 'Engineer';

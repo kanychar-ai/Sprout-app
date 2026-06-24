@@ -225,28 +225,53 @@ function renderScore() {
       factors.map((f) => '<div style="margin-top:12px"><div class="row between"><span class="tiny">' + f[0] + '</span><b class="tiny" style="color:var(--cobalt)">+' + f[1] + '</b></div><div class="score-bar"><i style="width:' + (f[1] / 30 * 100) + '%"></i></div></div>').join('') +
     '</div>';
 }
-const DOC_STATUS = {};
-function renderDocs() {
-  const docs = [['National ID card', 'From e-KYC · 1.1 MB', 'verified'], ['Payslip — May', 'payslip_may.pdf · 240 KB', 'verified'],
-    ['Bank statement', 'statement_q2.pdf · 1.2 MB', 'review'], ['Book bank', 'passbook.jpg · 0.6 MB', 'review'], ['Proof of address', 'utility_bill.jpg · 820 KB', 'review']];
-  function badge(k) { const s = DOC_STATUS[k] || docs.find((d) => d[0] === k)[2]; return s === 'verified' ? '<span class="badge ok tiny">Verified ✓</span>' : '<span class="badge amber tiny">Needs review</span>'; }
-  $('docsView').innerHTML = '<div class="tiny muted">Tap a file to set status: Verified · Needs review · Re-request.</div>' +
-    '<div class="mt12" id="docRows"></div>' +
-    '<button class="btn ghost mt8" id="reqDoc">⬇ Request another document</button>';
-  const host = $('docRows');
-  docs.forEach((d) => {
-    const row = document.createElement('div'); row.className = 'doc-row';
-    row.innerHTML = '<span style="font-size:20px">📄</span><div class="t"><b>' + esc(d[0]) + '</b><br><span>' + esc(d[1]) + '</span></div><span id="db_' + d[0].replace(/\W/g, '') + '">' + badge(d[0]) + '</span>';
-    row.addEventListener('click', () => {
-      const cur = DOC_STATUS[d[0]] || d[2];
-      DOC_STATUS[d[0]] = cur === 'verified' ? 'review' : 'verified';
-      document.getElementById('db_' + d[0].replace(/\W/g, '')).innerHTML = badge(d[0]);
-      logEvent(current.id, 'status', 'Document "' + d[0] + '" set ' + DOC_STATUS[d[0]]);
+const DOC_STATUSES = [['verified', 'Verified ✓', 'ok'], ['review', 'Needs review', 'amber'], ['re_request', 'Re-request', 'red'], ['waiting', 'Waiting', 'ghost']];
+function statusMeta(s) { return DOC_STATUSES.find((x) => x[0] === s) || ['waiting', 'Waiting', 'ghost']; }
+async function renderDocs() {
+  const c = current;
+  $('docsView').innerHTML = '<div class="tiny muted">Tap a file to view it. Set each status: Verified · Needs review · Re-request.</div><div class="mt12" id="docRows">Loading…</div>';
+  // requirement catalogue + what the customer actually uploaded
+  let reqs = [], uploaded = [];
+  try { const r = await sb.from('doc_requirements').select('*').eq('active', true).order('sort'); reqs = r.data || []; } catch (e) {}
+  if (!reqs.length) reqs = [{ doc_key: 'payslip', label: 'Payslip', source: 'upload' }, { doc_key: 'statement', label: 'Bank statement', source: 'upload' }, { doc_key: 'passbook', label: 'Book bank', source: 'upload' }, { doc_key: 'address', label: 'Proof of address', source: 'upload' }];
+  reqs = reqs.map((r) => ({ key: r.key || r.doc_key, label: r.label, source: r.source }));
+  const { data: docs } = await sb.from('case_documents').select('*').eq('case_id', c.id);
+  uploaded = docs || [];
+  const byKey = {}; uploaded.forEach((d) => { byKey[d.doc_key] = d; });
+
+  const host = $('docRows'); host.innerHTML = '';
+  const pub = (window.SPROUT_CONFIG || {}).storagePublicUrl || '';
+  reqs.forEach((req) => {
+    const up = byKey[req.key];
+    const row = document.createElement('div'); row.className = 'doc-row'; row.style.display = 'block';
+    if (req.source === 'kyc') {
+      row.innerHTML = '<div class="row gap10 center"><span style="font-size:20px">🪪</span><div class="t"><b>' + esc(req.label) + '</b><br><span>From e-KYC</span></div><span class="badge ok tiny">Verified ✓</span></div>';
+      host.appendChild(row); return;
+    }
+    if (!up) {
+      row.innerHTML = '<div class="row gap10 center"><span style="font-size:20px">📄</span><div class="t"><b>' + esc(req.label) + '</b><br><span>Not uploaded yet</span></div><span class="badge ghost tiny">Waiting</span></div>';
+      host.appendChild(row); return;
+    }
+    const m = statusMeta(up.status);
+    row.innerHTML =
+      '<div class="row gap10 center"><span style="font-size:20px">📎</span>' +
+      '<div class="t"><b>' + esc(req.label) + '</b><br><span>' + esc(up.filename || '') + '</span></div>' +
+      '<a class="btn ghost sm" target="_blank" rel="noopener" href="' + pub + encodeURI(up.path || '') + '">View</a></div>' +
+      '<div class="seg-status mt10" data-key="' + esc(up.doc_key) + '">' +
+        DOC_STATUSES.slice(0, 3).map((s) => '<button data-s="' + s[0] + '"' + (up.status === s[0] ? ' class="on"' : '') + '>' + s[1].replace(' ✓', '') + '</button>').join('') +
+      '</div>';
+    row.querySelectorAll('.seg-status button').forEach((b) => b.addEventListener('click', async () => {
+      const ns = b.dataset.s;
+      row.querySelectorAll('.seg-status button').forEach((x) => x.classList.toggle('on', x === b));
+      await sb.from('case_documents').update({ status: ns }).eq('id', up.id);
+      await logEvent(c.id, 'status', 'Document "' + req.label + '" set ' + statusMeta(ns)[1].replace(' ✓', ''));
       toast('Saved · logged');
-    });
+    }));
     host.appendChild(row);
   });
-  $('reqDoc').addEventListener('click', () => { logEvent(current.id, 'requested_docs', 'Requested another document'); toast('Requested · customer notified'); });
+  const req = document.createElement('button'); req.className = 'btn ghost mt8'; req.textContent = '⬇ Request another document';
+  req.addEventListener('click', () => { logEvent(c.id, 'requested_docs', 'Requested another document'); toast('Requested · logged'); });
+  $('docsView').appendChild(req);
 }
 function renderCompliance() {
   const rows = [['Sanctions / watchlist', 'Clear ✓'], ['PEP screening', 'Not a PEP ✓'], ['FATCA / CRS', 'TH — not US ✓'], ['Adverse media', 'None ✓'], ['AML risk level', 'Low']];

@@ -112,11 +112,34 @@
     render();
   }
 
+  function labelFor(key) { for (var i = 0; i < DOCS.length; i++) { if (DOCS[i].key === key) return DOCS[i].name; } return key; }
+  // upload the file to Supabase Storage + record metadata so officers can view it
+  function uploadToCloud(key, file) {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.storageUploadUrl || !window.SproutCaseId) return;
+    var caseId = window.SproutCaseId();
+    var safe = (file.name || 'file').replace(/[^\w.\-]/g, '_');
+    var path = caseId + '/' + key + '_' + safe;
+    fetch(cfg.storageUploadUrl + encodeURI(path), {
+      method: 'POST',
+      headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'x-upsert': 'true', 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
+    }).then(function (r) {
+      if (!r.ok) return;
+      fetch(cfg.caseDocsApi, {
+        method: 'POST',
+        headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+        body: JSON.stringify({ case_id: caseId, doc_key: key, label: labelFor(key), filename: file.name, path: path, status: 'review' })
+      }).catch(function () {});
+    }).catch(function () {});
+  }
+
   fileInput.addEventListener('change', function () {
     var f = fileInput.files && fileInput.files[0];
     if (!f || !currentKey) return;
     var url = (window.URL && URL.createObjectURL) ? URL.createObjectURL(f) : null;
     addFile(currentKey, { name: f.name, size: f.size, type: f.type, url: url });
+    uploadToCloud(currentKey, f);
     toast('📎 ' + f.name + ' uploaded');
     fileInput.value = '';
   });
