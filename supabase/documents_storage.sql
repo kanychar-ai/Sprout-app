@@ -6,11 +6,23 @@ insert into storage.buckets (id, name, public)
 values ('case-docs', 'case-docs', true)
 on conflict (id) do update set public = true;
 
--- customer (anon) may upload files into the bucket
+-- Allow uploads into the case-docs bucket.
+-- NOTE: the Storage API executes the object write under the `authenticated`
+-- Postgres role context (not `anon`), so a policy scoped `to anon` rejects
+-- customer uploads with "new row violates row-level security policy" (HTTP 400).
+-- Scope these `to public` so the upload succeeds regardless of the role the
+-- Storage service uses. (The bucket is public, so reads are already open via the
+-- public URL; the select policy keeps API listing working too.)
 drop policy if exists "anon upload case docs" on storage.objects;
-create policy "anon upload case docs" on storage.objects
-  for insert to anon with check (bucket_id = 'case-docs');
--- (public bucket → files are readable via their public URL)
+drop policy if exists "case-docs insert" on storage.objects;
+drop policy if exists "case-docs update" on storage.objects;
+drop policy if exists "case-docs select" on storage.objects;
+create policy "case-docs insert" on storage.objects
+  for insert to public with check (bucket_id = 'case-docs');
+create policy "case-docs update" on storage.objects
+  for update to public using (bucket_id = 'case-docs') with check (bucket_id = 'case-docs');
+create policy "case-docs select" on storage.objects
+  for select to public using (bucket_id = 'case-docs');
 
 -- 2) document metadata (what was uploaded + officer's status) ----------------
 create table if not exists public.case_documents (

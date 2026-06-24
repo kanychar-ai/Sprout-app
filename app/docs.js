@@ -125,7 +125,7 @@
       headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'x-upsert': 'true', 'Content-Type': file.type || 'application/octet-stream' },
       body: file
     }).then(function (r) {
-      if (!r.ok) { toast('⚠️ Upload failed (' + r.status + ') — has documents_storage.sql been run?'); return; }
+      if (!r.ok) { toast('⚠️ Upload failed (' + r.status + ') — please try again'); return; }
       fetch(cfg.caseDocsApi, {
         method: 'POST',
         headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
