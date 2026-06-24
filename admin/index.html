@@ -72,7 +72,7 @@
     <!-- Staff roles panel -->
     <div class="bo-panel" data-panel="staff" hidden>
       <div class="bo-bar">
-        <div><b>Staff &amp; roles</b><div class="tiny muted">Assign reviewer / approver / admin by email. The login routes each person by their role; anyone not listed here is a customer.</div></div>
+        <div><b>Staff &amp; roles</b><div class="tiny muted">Assign each person as <b>officer</b> (review or approve normal cases) or <b>manager</b> (approve special cases). Anyone not listed here is a customer.</div></div>
         <div class="bo-top-actions"><button class="btn ghost sm" id="staffAdd">+ Add</button><button class="btn primary sm" id="staffSave">Save</button></div>
       </div>
       <div class="note-soft" style="margin-bottom:12px">ℹ️ The login account (email + password) must also exist in <b>Supabase → Authentication → Users</b>. This list only sets each person's role.</div>
@@ -135,6 +135,6 @@
 </div>
 
 <script src="../app/config.js?v=19"></script>
-<script type="module" src="admin.js?v=7"></script>
+<script type="module" src="admin.js?v=8"></script>
 </body>
 </html>

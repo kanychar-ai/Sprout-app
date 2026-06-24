@@ -62,7 +62,7 @@ async function boot() {
 async function loadMe(email) {
   const { data } = await sb.from('staff_roles').select('*').eq('email', email).maybeSingle();
   me = data ? { email, name: data.name || email, role: data.role, tier: data.tier || 1 }
-            : { email, name: email, role: 'reviewer', tier: 1 };
+            : { email, name: email, role: 'officer', tier: 1 };
   $('whoName').textContent = me.name;
   $('roleBadge').textContent = me.role + (me.tier > 1 ? ' · T' + me.tier : '');
   $('roleBadge').className = 'badge ' + (me.role === 'manager' ? 'amber' : (me.role === 'approver' || me.role === 'officer' ? 'lime' : 'info'));
