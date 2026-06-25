@@ -113,35 +113,50 @@
   }
 
   function labelFor(key) { for (var i = 0; i < DOCS.length; i++) { if (DOCS[i].key === key) return DOCS[i].name; } return key; }
-  // upload the file to Supabase Storage + record metadata so officers can view it
+  // upload the file to Supabase Storage + record metadata so officers can view it.
+  // Resolves only when BOTH steps succeed, so the caller can tell the truth in the UI.
   function uploadToCloud(key, file) {
     var cfg = window.SPROUT_CONFIG || {};
-    if (!cfg.storageUploadUrl || !window.SproutCaseId) return;
+    if (!cfg.storageUploadUrl || !window.SproutCaseId) {
+      return Promise.reject(new Error('Cloud upload is not configured'));
+    }
     var caseId = window.SproutCaseId();
     var safe = (file.name || 'file').replace(/[^\w.\-]/g, '_');
     var path = caseId + '/' + key + '_' + safe;
-    fetch(cfg.storageUploadUrl + encodeURI(path), {
+    // surface the server's actual error text (not just the status) so failures are diagnosable
+    function fail(prefix, r) {
+      return r.text().catch(function () { return ''; }).then(function (body) {
+        throw new Error(prefix + ' (' + r.status + ')' + (body ? ' — ' + body.slice(0, 200) : ''));
+      });
+    }
+    return fetch(cfg.storageUploadUrl + encodeURI(path), {
       method: 'POST',
       headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'x-upsert': 'true', 'Content-Type': file.type || 'application/octet-stream' },
       body: file
     }).then(function (r) {
-      if (!r.ok) { toast('⚠️ Upload failed (' + r.status + ') — please try again'); return; }
-      fetch(cfg.caseDocsApi, {
+      if (!r.ok) return fail('Upload failed', r);
+      return fetch(cfg.caseDocsApi, {
         method: 'POST',
         headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
         body: JSON.stringify({ case_id: caseId, doc_key: key, label: labelFor(key), filename: file.name, path: path, status: 'review' })
-      }).then(function (r2) { if (!r2.ok) toast('⚠️ Saving file info failed (' + r2.status + ')'); })
-        .catch(function () { toast('⚠️ Network error saving file info'); });
-    }).catch(function () { toast('⚠️ Network error uploading file'); });
+      }).then(function (r2) { if (!r2.ok) return fail('Saving file info failed', r2); });
+    });
   }
 
   fileInput.addEventListener('change', function () {
     var f = fileInput.files && fileInput.files[0];
     if (!f || !currentKey) return;
+    var key = currentKey;
     var url = (window.URL && URL.createObjectURL) ? URL.createObjectURL(f) : null;
-    addFile(currentKey, { name: f.name, size: f.size, type: f.type, url: url });
-    uploadToCloud(currentKey, f);
-    toast('📎 ' + f.name + ' uploaded');
+    addFile(key, { name: f.name, size: f.size, type: f.type, url: url });
+    toast('⬆ Uploading ' + f.name + '…');
+    uploadToCloud(key, f)
+      .then(function () { toast('✅ ' + f.name + ' uploaded'); })
+      .catch(function (err) {
+        // the upload did not reach the officer — drop the optimistic row so it isn't mistaken for done
+        delete files[key]; render();
+        toast('⚠️ ' + (err && err.message ? err.message : 'Upload failed') + ' — please try again');
+      });
     fileInput.value = '';
   });
 
