@@ -266,16 +266,21 @@ async function renderDocs() {
     row.innerHTML =
       '<div class="row gap10 center"><span style="font-size:20px">📎</span>' +
       '<div class="t"><b>' + esc(req.label) + '</b><br><span>' + esc(up.filename || '') + '</span></div>' +
-      '<button class="btn ghost sm doc-view">👁 View</button></div>' +
-      '<div class="seg-status mt10" data-key="' + esc(up.doc_key) + '">' +
-        DOC_STATUSES.slice(0, 3).map((s) => '<button data-s="' + s[0] + '"' + (up.status === s[0] ? ' class="on"' : '') + '>' + s[1].replace(' ✓', '') + '</button>').join('') +
+      '<span class="badge ' + m[2] + ' tiny doc-badge">' + m[1] + '</span></div>' +
+      '<div class="doc-actions mt10">' +
+        '<button class="btn ghost sm doc-view">👁 View</button>' +
+        '<div class="seg-status" data-key="' + esc(up.doc_key) + '">' +
+          DOC_STATUSES.slice(0, 3).map((s) => '<button data-s="' + s[0] + '"' + (up.status === s[0] ? ' class="on"' : '') + '>' + s[1].replace(' ✓', '') + '</button>').join('') +
+        '</div>' +
       '</div>';
     row.querySelector('.doc-view').addEventListener('click', () => viewFile(fileUrl, up.filename));
+    const badge = row.querySelector('.doc-badge');
     row.querySelectorAll('.seg-status button').forEach((b) => b.addEventListener('click', async () => {
-      const ns = b.dataset.s;
+      const ns = b.dataset.s, nm = statusMeta(ns);
       row.querySelectorAll('.seg-status button').forEach((x) => x.classList.toggle('on', x === b));
+      if (badge) { badge.className = 'badge ' + nm[2] + ' tiny doc-badge'; badge.textContent = nm[1]; }  // keep the badge in sync
       await sb.from('case_documents').update({ status: ns }).eq('id', up.id);
-      await logEvent(c.id, 'status', 'Document "' + req.label + '" set ' + statusMeta(ns)[1].replace(' ✓', ''));
+      await logEvent(c.id, 'status', 'Document "' + req.label + '" set ' + nm[1].replace(' ✓', ''));
       toast('Saved · logged');
     }));
     host.appendChild(row);
