@@ -42,3 +42,70 @@
 
 .evt { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
 .evt:last-child{ border-bottom:none; } .evt .when{ color:var(--ink-3); margin-left:auto; white-space:nowrap; }
+
+/* login card wrapper (plain column on mobile, real card on desktop) */
+.auth-card { width:100%; }
+
+/* =========================================================================
+   Desktop back-office console — overrides the shared phone-frame shell on
+   wide screens so the officer app fills the desktop and reads like a real
+   review console. Colours come from the same brand tokens as the customer
+   app. Mobile (<900px) keeps the app shell completely untouched.
+   ========================================================================= */
+@media (min-width: 900px) {
+  /* light desktop page instead of the customer app's dark device stage */
+  body { background:
+    radial-gradient(120% 70% at 50% -10%, var(--cobalt-50) 0%, var(--paper) 55%) fixed;
+    display:block; }
+
+  /* phone card -> full-height desktop canvas */
+  .app-shell {
+    width:100%; max-width:1280px; height:100dvh; margin:0 auto;
+    aspect-ratio:auto; border-radius:0;
+    background:transparent;
+    box-shadow:inset 1px 0 0 var(--line), inset -1px 0 0 var(--line);
+  }
+
+  /* sticky console header spanning the width */
+  .app-top { padding:16px 34px; gap:16px; background:rgba(255,255,255,.9); }
+  .app-top h2 { font-size:22px; }
+  .app-top .sub { font-size:12.5px; }
+  .app-top .badge { font-size:12px; padding:5px 11px; }
+
+  .view { padding:30px 34px 48px; }
+
+  /* queue + search results -> responsive card grid that uses the real estate */
+  #taskList, #searchResults {
+    display:grid; gap:14px; align-items:start;
+    grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));
+  }
+  #taskList .case-row, #searchResults .case-row { margin-bottom:0; height:100%; }
+
+  /* headings / tabs / notes stay at a comfortable reading width above the grid */
+  .view[data-view="tasks"] > .row,
+  .view[data-view="tasks"] > .seg,
+  .view[data-view="tasks"] > .note-soft,
+  .view[data-view="search"] > .input,
+  .view[data-view="search"] > .tiny { max-width:600px; }
+
+  /* single-record screens read best in a centered column */
+  #caseHub, #dataView, #scoreView, #docsView, #complianceView,
+  #chatView, #reviewView, #decideView, #disburseView { max-width:900px; margin:0 auto; }
+
+  /* login centered as a card */
+  .view[data-view="login"] { align-items:center; justify-content:center; }
+  .auth-card {
+    max-width:420px; background:var(--card); border:1px solid var(--line);
+    border-radius:20px; padding:30px 28px; box-shadow:var(--shadow-card);
+  }
+
+  /* bigger, denser, modern cards with hover affordance */
+  .case-row { padding:16px 18px; transition:box-shadow .15s, border-color .15s, transform .15s; }
+  .case-row:hover { border-color:var(--cobalt-100); box-shadow:var(--shadow-card); transform:translateY(-1px); }
+  .case-row b { font-size:15.5px; }
+  .hub-link { transition:border-color .15s, box-shadow .15s; }
+  .hub-link:hover { border-color:var(--cobalt-100); box-shadow:var(--shadow-card); }
+
+  /* let the file name breathe on a wide row before it truncates */
+  .doc-row .doc-actions .seg-status button { font-size:12.5px; }
+}

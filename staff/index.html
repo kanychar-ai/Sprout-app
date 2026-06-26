@@ -7,7 +7,7 @@
 <title>Sprout · Officer</title>
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="stylesheet" href="../app/app.css?v=24">
-<link rel="stylesheet" href="staff.css?v=3">
+<link rel="stylesheet" href="staff.css?v=4">
 </head>
 <body>
 <div class="app-shell" id="shell">
@@ -21,14 +21,16 @@
 
   <!-- Login -->
   <section class="view" data-view="login">
-    <h2 style="margin:6px 0 2px">Officer sign in</h2>
-    <p class="tiny muted">Use the reviewer or approver account created in Supabase → Authentication.</p>
-    <div class="label mt12">Email</div>
-    <div class="input"><span>👤</span><input class="bare" id="email" type="email" autocomplete="username" placeholder="officer@company.com"></div>
-    <div class="label mt12">Password</div>
-    <div class="input"><span>🔒</span><input class="bare" id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
-    <button class="btn primary mt16" id="loginBtn">Sign in</button>
-    <div class="note-soft mt12" id="loginMsg" hidden></div>
+    <div class="auth-card">
+      <h2 style="margin:6px 0 2px">Officer sign in</h2>
+      <p class="tiny muted">Use the reviewer or approver account created in Supabase → Authentication.</p>
+      <div class="label mt12">Email</div>
+      <div class="input"><span>👤</span><input class="bare" id="email" type="email" autocomplete="username" placeholder="officer@company.com"></div>
+      <div class="label mt12">Password</div>
+      <div class="input"><span>🔒</span><input class="bare" id="password" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+      <button class="btn primary mt16" id="loginBtn">Sign in</button>
+      <div class="note-soft mt12" id="loginMsg" hidden></div>
+    </div>
   </section>
 
   <!-- My tasks -->
