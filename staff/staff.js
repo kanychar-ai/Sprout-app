@@ -31,9 +31,18 @@ function show(name, push) {
   $('title').textContent = t[0]; $('subtitle').textContent = t[1];
   $('back').hidden = !!IMMERSIVE[name] || name === 'tasks';
   $('logout').hidden = !me; $('roleBadge').hidden = !me;
+  // desktop sidebar: visible once signed in; highlight the active section
+  $('sidebar').hidden = !me;
+  const navKey = name === 'search' ? 'search' : 'tasks';
+  $('navTasks').classList.toggle('active', navKey === 'tasks');
+  $('navSearch').classList.toggle('active', navKey === 'search');
   if (push !== false && history[history.length - 1] !== name) history.push(name);
   views[name].scrollTop = 0;
 }
+// sidebar navigation (desktop)
+$('navTasks').addEventListener('click', () => { show('tasks'); loadTasks(); });
+$('navSearch').addEventListener('click', () => show('search'));
+$('sideLogout').addEventListener('click', () => $('logout').click());
 document.body.addEventListener('click', (e) => {
   const t = e.target.closest('[data-go]'); if (t) show(t.dataset.go);
 });
@@ -64,6 +73,10 @@ async function loadMe(email) {
   $('whoName').textContent = me.name;
   $('roleBadge').textContent = me.role;
   $('roleBadge').className = 'badge ' + (me.role === 'manager' ? 'amber' : 'lime');
+  // desktop sidebar identity
+  $('sideName').textContent = me.name;
+  $('sideRole').textContent = me.role;
+  $('sideAv').textContent = initials(me.name);
 }
 $('loginBtn').addEventListener('click', async () => {
   const { error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('password').value });

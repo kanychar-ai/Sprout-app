@@ -7,10 +7,25 @@
 <title>Sprout · Officer</title>
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="stylesheet" href="../app/app.css?v=24">
-<link rel="stylesheet" href="staff.css?v=4">
+<link rel="stylesheet" href="staff.css?v=5">
 </head>
 <body>
 <div class="app-shell" id="shell">
+
+  <!-- Desktop sidebar (hidden on mobile and until signed in) -->
+  <aside class="sidebar" id="sidebar" hidden>
+    <div class="sb-brand"><span class="sb-logo">🌱</span><div><b>Sprout</b><span>Officer console</span></div></div>
+    <nav class="sb-nav">
+      <button class="sb-item" id="navTasks"><span class="i">🗂️</span>My tasks</button>
+      <button class="sb-item" id="navSearch"><span class="i">🔎</span>Search cases</button>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-user"><div class="sb-av" id="sideAv">—</div><div class="sb-who"><b id="sideName">—</b><span id="sideRole">—</span></div></div>
+      <button class="sb-logout" id="sideLogout">⎋ Sign out</button>
+    </div>
+  </aside>
+
+  <div class="main-col">
 
   <div class="app-top">
     <button class="back" id="back" aria-label="Back" hidden>‹</button>
@@ -67,9 +82,11 @@
   <section class="view" data-view="disburse" hidden><div id="disburseView"></div></section>
 
   <div class="toast" id="toast"></div>
+
+  </div><!-- /main-col -->
 </div>
 
 <script src="../app/config.js?v=29"></script>
-<script type="module" src="staff.js?v=8"></script>
+<script type="module" src="staff.js?v=9"></script>
 </body>
 </html>

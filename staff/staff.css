@@ -46,6 +46,11 @@
 /* login card wrapper (plain column on mobile, real card on desktop) */
 .auth-card { width:100%; }
 
+/* On mobile the sidebar is hidden and .main-col is transparent (display:contents),
+   so app-top + views behave exactly as before. Desktop overrides both below. */
+.sidebar { display:none; }
+.main-col { display:contents; }
+
 /* =========================================================================
    Desktop back-office console — overrides the shared phone-frame shell on
    wide screens so the officer app fills the desktop and reads like a real
@@ -58,16 +63,52 @@
     radial-gradient(120% 70% at 50% -10%, var(--cobalt-50) 0%, var(--paper) 55%) fixed;
     display:block; }
 
-  /* phone card -> full-height desktop canvas */
+  /* phone card -> floating desktop console window with a left sidebar */
   .app-shell {
-    width:100%; max-width:1280px; height:100dvh; margin:0 auto;
-    aspect-ratio:auto; border-radius:0;
-    background:transparent;
-    box-shadow:inset 1px 0 0 var(--line), inset -1px 0 0 var(--line);
+    width:100%; max-width:1320px; height:min(940px, calc(100dvh - 40px));
+    margin:20px auto; aspect-ratio:auto; border-radius:24px; overflow:hidden;
+    flex-direction:row; background:var(--card);
+    box-shadow:0 30px 80px rgba(15,27,51,.22);
   }
 
-  /* sticky console header spanning the width */
+  /* left navigation rail (brand navy) — :not([hidden]) so the hidden attr still wins */
+  .sidebar:not([hidden]) {
+    display:flex; flex-direction:column; flex:0 0 248px; width:248px;
+    background:var(--navy); color:#fff; padding:22px 16px;
+  }
+  .sb-brand { display:flex; align-items:center; gap:12px; padding:6px 8px 20px; }
+  .sb-logo { width:40px; height:40px; border-radius:12px; background:var(--lime); color:var(--navy);
+    display:flex; align-items:center; justify-content:center; font-size:21px; flex:0 0 auto; }
+  .sb-brand b { font-size:16px; display:block; line-height:1.1; }
+  .sb-brand span { font-size:11.5px; color:rgba(255,255,255,.55); }
+  .sb-nav { display:flex; flex-direction:column; gap:4px; margin-top:4px; }
+  .sb-item { display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    background:none; border:none; color:rgba(255,255,255,.72); font:inherit; font-size:14.5px; font-weight:600;
+    padding:11px 12px; border-radius:12px; cursor:pointer; transition:background .15s, color .15s; }
+  .sb-item .i { font-size:17px; }
+  .sb-item:hover { background:rgba(255,255,255,.08); color:#fff; }
+  .sb-item.active { background:var(--cobalt); color:#fff; box-shadow:0 6px 16px rgba(37,99,235,.35); }
+  .sb-foot { margin-top:auto; display:flex; flex-direction:column; gap:12px;
+    padding-top:16px; border-top:1px solid rgba(255,255,255,.1); }
+  .sb-user { display:flex; align-items:center; gap:11px; padding:0 4px; }
+  .sb-av { width:38px; height:38px; border-radius:11px; background:var(--cobalt); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex:0 0 auto; }
+  .sb-who b { font-size:13.5px; display:block; line-height:1.2; }
+  .sb-who span { font-size:11.5px; color:rgba(255,255,255,.55); text-transform:capitalize; }
+  .sb-logout { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+    color:rgba(255,255,255,.85); font:inherit; font-size:13px; font-weight:600;
+    padding:10px; border-radius:11px; cursor:pointer; transition:background .15s, color .15s; }
+  .sb-logout:hover { background:rgba(255,255,255,.13); color:#fff; }
+
+  /* main column holds the header + scrolling views */
+  .main-col { display:flex; flex-direction:column; flex:1 1 auto; min-width:0; height:100%;
+    background:radial-gradient(120% 60% at 50% -10%, var(--cobalt-50) 0%, var(--paper) 50%); }
+
+  /* sticky console header spanning the main column */
   .app-top { padding:16px 34px; gap:16px; background:rgba(255,255,255,.9); }
+  /* sidebar owns identity + sign-out on desktop, so drop the duplicates */
+  .app-top #roleBadge, .app-top #logout { display:none; }
+  .view[data-view="tasks"] > .row.between { display:none; }
   .app-top h2 { font-size:22px; }
   .app-top .sub { font-size:12.5px; }
   .app-top .badge { font-size:12px; padding:5px 11px; }
