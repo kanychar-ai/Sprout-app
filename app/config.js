@@ -34,7 +34,11 @@ window.SPROUT_CONFIG = {
 
   // mock credit-bureau lookup (National ID -> score) the screening step reads
   creditBureauApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/credit_bureau',
-  creditBureauHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
+  creditBureauHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' },
+
+  // customer profile captured at sign-up (shown on the home screen)
+  customersApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/customers',
+  customersHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
 
   // ── ID-card verification (e-KYC) ──────────────────────────────────────────
   // Leave unset to use the built-in local format-check stub. To plug in a real

@@ -77,7 +77,32 @@
 
     if (name === 'prescreen') { if (typeof submitCase === 'function') submitCase(); runPrescreen(); }
     if (name === 'status' && typeof renderStatusOutcome === 'function') renderStatusOutcome();
+    if (name === 'home' && typeof renderHome === 'function') renderHome();
     if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home'); }, 1400);
+  }
+
+  // ---- customer profile (captured at sign-up, shown on home) -----------------
+  function getProfile() {
+    try { return JSON.parse(localStorage.getItem('sprout_profile') || 'null'); } catch (e) { return null; }
+  }
+  function saveProfile(p) { try { localStorage.setItem('sprout_profile', JSON.stringify(p)); } catch (e) {} }
+  function initialsOf(name) {
+    return (name || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+  }
+  // home hero reflects the signed-up customer; credit is 0 until income is provided
+  function renderHome() {
+    var p = getProfile();
+    if (!p) return;   // no signed-up profile yet → keep the static demo defaults
+    var display = (p.full_name && p.full_name.trim()) || (p.email ? p.email.split('@')[0] : 'there');
+    var nameEl = document.querySelector('.hh-name'); if (nameEl) nameEl.textContent = display;
+    var avEl = document.querySelector('.hh-av'); if (avEl) avEl.textContent = initialsOf(display);
+    var income = (+p.income) || 0;
+    var avail = income > 0 ? Math.min(2000000, Math.round(income * 4 / 1000) * 1000) : 0;
+    var amtEl = document.querySelector('.hh-amount'); if (amtEl) amtEl.textContent = '฿' + avail.toLocaleString('en-US');
+    var subEl = document.querySelector('.hh-sub');
+    if (subEl) subEl.innerHTML = avail > 0
+      ? '<span class="pill">Pre-bureau</span> EIR from 15.99%'
+      : '<span class="pill">Add income</span> to unlock your limit';
   }
 
   // navigation wiring (data-go on any element)
@@ -710,8 +735,25 @@
     if (!cfg.supabaseUrl) { show('otp'); return; } // demo fallback
     var email = ((document.getElementById('suUser') || {}).value || '').trim();
     var pass = (document.getElementById('suPass') || {}).value || '';
+    var fullName = ((document.getElementById('suName') || {}).value || '').trim();
+    var mobile = ((document.getElementById('suMobile') || {}).value || '').trim();
     if (email.indexOf('@') === -1) { showToast('Please enter a valid email address'); return; }
     if (pass.length < 6) { showToast('Password must be at least 6 characters'); return; }
+    // remember the entered profile so the app can greet them by name (credit stays 0 until income)
+    var parts = fullName.split(/\s+/);
+    var profile = {
+      email: email, full_name: fullName,
+      first_name: parts[0] || '', last_name: parts.slice(1).join(' ') || '',
+      mobile: mobile, income: 0
+    };
+    saveProfile(profile);
+    if (cfg.customersApi) {
+      fetch(cfg.customersApi, {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, cfg.customersHeaders || {}),
+        body: JSON.stringify(profile)
+      }).catch(function () {});   // best-effort; the app already has the profile locally
+    }
     showToast('Creating your account…');
     fetch(cfg.supabaseUrl + '/auth/v1/signup', {
       method: 'POST', headers: { apikey: cfg.supabaseKey, 'Content-Type': 'application/json' },
