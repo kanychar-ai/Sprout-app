@@ -48,7 +48,7 @@
   var subtitle = document.getElementById('subtitle');
   var back = document.getElementById('back');
   var shell = document.getElementById('shell');
-  var history = ['home'];
+  var history = [];   // back stack of visited screens; last entry = current screen
 
   function baht(n) { return '฿' + Math.round(n).toLocaleString('en-US'); }
 
@@ -71,7 +71,16 @@
     }
     back.hidden = immersive;   // hero screens own their navigation; flow screens get a back arrow
 
-    if (push !== false) { if (history[history.length - 1] !== name) history.push(name); }
+    // back stack: forward navigation pushes a new entry; `push === false` replaces
+    // the current entry — used for the initial load, redirects off transient screens
+    // (role/prescreen), and re-rendering after a back-pop — so Back always returns to
+    // the real previous screen, never a loading/redirect screen.
+    if (push === false) {
+      if (history.length === 0) history.push(name);
+      else history[history.length - 1] = name;
+    } else if (history[history.length - 1] !== name) {
+      history.push(name);
+    }
     if (location.hash !== '#' + name) location.hash = name;
     views[name].scrollTop = 0;
 
@@ -83,7 +92,7 @@
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
     }
-    if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home'); }, 1400);
+    if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home', false); }, 1400);
   }
 
   // ---- customer profile (captured at sign-up, shown on home) -----------------
@@ -164,7 +173,10 @@
   });
   window.addEventListener('hashchange', function () {
     var n = location.hash.replace('#', '');
-    if (n && views[n] && views[n].hidden) show(n);
+    if (!n || !views[n] || !views[n].hidden) return;   // ignore hashes we set ourselves
+    // browser / hardware back landing on the previous screen → treat it as a back-pop
+    if (history.length > 1 && history[history.length - 2] === n) { history.pop(); show(n, false); }
+    else show(n);
   });
 
   // ---- consent / accept checkboxes ----
@@ -742,7 +754,7 @@
     var items = document.querySelectorAll('#psList .psitem');
     // safety net: prescreen is an immersive screen with no back arrow, so it must
     // always move on — route to status even if the animation can't run.
-    if (!ring) { setTimeout(function () { if (location.hash === '#prescreen') show('status'); }, 1200); return; }
+    if (!ring) { setTimeout(function () { if (location.hash === '#prescreen') show('status', false); }, 1200); return; }
     psRan = true;
     var p = 0, steps = items.length, done = 0;
     items.forEach(function (it) { it.querySelector('.dot').style.background = 'rgba(255,255,255,.2)'; it.querySelector('.psck').textContent = '…'; });
@@ -761,7 +773,7 @@
       }
       if (p >= 100) {
         clearInterval(iv);
-        setTimeout(function () { if (location.hash === '#prescreen') show('status'); }, 700);
+        setTimeout(function () { if (location.hash === '#prescreen') show('status', false); }, 700);
       }
     }, 90);
   }
