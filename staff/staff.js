@@ -230,7 +230,7 @@ function renderHub(c, events) {
 }
 
 // ---- detail screens (read) -------------------------------------------------
-function kv(k, v) { return '<div class="kv"><span>' + k + '</span><span class="v">' + esc(v) + '</span></div>'; }
+function kv(k, v) { return '<div class="kv"><span>' + k + '</span><span class="v">' + esc(v == null || v === '' ? '—' : v) + '</span></div>'; }
 function renderData() {
   const c = current;
   $('dataView').innerHTML =

@@ -168,10 +168,31 @@
       : '<span class="pill">Add income</span> to unlock your limit';
   }
 
+  // required fields per step — block "Continue" until the customer fills them,
+  // so the officer never receives a half-empty application.
+  var STEP_GUARDS = {
+    kyc: function () {
+      if (!currentNID()) return 'Please enter your National ID';
+      if (!val('dob')) return 'Please add your date of birth';
+      if (!val('gender')) return 'Please select your gender';
+      return null;
+    },
+    income: function () {
+      if (!val('occField')) return 'Please enter your occupation';
+      if (!val('employer')) return 'Please enter your employer';
+      return null;
+    }
+  };
   // navigation wiring (data-go on any element)
   document.body.addEventListener('click', function (e) {
     var t = e.target.closest('[data-go]');
-    if (t && !t.disabled) { show(t.dataset.go); }
+    if (!t || t.disabled) return;
+    var cur = history[history.length - 1];
+    if (STEP_GUARDS[cur] && t.dataset.go !== cur) {     // leaving a step forward → validate
+      var err = STEP_GUARDS[cur]();
+      if (err) { showToast('⚠️ ' + err); return; }
+    }
+    show(t.dataset.go);
   });
   back.addEventListener('click', function () {
     history.pop();
