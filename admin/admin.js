@@ -186,9 +186,9 @@ async function loadRules() {
 function refreshRulesUI() {
   const sel = $('ruleProductSel');
   if (sel) {
-    sel.innerHTML = ['<option value="">All products (default)</option>']
-      .concat(productNames.map((n) => '<option value="' + esc(n) + '">' + esc(n) + '</option>')).join('');
-    if (rulesProduct && productNames.indexOf(rulesProduct) === -1) rulesProduct = '';  // product removed
+    sel.innerHTML = productNames.map((n) => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+    // rules are set per product: default to the first product, keep selection if still valid
+    if (productNames.indexOf(rulesProduct) === -1) rulesProduct = productNames[0] || '';
     sel.value = rulesProduct;
   }
   renderRules();
@@ -202,12 +202,16 @@ function renderRules() {
     host.innerHTML = '<div class="muted tiny">No rules yet — run supabase/prescreen.sql to seed them.</div>';
     return;
   }
-  const hasOwn = rulesProduct && rulesCache.some((r) => r.product === rulesProduct);
   const hint = $('ruleProductHint');
-  if (hint) hint.textContent = !rulesProduct
-    ? 'Default set — used by any product without its own rules.'
-    : (hasOwn ? '✏️ Editing ' + rulesProduct + '’s own rules.'
-              : 'New — pre-filled from the default. Save to give ' + rulesProduct + ' its own rules.');
+  if (!productNames.length) {
+    host.innerHTML = '<div class="muted tiny">Add a product first, then set up its screening rules.</div>';
+    if (hint) hint.textContent = '';
+    return;
+  }
+  const hasOwn = rulesCache.some((r) => r.product === rulesProduct);
+  if (hint) hint.textContent = hasOwn
+    ? '✏️ Editing ' + rulesProduct + '’s rules.'
+    : 'New — pre-filled from a sensible default. Save to create ' + rulesProduct + '’s rules.';
 
   base.forEach((type) => {
     const meta = RULE_META[type.key] || { type: 'toggle' };
