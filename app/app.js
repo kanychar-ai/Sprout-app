@@ -106,6 +106,25 @@
       var p = getProfile(); if (p) { p.income = +e.target.value || 0; saveProfile(p); }
     }
   });
+  // on login, restore the customer's profile by email so the UI greets the right person
+  function loadCustomerProfile(email, token) {
+    var cfg = window.SPROUT_CONFIG || {};
+    // start from at least the email so the UI never falls back to the demo identity
+    var base = getProfile();
+    if (!base || base.email !== email) saveProfile({ email: email, income: 0 });
+    if (!cfg.customersApi) return Promise.resolve();
+    var headers = Object.assign({}, cfg.customersHeaders || {});
+    if (token) headers.Authorization = 'Bearer ' + token;   // authenticated → allowed to read the row
+    return fetch(cfg.customersApi + '?select=*&email=eq.' + encodeURIComponent(email), { headers: headers })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        if (rows && rows[0]) {
+          var c = rows[0];
+          saveProfile({ email: c.email, full_name: c.full_name, first_name: c.first_name,
+            last_name: c.last_name, mobile: c.mobile, income: +c.income || 0 });
+        }
+      }).catch(function () {});
+  }
   function initialsOf(name) {
     return (name || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
   }
@@ -781,7 +800,7 @@
           body: JSON.stringify({ email: email, password: pass })
         }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
           .then(function (res) {
-            if (res.ok && res.j.access_token) { show('role'); }
+            if (res.ok && res.j.access_token) { loadCustomerProfile(email, res.j.access_token).then(function () { show('role'); }); }
             else { showToast('⚠️ Invalid email or password'); }
           });
       })
