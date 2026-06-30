@@ -48,16 +48,18 @@
 
   <!-- 1.2 Create account -->
   <section class="view" data-view="create" hidden>
-    <div class="label">Full name</div>
-    <div class="input"><input class="bare" id="suName" autocomplete="name" placeholder="Your full name"></div>
+    <div class="row gap10">
+      <div style="flex:1"><div class="label">Name</div><div class="input"><input class="bare" id="suFirst" autocomplete="given-name" placeholder="First name"></div></div>
+      <div style="flex:1"><div class="label">Surname</div><div class="input"><input class="bare" id="suLast" autocomplete="family-name" placeholder="Surname"></div></div>
+    </div>
     <div class="label mt12">Email <span class="label-hint">· you'll log in with this</span></div>
     <div class="input"><span>📧</span><input class="bare" id="suUser" type="email" autocomplete="email" placeholder="you@email.com"></div>
     <div class="label mt12">Mobile number</div>
     <div class="input"><span>📱</span><input class="bare" id="suMobile" inputmode="tel" autocomplete="tel" placeholder="08X-XXX-XXXX"></div>
     <div class="label mt12">Create password</div>
     <div class="input"><span>🔒</span><input class="bare" id="suPass" type="password" autocomplete="new-password" placeholder="Create a password"><button class="eye" id="suEye" type="button" aria-label="Show password" data-eye="suPass">👁</button></div>
-    <div class="row gap6 mt8"><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar on"></i><i class="pwbar"></i></div>
-    <div class="help">Strong · 8+ chars, number &amp; symbol</div>
+    <div class="row gap6 mt8" id="pwBars"><i class="pwbar"></i><i class="pwbar"></i><i class="pwbar"></i><i class="pwbar"></i></div>
+    <div class="help" id="pwHelp">Use 8+ chars, a number &amp; a symbol</div>
     <div class="tile mt14 consent" data-toggle="consent">
       <div class="ck on"><span>✓</span></div>
       <div class="ctxt">I agree to the <b>Terms &amp; Privacy</b> and to an identity and credit check.</div>
@@ -536,7 +538,7 @@
 
 <script src="config.js?v=36"></script>
 <script src="id-verify.js?v=32"></script>
-<script src="app.js?v=38"></script>
+<script src="app.js?v=39"></script>
 <script src="kyc.js?v=32"></script>
 <script src="docs.js?v=34"></script>
 </body>

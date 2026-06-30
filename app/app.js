@@ -817,15 +817,16 @@
     if (!cfg.supabaseUrl) { show('otp'); return; } // demo fallback
     var email = ((document.getElementById('suUser') || {}).value || '').trim();
     var pass = (document.getElementById('suPass') || {}).value || '';
-    var fullName = ((document.getElementById('suName') || {}).value || '').trim();
+    var first = ((document.getElementById('suFirst') || {}).value || '').trim();
+    var last = ((document.getElementById('suLast') || {}).value || '').trim();
+    var fullName = (first + ' ' + last).trim();
     var mobile = ((document.getElementById('suMobile') || {}).value || '').trim();
     if (email.indexOf('@') === -1) { showToast('Please enter a valid email address'); return; }
     if (pass.length < 6) { showToast('Password must be at least 6 characters'); return; }
     // remember the entered profile so the app can greet them by name (credit stays 0 until income)
-    var parts = fullName.split(/\s+/);
     var profile = {
       email: email, full_name: fullName,
-      first_name: parts[0] || '', last_name: parts.slice(1).join(' ') || '',
+      first_name: first, last_name: last,
       mobile: mobile, income: 0
     };
     saveProfile(profile);
@@ -859,6 +860,18 @@
   }
   var suSubmit = document.getElementById('suSubmit');
   if (suSubmit) suSubmit.addEventListener('click', signupSubmit);
+  // live password-strength meter (was a fixed "Strong" before)
+  var suPassEl = document.getElementById('suPass');
+  if (suPassEl) suPassEl.addEventListener('input', function () {
+    var v = suPassEl.value || '', s = 0;
+    if (v.length >= 8) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; if (v.length >= 12) s++;
+    s = Math.min(4, s);
+    var bars = document.querySelectorAll('#pwBars .pwbar');
+    for (var i = 0; i < bars.length; i++) bars[i].classList.toggle('on', i < s);
+    var labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
+    var help = document.getElementById('pwHelp');
+    if (help) help.textContent = v ? (labels[s] + ' · 8+ chars, number & symbol') : 'Use 8+ chars, a number & a symbol';
+  });
   document.getElementById('applyBtn').addEventListener('click', function () {
     if (!this.disabled) showToast('✓ Application started — verifying your identity');
   });
