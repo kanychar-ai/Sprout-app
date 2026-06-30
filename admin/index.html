@@ -19,6 +19,7 @@
       <button class="sb-item bo-tab" data-tab="prescreen"><span class="i">🛡️</span>Pre-screen rules</button>
       <button class="sb-item bo-tab" data-tab="documents"><span class="i">📄</span>Documents</button>
       <button class="sb-item bo-tab" data-tab="staff"><span class="i">👤</span>Staff &amp; roles</button>
+      <button class="sb-item bo-tab" data-tab="bureau"><span class="i">📈</span>Credit bureau</button>
     </nav>
     <div class="sb-foot" id="topActions" hidden>
       <a class="sb-link" href="../staff/" target="_blank" rel="noopener">🖥️ Officer console ↗</a>
@@ -97,6 +98,16 @@
         <div class="bo-msg" id="staffMsg" hidden></div>
         <div id="staffList"></div>
       </div>
+
+      <!-- Credit bureau panel -->
+      <div class="bo-panel" data-panel="bureau" hidden>
+        <div class="bo-bar">
+          <div><b>Credit bureau</b><div class="tiny muted">Mock bureau lookup. Pre-screening matches the applicant's National ID here to read their credit score.</div></div>
+          <div class="bo-top-actions"><button class="btn ghost sm" id="bureauAdd">+ Add</button><button class="btn primary sm" id="bureauSave">Save</button></div>
+        </div>
+        <div class="bo-msg" id="bureauMsg" hidden></div>
+        <div id="bureauList"></div>
+      </div>
     </section>
 
   </div><!-- /main-col -->
@@ -154,7 +165,7 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="../app/config.js?v=34"></script>
-<script type="module" src="admin.js?v=13"></script>
+<script src="../app/config.js?v=35"></script>
+<script type="module" src="admin.js?v=14"></script>
 </body>
 </html>

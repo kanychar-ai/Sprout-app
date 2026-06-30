@@ -30,7 +30,11 @@ window.SPROUT_CONFIG = {
   // customer document uploads → Supabase Storage (bucket: case-docs) + metadata table
   storageUploadUrl: 'https://luhnjwfpiwnldcsulyex.supabase.co/storage/v1/object/case-docs/',
   storagePublicUrl: 'https://luhnjwfpiwnldcsulyex.supabase.co/storage/v1/object/public/case-docs/',
-  caseDocsApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/case_documents'
+  caseDocsApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/case_documents',
+
+  // mock credit-bureau lookup (National ID -> score) the screening step reads
+  creditBureauApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/credit_bureau',
+  creditBureauHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' }
 
   // ── ID-card verification (e-KYC) ──────────────────────────────────────────
   // Leave unset to use the built-in local format-check stub. To plug in a real

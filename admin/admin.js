@@ -33,7 +33,7 @@ async function refresh() {
     const email = (data.session.user && data.session.user.email) || '';
     $('sideName').textContent = email;
     $('sideAv').textContent = (email[0] || '?').toUpperCase();
-    loadProducts(); loadRules(); loadDocReqs(); loadStaff();
+    loadProducts(); loadRules(); loadDocReqs(); loadStaff(); loadBureau();
   }
 }
 
@@ -430,5 +430,57 @@ async function saveStaff() {
 }
 $('staffAdd').addEventListener('click', () => { staffCache.push({ email: '', name: '', role: 'officer' }); renderStaff(); });
 $('staffSave').addEventListener('click', saveStaff);
+
+// ---- credit bureau ---------------------------------------------------------
+let bureauCache = [];
+let bureauDeleted = [];
+
+async function loadBureau() {
+  msg($('bureauMsg'), '', 'err');
+  const { data, error } = await sb.from('credit_bureau').select('*').order('name');
+  if (error) { msg($('bureauMsg'), 'Could not load: ' + error.message); $('bureauList').innerHTML = ''; return; }
+  bureauCache = data || []; bureauDeleted = [];
+  renderBureau();
+}
+function renderBureau() {
+  const host = $('bureauList'); host.innerHTML = '';
+  if (!bureauCache.length) { host.innerHTML = '<div class="muted tiny">No records yet — add a National ID and its score.</div>'; return; }
+  bureauCache.forEach((b, i) => {
+    const card = document.createElement('div'); card.className = 'srow'; card.dataset.i = i;
+    card.innerHTML =
+      '<div style="flex:1.4"><label class="label">National ID</label><input class="field b-nid" value="' + esc(b.national_id || '') + '" placeholder="1-2345-67890-12-3"></div>' +
+      '<div style="flex:1.2"><label class="label">Name</label><input class="field b-name" value="' + esc(b.name || '') + '"></div>' +
+      '<div style="flex:0 0 130px"><label class="label">Credit score</label><input class="field b-score" type="number" inputmode="numeric" placeholder="e.g. 650" value="' + (b.score ?? '') + '"></div>' +
+      '<div style="flex:0 0 auto"><button type="button" class="btn ghost sm danger b-del">Delete</button></div>';
+    card.querySelector('.b-del').addEventListener('click', () => {
+      if (b.national_id) bureauDeleted.push(b.national_id);
+      bureauCache.splice(i, 1); renderBureau();
+    });
+    host.appendChild(card);
+  });
+}
+async function saveBureau() {
+  const rows = [];
+  let bad = false;
+  document.querySelectorAll('#bureauList .srow').forEach((card) => {
+    const nid = card.querySelector('.b-nid').value.trim();
+    if (!nid) return;
+    const score = parseInt(card.querySelector('.b-score').value, 10);
+    if (isNaN(score)) bad = true;
+    rows.push({ national_id: nid, name: card.querySelector('.b-name').value.trim() || null, score: isNaN(score) ? 0 : score });
+  });
+  if (bad) { msg($('bureauMsg'), 'Each record needs a numeric score.'); return; }
+  $('bureauSave').disabled = true;
+  if (bureauDeleted.length) {
+    const { error: de } = await sb.from('credit_bureau').delete().in('national_id', bureauDeleted);
+    if (de) { $('bureauSave').disabled = false; msg($('bureauMsg'), 'Delete failed: ' + de.message); return; }
+  }
+  const { error } = await sb.from('credit_bureau').upsert(rows, { onConflict: 'national_id' });
+  $('bureauSave').disabled = false;
+  if (error) { msg($('bureauMsg'), 'Save failed: ' + error.message); return; }
+  toast('Credit bureau saved'); loadBureau();
+}
+$('bureauAdd').addEventListener('click', () => { bureauCache.push({ national_id: '', name: '', score: 0 }); renderBureau(); });
+$('bureauSave').addEventListener('click', saveBureau);
 
 refresh();

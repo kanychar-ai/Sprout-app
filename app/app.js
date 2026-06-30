@@ -411,6 +411,20 @@
     dsr: "Making sure it's affordable", nationality: 'Confirming residency'
   };
   var prescreenRules = [];   // enabled rules (with config) loaded from the back office
+
+  // ---- credit bureau: look up this applicant's score by National ID ----------
+  var APPLICANT_NID = '1-1037-xxxxx-12-3';   // demo applicant's National ID (matches the submitted case)
+  var bureauScore = null;                    // looked up live; falls back to a default until loaded
+  function loadCreditScore() {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.creditBureauApi) return;
+    fetch(cfg.creditBureauApi + '?select=score&national_id=eq.' + encodeURIComponent(APPLICANT_NID),
+      { headers: cfg.creditBureauHeaders || {} })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { if (rows && rows.length) bureauScore = rows[0].score; })
+      .catch(function () {});
+  }
+  loadCreditScore();
   // pick the rule set for the chosen product: the product's own rules if it has
   // any, otherwise the shared default set (product ''); then only the enabled ones.
   function rulesForCurrentProduct() {
@@ -462,7 +476,7 @@
     var pay = (document.getElementById('payType') || {}).value || 'Payroll';
     return {
       age: 32, gender: 'male', occupation: occ, paytype: pay, docsComplete: true,
-      compliance: complianceAnswers(), credit_score: 720, income: 45000, dsr: 19, thai: true
+      compliance: complianceAnswers(), credit_score: (bureauScore != null ? bureauScore : 720), income: 45000, dsr: 19, thai: true
     };
   }
   function hasList(c) { return c && Array.isArray(c.allowed) && c.allowed.length; }
@@ -597,7 +611,7 @@
       id: id, customer_name: 'Somchai Jaidee', product: prod, amount: amount, term: term,
       monthly: Math.round(amount / Math.max(1, term)), purpose: 'Personal',
       occupation: occ, employer: 'SCG Co., Ltd.', income: 45000, existing_debt: 8500,
-      phone: '081-234-5678', national_id: '1-1037-xxxxx-12-3',
+      phone: '081-234-5678', national_id: APPLICANT_NID,
       score: 72, dsr: 28, ncb: 'clear', status: 'to_review'
     };
     var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
