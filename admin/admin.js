@@ -26,8 +26,14 @@ async function refresh() {
   const signedIn = !!(data && data.session);
   $('loginView').hidden = signedIn;
   $('managerView').hidden = !signedIn;
+  $('sidebar').hidden = !signedIn;
   $('topActions').hidden = !signedIn;
-  if (signedIn) { loadProducts(); loadRules(); loadDocReqs(); loadStaff(); }
+  if (signedIn) {
+    const email = (data.session.user && data.session.user.email) || '';
+    $('sideName').textContent = email;
+    $('sideAv').textContent = (email[0] || '?').toUpperCase();
+    loadProducts(); loadRules(); loadDocReqs(); loadStaff();
+  }
 }
 
 $('loginBtn').addEventListener('click', async () => {

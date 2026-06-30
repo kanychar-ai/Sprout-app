@@ -6,80 +6,95 @@
 <meta name="robots" content="noindex">
 <title>Sprout · Back office</title>
 <link rel="stylesheet" href="../assets/styles.css">
-<link rel="stylesheet" href="admin.css?v=3">
+<link rel="stylesheet" href="admin.css?v=4">
 </head>
 <body>
-<div class="bo">
-  <header class="bo-top">
-    <div class="bo-brand">🌱 Sprout <span>Back office</span></div>
-    <div class="bo-top-actions" id="topActions" hidden>
-      <a class="btn ghost sm" href="../app/" target="_blank" rel="noopener">Open app ↗</a>
-      <button class="btn ghost sm" id="logoutBtn">Log out</button>
+<div class="app-shell" id="shell">
+
+  <!-- Sidebar (hidden until signed in) -->
+  <aside class="sidebar" id="sidebar" hidden>
+    <div class="sb-brand"><span class="sb-logo">🌱</span><div><b>Sprout</b><span>Back office</span></div></div>
+    <nav class="sb-nav">
+      <button class="sb-item bo-tab on" data-tab="products"><span class="i">🏷️</span>Loan products</button>
+      <button class="sb-item bo-tab" data-tab="prescreen"><span class="i">🛡️</span>Pre-screen rules</button>
+      <button class="sb-item bo-tab" data-tab="documents"><span class="i">📄</span>Documents</button>
+      <button class="sb-item bo-tab" data-tab="staff"><span class="i">👤</span>Staff &amp; roles</button>
+    </nav>
+    <div class="sb-foot" id="topActions" hidden>
+      <a class="sb-link" href="../staff/" target="_blank" rel="noopener">🖥️ Officer console ↗</a>
+      <a class="sb-link" href="../app/" target="_blank" rel="noopener">📱 Customer app ↗</a>
+      <div class="sb-user"><div class="sb-av" id="sideAv">—</div><div class="sb-who"><b id="sideName">—</b><span id="sideRole">Signed in</span></div></div>
+      <button class="sb-logout" id="logoutBtn">⎋ Sign out</button>
     </div>
-  </header>
+  </aside>
 
-  <!-- Login -->
-  <section class="bo-card login" id="loginView">
-    <h2>Staff sign in</h2>
-    <p class="muted tiny">Sign in with the email &amp; password created for you in Supabase → Authentication.</p>
-    <label class="label">Email</label>
-    <input class="field" id="email" type="email" autocomplete="username" placeholder="you@company.com">
-    <label class="label mt12">Password</label>
-    <input class="field" id="password" type="password" autocomplete="current-password" placeholder="••••••••">
-    <button class="btn primary mt16" id="loginBtn">Sign in</button>
-    <div class="bo-msg" id="loginMsg" hidden></div>
-  </section>
+  <div class="main-col">
 
-  <!-- Manager (tabs) -->
-  <section id="managerView" hidden>
-    <div class="bo-tabs">
-      <button class="bo-tab on" data-tab="products">Loan products</button>
-      <button class="bo-tab" data-tab="prescreen">Pre-screening rules</button>
-      <button class="bo-tab" data-tab="documents">Documents</button>
-      <button class="bo-tab" data-tab="staff">Staff</button>
+    <div class="app-top">
+      <span class="at-logo">🌱</span>
+      <div style="flex:1"><h2 id="title">Back office</h2><div class="sub">Configure the lending platform</div></div>
     </div>
 
-    <!-- Products panel -->
-    <div class="bo-panel" data-panel="products">
-      <div class="bo-bar">
-        <div><b>Loan products</b><div class="tiny muted" id="countLabel">—</div></div>
-        <button class="btn primary sm" id="addBtn">+ Add product</button>
+    <!-- Login -->
+    <section class="view login-view" id="loginView">
+      <div class="auth-card">
+        <h2 style="margin:6px 0 2px">Staff sign in</h2>
+        <p class="muted tiny">Sign in with the email &amp; password created for you in Supabase → Authentication.</p>
+        <label class="label mt12">Email</label>
+        <input class="field" id="email" type="email" autocomplete="username" placeholder="you@company.com">
+        <label class="label mt12">Password</label>
+        <input class="field" id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+        <button class="btn primary mt16" id="loginBtn">Sign in</button>
+        <div class="bo-msg" id="loginMsg" hidden></div>
       </div>
-      <div class="bo-msg" id="listMsg" hidden></div>
-      <div id="list"></div>
-    </div>
+    </section>
 
-    <!-- Pre-screening rules panel -->
-    <div class="bo-panel" data-panel="prescreen" hidden>
-      <div class="bo-bar">
-        <div><b>Pre-screening rules</b><div class="tiny muted">Turn checks on/off and set their criteria. The customer's screening step uses the enabled rules.</div></div>
-        <button class="btn primary sm" id="rulesSave">Save rules</button>
-      </div>
-      <div class="bo-msg" id="rulesMsg" hidden></div>
-      <div id="rulesList"></div>
-    </div>
+    <!-- Manager (tabs) -->
+    <section class="view" id="managerView" hidden>
 
-    <!-- Document requirements panel -->
-    <div class="bo-panel" data-panel="documents" hidden>
-      <div class="bo-bar">
-        <div><b>Document requirements</b><div class="tiny muted">Set which documents the customer uploads and whether each is required or optional.</div></div>
-        <div class="bo-top-actions"><button class="btn ghost sm" id="docAdd">+ Add</button><button class="btn primary sm" id="docsSave">Save</button></div>
+      <!-- Products panel -->
+      <div class="bo-panel" data-panel="products">
+        <div class="bo-bar">
+          <div><b>Loan products</b><div class="tiny muted" id="countLabel">—</div></div>
+          <button class="btn primary sm" id="addBtn">+ Add product</button>
+        </div>
+        <div class="bo-msg" id="listMsg" hidden></div>
+        <div id="list"></div>
       </div>
-      <div class="bo-msg" id="docsMsg" hidden></div>
-      <div id="docReqList"></div>
-    </div>
 
-    <!-- Staff roles panel -->
-    <div class="bo-panel" data-panel="staff" hidden>
-      <div class="bo-bar">
-        <div><b>Staff &amp; roles</b><div class="tiny muted">Assign each person as <b>officer</b> (review &amp; approve cases, or send one to a manager) or <b>manager</b> (decide cases an officer escalates). Anyone not listed here is a customer.</div></div>
-        <div class="bo-top-actions"><button class="btn ghost sm" id="staffAdd">+ Add</button><button class="btn primary sm" id="staffSave">Save</button></div>
+      <!-- Pre-screening rules panel -->
+      <div class="bo-panel" data-panel="prescreen" hidden>
+        <div class="bo-bar">
+          <div><b>Pre-screening rules</b><div class="tiny muted">Turn checks on/off and set their criteria. The customer's screening step uses the enabled rules.</div></div>
+          <button class="btn primary sm" id="rulesSave">Save rules</button>
+        </div>
+        <div class="bo-msg" id="rulesMsg" hidden></div>
+        <div id="rulesList"></div>
       </div>
-      <div class="note-soft" style="margin-bottom:12px">ℹ️ The login account (email + password) must also exist in <b>Supabase → Authentication → Users</b>. This list only sets each person's role.</div>
-      <div class="bo-msg" id="staffMsg" hidden></div>
-      <div id="staffList"></div>
-    </div>
-  </section>
+
+      <!-- Document requirements panel -->
+      <div class="bo-panel" data-panel="documents" hidden>
+        <div class="bo-bar">
+          <div><b>Document requirements</b><div class="tiny muted">Set which documents the customer uploads and whether each is required or optional.</div></div>
+          <div class="bo-top-actions"><button class="btn ghost sm" id="docAdd">+ Add</button><button class="btn primary sm" id="docsSave">Save</button></div>
+        </div>
+        <div class="bo-msg" id="docsMsg" hidden></div>
+        <div id="docReqList"></div>
+      </div>
+
+      <!-- Staff roles panel -->
+      <div class="bo-panel" data-panel="staff" hidden>
+        <div class="bo-bar">
+          <div><b>Staff &amp; roles</b><div class="tiny muted">Assign each person as <b>officer</b> (review &amp; approve cases, or send one to a manager) or <b>manager</b> (decide cases an officer escalates). Anyone not listed here is a customer.</div></div>
+          <div class="bo-top-actions"><button class="btn ghost sm" id="staffAdd">+ Add</button><button class="btn primary sm" id="staffSave">Save</button></div>
+        </div>
+        <div class="note-soft" style="margin-bottom:12px">ℹ️ The login account (email + password) must also exist in <b>Supabase → Authentication → Users</b>. This list only sets each person's role.</div>
+        <div class="bo-msg" id="staffMsg" hidden></div>
+        <div id="staffList"></div>
+      </div>
+    </section>
+
+  </div><!-- /main-col -->
 
   <!-- Edit / add form (overlay) -->
   <div class="bo-overlay" id="overlay" hidden>
@@ -134,7 +149,7 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="../app/config.js?v=19"></script>
-<script type="module" src="admin.js?v=9"></script>
+<script src="../app/config.js?v=29"></script>
+<script type="module" src="admin.js?v=10"></script>
 </body>
 </html>
