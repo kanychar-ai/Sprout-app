@@ -22,7 +22,6 @@
   <div class="app-top">
     <button class="back" id="back" aria-label="Back" hidden>‹</button>
     <div style="flex:1"><h2 id="title">Sprout</h2><div class="sub" id="subtitle">Transparent lending</div></div>
-    <button class="avatar" data-go="me" aria-label="Profile" style="background:var(--lime);color:var(--navy);width:34px;height:34px;border-radius:11px;border:none;cursor:pointer;font:inherit;font-weight:800">S</button>
   </div>
 
   <!-- ===================== AUTH / ENTRY ===================== -->
@@ -49,8 +48,8 @@
   <!-- 1.2 Create account -->
   <section class="view" data-view="create" hidden>
     <div class="row gap10">
-      <div style="flex:1"><div class="label">Name</div><div class="input"><input class="bare" id="suFirst" autocomplete="given-name" placeholder="First name"></div></div>
-      <div style="flex:1"><div class="label">Surname</div><div class="input"><input class="bare" id="suLast" autocomplete="family-name" placeholder="Surname"></div></div>
+      <div style="flex:1;min-width:0"><div class="label">Name</div><div class="input"><input class="bare" id="suFirst" autocomplete="given-name" placeholder="First name"></div></div>
+      <div style="flex:1;min-width:0"><div class="label">Surname</div><div class="input"><input class="bare" id="suLast" autocomplete="family-name" placeholder="Surname"></div></div>
     </div>
     <div class="label mt12">Email <span class="label-hint">· you'll log in with this</span></div>
     <div class="input"><span>📧</span><input class="bare" id="suUser" type="email" autocomplete="email" placeholder="you@email.com"></div>
