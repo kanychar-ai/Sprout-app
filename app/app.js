@@ -331,12 +331,6 @@
     if (history[history.length - 1] === 'banklist') history.pop();   // return to the bank step
     show('bank', false);
   });
-  // reveal the name-match card once an account number is entered
-  var acctEl = document.getElementById('acctNumber');
-  if (acctEl) acctEl.addEventListener('input', function () {
-    var m = document.getElementById('bankMatch');
-    if (m) m.hidden = acctEl.value.replace(/\D/g, '').length < 6;
-  });
 
   // ---- document add (mock) ----
   document.querySelectorAll('[data-add]').forEach(function (el) {
@@ -825,12 +819,16 @@
     var dsr = computeDsr(income, debt);
     // persist the entered income so the home limit and prescreen reflect it
     if (p.email) { p.income = income; saveProfile(p); persistCustomerIncome(p.email, income); }
+    // run the product's auto pre-screening rules and record why it passed/failed
+    var ev = (typeof evaluateApplication === 'function') ? evaluateApplication() : { ok: true, fails: [] };
+    var prescreenFails = ev.fails.map(function (r) { return r.label || (PS_LABELS[r.key] || r.key); });
     var body = {
       id: id, customer_name: name, product: prod, amount: amount, term: term,
       monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
       occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
       phone: p.mobile || '', national_id: nid || null,
-      score: computeScore(bureauScore, dsr), dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review'
+      score: computeScore(bureauScore, dsr), dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review',
+      prescreen_pass: ev.ok, prescreen_fails: prescreenFails
     };
     var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
     var extra = cfg.casesHeaders || {};

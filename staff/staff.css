@@ -50,6 +50,14 @@
 .bubble.me { background:var(--cobalt); color:#fff; margin-left:auto; border-bottom-right-radius:5px; }
 .bubble.them { background:#eef1f6; color:var(--ink); border-bottom-left-radius:5px; }
 
+/* auto pre-screen result banner in the case hub */
+.ps-banner { border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.45; }
+.ps-banner.ok { background:var(--ok-bg); color:var(--ok); }
+.ps-banner.fail { background:var(--soft-red-bg); color:var(--soft-red); }
+.ps-banner b { color:inherit; }
+.ps-banner .ps-reasons { margin:6px 0 0; padding-left:18px; }
+.ps-banner .ps-reasons li { margin:2px 0; font-weight:600; }
+
 .evt { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
 .evt:last-child{ border-bottom:none; } .evt .when{ color:var(--ink-3); margin-left:auto; white-space:nowrap; }
 

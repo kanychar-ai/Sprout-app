@@ -187,6 +187,21 @@ function actionFor(c) {
     return '<div class="note-soft mt14">✅ Disbursed to the customer.</div>';
   return '';
 }
+// auto pre-screening outcome banner for the officer (why the case passed/failed)
+function prescreenBanner(c) {
+  if (c.prescreen_pass === true) {
+    return '<div class="ps-banner ok mt8">✓ <b>Auto pre-screen: passed</b> — all enabled rules for ' + esc(c.product || 'this product') + ' were met.</div>';
+  }
+  if (c.prescreen_pass === false) {
+    const fails = Array.isArray(c.prescreen_fails) ? c.prescreen_fails : [];
+    const li = fails.length
+      ? '<ul class="ps-reasons">' + fails.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul>'
+      : '<div class="tiny" style="margin-top:4px">No specific rule was recorded.</div>';
+    return '<div class="ps-banner fail mt8">⚠️ <b>Auto pre-screen: did not pass</b> — ' + fails.length +
+      ' rule' + (fails.length === 1 ? '' : 's') + ' failed for ' + esc(c.product || 'this product') + ':' + li + '</div>';
+  }
+  return '';  // older case with no auto-screen recorded
+}
 function renderHub(c, events) {
   let recHtml = '';
   if (c.reviewer_email) recHtml += '<div class="kv"><span>Reviewer recommendation</span><span class="v">' + esc(c.recommendation || '—') + ' · ' + esc(c.reviewer_name || c.reviewer_email) + '</span></div>';
@@ -197,11 +212,13 @@ function renderHub(c, events) {
       '<div style="flex:1"><b style="font-size:16px">' + esc(c.customer_name) + '</b>' +
       '<div class="tiny muted">Age — · ' + esc(c.occupation || '') + ' · ' + baht(c.amount) + '</div></div>' + statusBadge(c.status) + '</div>' +
       '<div class="tiny mt8" style="color:var(--ink-2)">Score <b>' + (c.score ?? '—') + '</b> · DSR ' + (c.dsr ?? '—') + '% · NCB ' + esc(c.ncb || '—') + '</div>' +
+      prescreenBanner(c) +
       (recHtml ? '<div class="mt8">' + recHtml + '</div>' : '') + '</div>' +
     link('data', '📄', 'Application data', 'What the customer submitted') +
     link('score', '📈', 'Score breakdown', 'How the ' + (c.score ?? '—') + ' was calculated') +
     link('docs', '📁', 'Documents', '5 files · review') +
-    link('compliance', '🛡️', 'Compliance &amp; screening', 'Sanctions · PEP · FATCA · risk', '<span class="badge ok tiny">Low</span>') +
+    link('compliance', '🛡️', 'Compliance &amp; screening', 'Sanctions · PEP · FATCA · risk',
+      c.prescreen_pass === false ? '<span class="badge red tiny">Flagged</span>' : '<span class="badge ok tiny">Low</span>') +
     link('chat', '💬', 'Chat with customer', 'Ask for info or clarify') +
     actionFor(c) +
     '<div class="card flat mt14" style="padding:12px"><b class="tiny">Audit log</b>' +
