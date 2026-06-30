@@ -180,23 +180,7 @@
     </div>
 
     <div class="sec-h"><b>Recent activity</b><button class="link-btn" data-go="activity">See all</button></div>
-    <div class="card flat" style="padding:4px 15px">
-      <div class="act">
-        <span class="act-ic" style="background:var(--cobalt-50);color:var(--cobalt)"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></span>
-        <div class="t"><b>Identity verified</b><span>e-KYC · today 14:03</span></div>
-        <span class="badge ok" style="cursor:default">Done</span>
-      </div>
-      <div class="act">
-        <span class="act-ic" style="background:var(--ok-bg);color:var(--ok)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-        <div class="t"><b>Account created</b><span><span class="js-cust-handle">somchai.j</span> · just now</span></div>
-        <span class="badge ok" style="cursor:default">Done</span>
-      </div>
-      <div class="act">
-        <span class="act-ic" style="background:var(--amber-bg);color:var(--amber)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg></span>
-        <div class="t"><b>Income verification</b><span>Pending your action</span></div>
-        <span class="badge amber" style="cursor:default">Next</span>
-      </div>
-    </div>
+    <div class="card flat" style="padding:4px 15px" id="homeActivity"></div>
 
     <div class="note-soft mt16" style="margin-bottom:6px">💡 This is an early estimate. We'll confirm your real offer after a quick ID and income check.</div>
   </section>
@@ -537,7 +521,7 @@
 
 <script src="config.js?v=36"></script>
 <script src="id-verify.js?v=32"></script>
-<script src="app.js?v=40"></script>
+<script src="app.js?v=41"></script>
 <script src="kyc.js?v=32"></script>
 <script src="docs.js?v=34"></script>
 </body>

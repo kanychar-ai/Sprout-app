@@ -84,10 +84,11 @@
     if (location.hash !== '#' + name) location.hash = name;
     views[name].scrollTop = 0;
 
-    if (name === 'prescreen') { if (typeof submitCase === 'function') submitCase(); runPrescreen(); }
+    if (name === 'prescreen') { if (typeof submitCase === 'function') submitCase(); if (typeof markSubmitted === 'function') markSubmitted(); runPrescreen(); }
     if (name === 'status' && typeof renderStatusOutcome === 'function') renderStatusOutcome();
+    if (typeof markStep === 'function') markStep(name);   // record progress on step screens
     if (typeof fillIdentity === 'function') fillIdentity();
-    if (name === 'home' && typeof renderHome === 'function') renderHome();
+    if (name === 'home') { if (typeof renderHome === 'function') renderHome(); if (typeof renderHomeApp === 'function') renderHomeApp(); }
     if (name === 'income') {
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
@@ -450,40 +451,89 @@
   }
   loadProducts();
 
-  // ---- home application tracker (single source of truth) --------------------
-  // The 4-step verification wizard. WIZARD_DONE = how many are completed, so the
-  // home card, the "X steps left" badge and the "Continue" target all stay in
-  // sync with the per-screen "Step X of 4" labels and the activity feed.
+  // ---- home application tracker (real progress, resumable) ------------------
+  // The 4 verification steps. Progress is saved as the customer moves through
+  // them, so an unfinished application shows where they stopped and resumes there.
   var WIZARD = [
-    { view: 'kyc',    label: 'Verify identity' },
-    { view: 'income', label: 'Income' },
-    { view: 'bank',   label: 'Receiving account' },
-    { view: 'docs',   label: 'Upload documents' }
+    { view: 'kyc',    label: 'Verify identity',   done: 'Identity verified' },
+    { view: 'income', label: 'Income',            done: 'Income verified' },
+    { view: 'bank',   label: 'Receiving account', done: 'Bank account linked' },
+    { view: 'docs',   label: 'Upload documents',  done: 'Documents uploaded' }
   ];
-  var WIZARD_DONE = 1; // identity verified; customer is now on step 2 (income)
+  function wizardIndex(view) { for (var i = 0; i < WIZARD.length; i++) if (WIZARD[i].view === view) return i; return -1; }
+  function getProgress() { try { return JSON.parse(localStorage.getItem('sprout_progress') || 'null'); } catch (e) { return null; } }
+  function saveProgress(pr) { try { localStorage.setItem('sprout_progress', JSON.stringify(pr)); } catch (e) {} }
+  function resetProgress() { saveProgress({ started: false, submitted: false, step: 0, current: WIZARD[0].view }); }
+  // record that the customer reached this step (so an unfinished app can resume here)
+  function markStep(view) {
+    var idx = wizardIndex(view); if (idx === -1) return;
+    var pr = getProgress() || { started: false, submitted: false, step: 0, current: WIZARD[0].view };
+    if (pr.submitted) return;                 // already submitted — don't reopen
+    pr.started = true; pr.step = idx; pr.current = view; saveProgress(pr);
+  }
+  function markSubmitted() {
+    var pr = getProgress() || { step: WIZARD.length - 1, current: WIZARD[WIZARD.length - 1].view };
+    pr.started = true; pr.submitted = true; pr.step = WIZARD.length; saveProgress(pr);
+  }
 
   function renderProgress() {
-    var total = WIZARD.length;
-    var cur = Math.min(WIZARD_DONE, total - 1); // 0-based index of the current step
-    var dotsEl = document.getElementById('homeSteps');
-    if (dotsEl) {
-      var html = '';
-      for (var i = 0; i < total; i++) {
-        html += '<i class="' + (i < WIZARD_DONE ? 'done' : (i === cur ? 'on' : '')) + '"></i>';
-      }
-      dotsEl.innerHTML = html;
+    var pr = getProgress(), total = WIZARD.length;
+    var stepsEl = document.getElementById('homeSteps'), btn = document.getElementById('homeContinue');
+    function dots(fillTo, onIdx) {
+      if (!stepsEl) return;
+      var h = ''; for (var i = 0; i < total; i++) h += '<i class="' + (i < fillTo ? 'done' : (i === onIdx ? 'on' : '')) + '"></i>';
+      stepsEl.innerHTML = h;
     }
-    var left = total - WIZARD_DONE;
+    if (!pr || (!pr.started && !pr.submitted)) {                 // no application yet
+      dots(0, -1);
+      setText('homeStepsLeft', 'Not started');
+      var b0 = document.getElementById('homeStepsLeft'); if (b0) b0.className = 'badge ghost';
+      setText('homeStepMsg', 'You don’t have an application in progress. Start one to turn your indicative offer into a real one.');
+      if (btn) { btn.textContent = 'Start application'; btn.dataset.go = 'products'; }
+      return;
+    }
+    if (pr.submitted) {                                          // submitted, under review
+      dots(total, -1);
+      setText('homeStepsLeft', 'Submitted');
+      var b1 = document.getElementById('homeStepsLeft'); if (b1) b1.className = 'badge ok';
+      setText('homeStepMsg', 'Your application is in and being reviewed — we’ll let you know the outcome.');
+      if (btn) { btn.textContent = 'Track status'; btn.dataset.go = 'status'; }
+      return;
+    }
+    var idx = Math.min(pr.step || 0, total - 1), left = total - idx;   // in progress
+    dots(idx, idx);
     setText('homeStepsLeft', left + (left === 1 ? ' step left' : ' steps left'));
-    setText('homeStepMsg', 'Identity verified. Next: ' + WIZARD[cur].label.toLowerCase() +
-      ' (step ' + (cur + 1) + ' of ' + total + ') to turn your indicative offer into a real one.');
-    var btn = document.getElementById('homeContinue');
-    if (btn) {
-      btn.textContent = 'Continue · Step ' + (cur + 1) + ' of ' + total;
-      btn.dataset.go = WIZARD[cur].view;
-    }
+    var b2 = document.getElementById('homeStepsLeft'); if (b2) b2.className = 'badge amber';
+    setText('homeStepMsg', 'You stopped at step ' + (idx + 1) + ' of ' + total + ' · ' + WIZARD[idx].label + '. Pick up where you left off.');
+    if (btn) { btn.textContent = 'Resume · Step ' + (idx + 1) + ' of ' + total; btn.dataset.go = pr.current || WIZARD[idx].view; }
   }
-  renderProgress();
+
+  function renderActivity() {
+    var host = document.getElementById('homeActivity'); if (!host) return;
+    var pr = getProgress(), profile = getProfile(), total = WIZARD.length, acts = [];
+    var idx = pr ? Math.min(pr.step || 0, total - 1) : 0;
+    if (pr && pr.submitted) acts.push({ t: 'Application submitted', s: 'Under officer review', b: 'Review', tone: 'info', ic: '🔍' });
+    else if (pr && pr.started) acts.push({ t: WIZARD[idx].label, s: 'Pending your action', b: 'Next', tone: 'amber', ic: '⏳' });
+    var upto = pr ? (pr.submitted ? total : idx) : 0;
+    for (var i = upto - 1; i >= 0; i--) acts.push({ t: WIZARD[i].done, s: 'Completed', b: 'Done', tone: 'ok', ic: '✓' });
+    if (profile) {
+      var who = (profile.full_name && profile.full_name.trim()) || (profile.email ? profile.email.split('@')[0] : 'You');
+      acts.push({ t: 'Account created', s: who, b: 'Done', tone: 'ok', ic: '✓' });
+    }
+    if (!acts.length) {
+      host.innerHTML = '<div class="tiny muted" style="padding:14px 2px">No activity yet — start an application to see updates here.</div>';
+      return;
+    }
+    var bg = { ok: 'var(--ok-bg)', amber: 'var(--amber-bg)', info: 'var(--cobalt-50)' };
+    var fg = { ok: 'var(--ok)', amber: 'var(--amber)', info: 'var(--cobalt)' };
+    host.innerHTML = acts.map(function (a) {
+      return '<div class="act"><span class="act-ic" style="background:' + bg[a.tone] + ';color:' + fg[a.tone] + ';font-weight:800">' + a.ic + '</span>' +
+        '<div class="t"><b>' + esc(a.t) + '</b><span>' + esc(a.s) + '</span></div>' +
+        '<span class="badge ' + a.tone + '" style="cursor:default">' + a.b + '</span></div>';
+    }).join('');
+  }
+  function renderHomeApp() { renderProgress(); renderActivity(); }
+  renderHomeApp();
 
   // ---- pre-screening checklist driven by back-office rules -----------------
   // customer-friendly wording for each enabled rule; falls back to the static
@@ -706,6 +756,7 @@
   // begin a fresh application: drop the previous case id so a new one is generated
   function resetApplication() {
     caseSubmitted = false;
+    if (typeof resetProgress === 'function') resetProgress();   // fresh application → clear saved step
     try { if (window.localStorage) localStorage.removeItem('sprout_case'); } catch (e) {}
   }
 
