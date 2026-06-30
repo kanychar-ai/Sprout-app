@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Sprout · Back office</title>
 <link rel="stylesheet" href="../assets/styles.css">
-<link rel="stylesheet" href="admin.css?v=6">
+<link rel="stylesheet" href="admin.css?v=7">
 </head>
 <body>
 <div class="app-shell" id="shell">
@@ -103,7 +103,16 @@
       <div class="bo-panel" data-panel="bureau" hidden>
         <div class="bo-bar">
           <div><b>Credit bureau</b><div class="tiny muted">Mock bureau lookup. Pre-screening matches the applicant's National ID here to read their credit score.</div></div>
-          <div class="bo-top-actions"><button class="btn ghost sm" id="bureauAdd">+ Add</button><button class="btn primary sm" id="bureauSave">Save</button></div>
+          <div class="bo-top-actions">
+            <label class="bsort tiny muted">Sort by
+              <select class="field" id="bureauSort">
+                <option value="national_id">National ID</option>
+                <option value="first_name">First name</option>
+                <option value="last_name">Last name</option>
+              </select>
+            </label>
+            <button class="btn ghost sm" id="bureauAdd">+ Add</button><button class="btn primary sm" id="bureauSave">Save</button>
+          </div>
         </div>
         <div class="bo-msg" id="bureauMsg" hidden></div>
         <div id="bureauList"></div>
@@ -166,6 +175,6 @@
 </div>
 
 <script src="../app/config.js?v=35"></script>
-<script type="module" src="admin.js?v=14"></script>
+<script type="module" src="admin.js?v=15"></script>
 </body>
 </html>

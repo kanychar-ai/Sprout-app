@@ -169,6 +169,15 @@ select.field { cursor: pointer; }
 .srow .field { height: 42px; }
 .srow .role-pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
 
+/* ---- credit-bureau table: headers once, compact sortable rows ----------- */
+.bsort { display: inline-flex; align-items: center; gap: 8px; }
+.bsort .field { height: 36px; width: auto; font-weight: 600; padding: 0 10px; }
+.bhead, .brow { display: grid; grid-template-columns: 1.5fr 1fr 1fr 120px 76px; gap: 8px; align-items: center; }
+.bhead { padding: 2px 14px 6px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.brow { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; margin-bottom: 8px; }
+.brow .field { height: 42px; }
+.brow .b-del { height: 42px; }
+
 /* ---- iOS-style switch --------------------------------------------------- */
 .bo-switch { position: relative; width: 46px; height: 27px; flex: 0 0 auto; }
 .bo-switch input { opacity: 0; width: 0; height: 0; }

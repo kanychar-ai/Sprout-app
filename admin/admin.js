@@ -434,10 +434,11 @@ $('staffSave').addEventListener('click', saveStaff);
 // ---- credit bureau ---------------------------------------------------------
 let bureauCache = [];
 let bureauDeleted = [];
+let bureauSort = 'national_id';   // national_id | first_name | last_name
 
 async function loadBureau() {
   msg($('bureauMsg'), '', 'err');
-  const { data, error } = await sb.from('credit_bureau').select('*').order('name');
+  const { data, error } = await sb.from('credit_bureau').select('*');
   if (error) { msg($('bureauMsg'), 'Could not load: ' + error.message); $('bureauList').innerHTML = ''; return; }
   bureauCache = data || []; bureauDeleted = [];
   renderBureau();
@@ -445,29 +446,46 @@ async function loadBureau() {
 function renderBureau() {
   const host = $('bureauList'); host.innerHTML = '';
   if (!bureauCache.length) { host.innerHTML = '<div class="muted tiny">No records yet — add a National ID and its score.</div>'; return; }
-  bureauCache.forEach((b, i) => {
-    const card = document.createElement('div'); card.className = 'srow'; card.dataset.i = i;
-    card.innerHTML =
-      '<div style="flex:1.4"><label class="label">National ID</label><input class="field b-nid" value="' + esc(b.national_id || '') + '" placeholder="1-2345-67890-12-3"></div>' +
-      '<div style="flex:1.2"><label class="label">Name</label><input class="field b-name" value="' + esc(b.name || '') + '"></div>' +
-      '<div style="flex:0 0 130px"><label class="label">Credit score</label><input class="field b-score" type="number" inputmode="numeric" placeholder="e.g. 650" value="' + (b.score ?? '') + '"></div>' +
-      '<div style="flex:0 0 auto"><button type="button" class="btn ghost sm danger b-del">Delete</button></div>';
-    card.querySelector('.b-del').addEventListener('click', () => {
+  // sort a display copy by the chosen field; keep editing live against the cache objects
+  const view = bureauCache.slice().sort((a, b) =>
+    String(a[bureauSort] || '').localeCompare(String(b[bureauSort] || ''), undefined, { numeric: true, sensitivity: 'base' }));
+  // column headers once at the top
+  host.innerHTML =
+    '<div class="bhead"><span>National ID</span><span>First name</span><span>Last name</span><span>Credit score</span><span></span></div>';
+  view.forEach((b) => {
+    const row = document.createElement('div'); row.className = 'brow';
+    row.innerHTML =
+      '<input class="field b-nid" value="' + esc(b.national_id || '') + '" placeholder="1-2345-67890-12-3">' +
+      '<input class="field b-first" value="' + esc(b.first_name || '') + '" placeholder="First">' +
+      '<input class="field b-last" value="' + esc(b.last_name || '') + '" placeholder="Last">' +
+      '<input class="field b-score" type="number" inputmode="numeric" placeholder="e.g. 650" value="' + (b.score ?? '') + '">' +
+      '<button type="button" class="btn ghost sm danger b-del">Delete</button>';
+    // live-sync edits back to the cache object so re-sorting keeps changes
+    row.querySelector('.b-nid').addEventListener('input', (e) => { b.national_id = e.target.value; });
+    row.querySelector('.b-first').addEventListener('input', (e) => { b.first_name = e.target.value; });
+    row.querySelector('.b-last').addEventListener('input', (e) => { b.last_name = e.target.value; });
+    row.querySelector('.b-score').addEventListener('input', (e) => { b.score = e.target.value; });
+    row.querySelector('.b-del').addEventListener('click', () => {
       if (b.national_id) bureauDeleted.push(b.national_id);
-      bureauCache.splice(i, 1); renderBureau();
+      const idx = bureauCache.indexOf(b); if (idx > -1) bureauCache.splice(idx, 1);
+      renderBureau();
     });
-    host.appendChild(card);
+    host.appendChild(row);
   });
 }
 async function saveBureau() {
   const rows = [];
   let bad = false;
-  document.querySelectorAll('#bureauList .srow').forEach((card) => {
-    const nid = card.querySelector('.b-nid').value.trim();
+  bureauCache.forEach((b) => {
+    const nid = String(b.national_id || '').trim();
     if (!nid) return;
-    const score = parseInt(card.querySelector('.b-score').value, 10);
+    const score = parseInt(b.score, 10);
     if (isNaN(score)) bad = true;
-    rows.push({ national_id: nid, name: card.querySelector('.b-name').value.trim() || null, score: isNaN(score) ? 0 : score });
+    const first = String(b.first_name || '').trim(), last = String(b.last_name || '').trim();
+    rows.push({
+      national_id: nid, first_name: first || null, last_name: last || null,
+      name: (first + ' ' + last).trim() || null, score: isNaN(score) ? 0 : score
+    });
   });
   if (bad) { msg($('bureauMsg'), 'Each record needs a numeric score.'); return; }
   $('bureauSave').disabled = true;
@@ -480,7 +498,8 @@ async function saveBureau() {
   if (error) { msg($('bureauMsg'), 'Save failed: ' + error.message); return; }
   toast('Credit bureau saved'); loadBureau();
 }
-$('bureauAdd').addEventListener('click', () => { bureauCache.push({ national_id: '', name: '', score: 0 }); renderBureau(); });
+$('bureauAdd').addEventListener('click', () => { bureauCache.push({ national_id: '', first_name: '', last_name: '', score: '' }); renderBureau(); });
+$('bureauSort').addEventListener('change', (e) => { bureauSort = e.target.value; renderBureau(); });
 $('bureauSave').addEventListener('click', saveBureau);
 
 refresh();
