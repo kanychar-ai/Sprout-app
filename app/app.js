@@ -77,7 +77,12 @@
 
     if (name === 'prescreen') { if (typeof submitCase === 'function') submitCase(); runPrescreen(); }
     if (name === 'status' && typeof renderStatusOutcome === 'function') renderStatusOutcome();
+    if (typeof fillIdentity === 'function') fillIdentity();
     if (name === 'home' && typeof renderHome === 'function') renderHome();
+    if (name === 'income') {
+      var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
+      if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
+    }
     if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home'); }, 1400);
   }
 
@@ -86,8 +91,32 @@
     try { return JSON.parse(localStorage.getItem('sprout_profile') || 'null'); } catch (e) { return null; }
   }
   function saveProfile(p) { try { localStorage.setItem('sprout_profile', JSON.stringify(p)); } catch (e) {} }
+  function persistCustomerIncome(email, income) {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.customersApi || !email) return;
+    fetch(cfg.customersApi, {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, cfg.customersHeaders || {}),
+      body: JSON.stringify({ email: email, income: income })
+    }).catch(function () {});
+  }
+  // keep the saved profile's income in step with the calculator field so home updates
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'income') {
+      var p = getProfile(); if (p) { p.income = +e.target.value || 0; saveProfile(p); }
+    }
+  });
   function initialsOf(name) {
     return (name || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+  }
+  // replace any hard-coded demo identity in the markup with the signed-up customer's
+  function fillIdentity() {
+    var p = getProfile(); if (!p) return;
+    var name = (p.full_name && p.full_name.trim()) || (p.email ? p.email.split('@')[0] : '');
+    var handle = p.email ? p.email.split('@')[0] : name;
+    if (name) document.querySelectorAll('.js-cust-name').forEach(function (el) { el.textContent = name; });
+    if (p.email) document.querySelectorAll('.js-cust-email').forEach(function (el) { el.textContent = p.email; });
+    if (handle) document.querySelectorAll('.js-cust-handle').forEach(function (el) { el.textContent = handle; });
   }
   // home hero reflects the signed-up customer; credit is 0 until income is provided
   function renderHome() {
@@ -437,19 +466,41 @@
   };
   var prescreenRules = [];   // enabled rules (with config) loaded from the back office
 
-  // ---- credit bureau: look up this applicant's score by National ID ----------
-  var APPLICANT_NID = '1-1037-xxxxx-12-3';   // demo applicant's National ID (matches the submitted case)
-  var bureauScore = null;                    // looked up live; falls back to a default until loaded
+  // ---- applicant inputs + credit-bureau lookup (all from what the user enters) --
+  function val(id) { var el = document.getElementById(id); return el ? String(el.value || '').trim() : ''; }
+  function num(id) { return +val(id) || 0; }
+  function currentNID() { return val('nationalId'); }
+  function ageFromDob(dob) {
+    if (!dob) return 0;
+    var d = new Date(dob); if (isNaN(d.getTime())) return 0;
+    var now = new Date(), a = now.getFullYear() - d.getFullYear(), m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
+    return a < 0 ? 0 : a;
+  }
+  function computeDsr(income, debt) { return income > 0 ? Math.round(debt / income * 100) : 0; }
+  // internal 0–100 score derived from the bureau score (300–900) and affordability (DSR)
+  function computeScore(bureau, dsr) {
+    var bNorm = bureau ? Math.max(0, Math.min(100, (bureau - 300) / 6)) : 0;
+    var afford = Math.max(0, 100 - dsr);
+    return Math.round(Math.max(0, Math.min(100, bNorm * 0.7 + afford * 0.3)));
+  }
+  function ncbFromBureau(bureau) { return !bureau ? 'no-hit' : (bureau >= 600 ? 'clear' : 'review'); }
+
+  var bureauScore = null;     // looked up live by the entered National ID; null until found
+  var bureauScoreFor = null;  // which National ID the cached score belongs to
   function loadCreditScore() {
     var cfg = window.SPROUT_CONFIG || {};
-    if (!cfg.creditBureauApi) return;
-    fetch(cfg.creditBureauApi + '?select=score&national_id=eq.' + encodeURIComponent(APPLICANT_NID),
+    var nid = currentNID();
+    if (!cfg.creditBureauApi || !nid) { bureauScore = null; bureauScoreFor = null; return; }
+    if (nid === bureauScoreFor) return;
+    fetch(cfg.creditBureauApi + '?select=score&national_id=eq.' + encodeURIComponent(nid),
       { headers: cfg.creditBureauHeaders || {} })
       .then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (rows) { if (rows && rows.length) bureauScore = rows[0].score; })
+      .then(function (rows) { bureauScoreFor = nid; bureauScore = (rows && rows.length) ? rows[0].score : null; })
       .catch(function () {});
   }
-  loadCreditScore();
+  // refresh the bureau score whenever the National ID changes
+  document.addEventListener('input', function (e) { if (e.target && e.target.id === 'nationalId') loadCreditScore(); });
   // pick the rule set for the chosen product: the product's own rules if it has
   // any, otherwise the shared default set (product ''); then only the enabled ones.
   function rulesForCurrentProduct() {
@@ -497,11 +548,18 @@
     return out; // [US person, tax resident outside TH, PEP]
   }
   function buildProfile() {
-    var occ = (document.getElementById('occField') || {}).value || 'Engineer';
-    var pay = (document.getElementById('payType') || {}).value || 'Payroll';
+    var income = num('income'), debt = num('debt'), nid = currentNID();
     return {
-      age: 32, gender: 'male', occupation: occ, paytype: pay, docsComplete: true,
-      compliance: complianceAnswers(), credit_score: (bureauScore != null ? bureauScore : 720), income: 45000, dsr: 19, thai: true
+      age: ageFromDob(val('dob')),
+      gender: val('gender'),
+      occupation: val('occField'),
+      paytype: val('payType') || 'Payroll',
+      docsComplete: true,
+      compliance: complianceAnswers(),
+      credit_score: (bureauScore != null ? bureauScore : 0),   // 0 when the bureau has no record (no fake score)
+      income: income,
+      dsr: computeDsr(income, debt),
+      thai: !!nid                                              // treat as Thai resident once an ID is provided
     };
   }
   function hasList(c) { return c && Array.isArray(c.allowed) && c.allowed.length; }
@@ -627,17 +685,22 @@
     if (!cfg.casesApi || caseSubmitted) return;
     caseSubmitted = true;
     var id = getCaseId();
-    var amount = +((document.getElementById('amt') || {}).value || 150000);
-    var term = +((document.getElementById('term') || {}).value || 36);
-    var occ = (document.getElementById('occField') || {}).value || 'Engineer';
-    var pay = (document.getElementById('payType') || {}).value || 'Payroll';
+    var amount = num('amt'), term = num('term') || 1;
+    var income = num('income'), debt = num('debt'), nid = currentNID();
     var prod = (typeof selectedProduct !== 'undefined' && selectedProduct) ? selectedProduct.name : 'Personal Loan';
+    var p = getProfile() || {};
+    var name = (p.full_name && p.full_name.trim()) || (p.email ? p.email.split('@')[0] : 'Applicant');
+    // monthly payment: use the calculator's figure if present, else principal / term
+    var pmt = parseInt(((document.getElementById('pmt') || {}).textContent || '').replace(/[^\d]/g, ''), 10);
+    var dsr = computeDsr(income, debt);
+    // persist the entered income so the home limit and prescreen reflect it
+    if (p.email) { p.income = income; saveProfile(p); persistCustomerIncome(p.email, income); }
     var body = {
-      id: id, customer_name: 'Somchai Jaidee', product: prod, amount: amount, term: term,
-      monthly: Math.round(amount / Math.max(1, term)), purpose: 'Personal',
-      occupation: occ, employer: 'SCG Co., Ltd.', income: 45000, existing_debt: 8500,
-      phone: '081-234-5678', national_id: APPLICANT_NID,
-      score: 72, dsr: 28, ncb: 'clear', status: 'to_review'
+      id: id, customer_name: name, product: prod, amount: amount, term: term,
+      monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
+      occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
+      phone: p.mobile || '', national_id: nid || null,
+      score: computeScore(bureauScore, dsr), dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review'
     };
     var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
     var extra = cfg.casesHeaders || {};

@@ -117,7 +117,7 @@
         <p style="color:#aab8d6;font-size:14px;margin:0 0 26px">Detecting your role from this account</p>
         <div class="card role-card">
           <div class="row gap10"><div class="avatar" style="background:var(--cobalt)">S</div>
-            <div style="text-align:left"><div style="font-weight:700;color:#fff">somchai.j</div><div class="tiny" style="color:#aab8d6">knychr1991@gmail.com</div></div>
+            <div style="text-align:left"><div class="js-cust-name" style="font-weight:700;color:#fff">somchai.j</div><div class="js-cust-email tiny" style="color:#aab8d6">knychr1991@gmail.com</div></div>
             <span class="badge lime" style="margin-left:auto">CUSTOMER</span>
           </div>
           <div class="divider" style="background:rgba(255,255,255,.1)"></div>
@@ -136,7 +136,7 @@
       <div class="hh-top">
         <div class="hh-id">
           <div class="hh-av">S</div>
-          <div><div class="hh-hi">Good morning</div><div class="hh-name">Somchai Jaidee</div></div>
+          <div><div class="hh-hi">Good morning</div><div class="hh-name js-cust-name">Somchai Jaidee</div></div>
         </div>
         <button class="hh-bell" data-go="alerts" aria-label="Notifications">
           <svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
@@ -187,7 +187,7 @@
       </div>
       <div class="act">
         <span class="act-ic" style="background:var(--ok-bg);color:var(--ok)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-        <div class="t"><b>Account created</b><span>somchai.j · yesterday</span></div>
+        <div class="t"><b>Account created</b><span><span class="js-cust-handle">somchai.j</span> · just now</span></div>
         <span class="badge ok" style="cursor:default">Done</span>
       </div>
       <div class="act">
@@ -238,7 +238,7 @@
       </div>
       <div class="act">
         <span class="act-ic" style="background:var(--ok-bg);color:var(--ok)"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-        <div class="t"><b>Account created</b><span>somchai.j · yesterday</span></div>
+        <div class="t"><b>Account created</b><span><span class="js-cust-handle">somchai.j</span> · just now</span></div>
         <span class="badge ok" style="cursor:default">Done</span>
       </div>
       <div class="act">
@@ -272,6 +272,11 @@
         <div style="flex:1"><div class="label">Monthly income</div><input class="field" id="income" inputmode="numeric" value="45000"></div>
         <div style="flex:1"><div class="label">Existing debt</div><input class="field" id="debt" inputmode="numeric" value="8500"></div>
       </div>
+      <div class="label mt12">Loan purpose</div>
+      <select class="selectbox" id="purpose">
+        <option>Personal</option><option>Debt consolidation</option><option>Home improvement</option>
+        <option>Education</option><option>Medical</option><option>Business</option><option>Vehicle</option>
+      </select>
     </div>
 
     <div class="card mt12" style="background:var(--navy);color:#fff">
@@ -322,6 +327,15 @@
       <div class="idslot" id="slotFront" role="button" tabindex="0"><div class="idslot-th">🪪</div><div class="idslot-lbl">Front</div><span class="badge ghost tiny idslot-st">Required</span></div>
       <div class="idslot" id="slotBack" role="button" tabindex="0"><div class="idslot-th">🪪</div><div class="idslot-lbl">Back</div><span class="badge ghost tiny idslot-st">Required</span></div>
     </div>
+    <div class="card flat mt12">
+      <div class="label" style="margin:0 0 6px">National ID (13 digits)</div>
+      <div class="input"><span>🪪</span><input class="bare" id="nationalId" inputmode="numeric" placeholder="1-2345-67890-12-3"></div>
+      <div class="row gap10 mt12">
+        <div style="flex:1"><div class="label">Date of birth</div><input class="field" id="dob" type="date"></div>
+        <div style="flex:1"><div class="label">Gender</div>
+          <select class="selectbox" id="gender"><option value="">—</option><option value="male">Male</option><option value="female">Female</option></select></div>
+      </div>
+    </div>
     <div class="note-soft mt12">🔒 Your ID is encrypted and the photo is deleted right after we read it (PDPA).</div>
     <button class="btn primary dock" id="kycCapture">📷 Capture front</button>
     <div class="row dock" id="kycReview" hidden>
@@ -338,9 +352,9 @@
     <div class="input focus" id="occInput"><span>🔎</span><input class="bare" id="occField" autocomplete="off" placeholder="Search your occupation"></div>
     <div class="card flat" id="occList" style="margin-top:6px;padding:6px"></div>
     <div class="label mt12">Employer</div>
-    <div class="input"><span>🏢</span> SCG Co., Ltd.</div>
+    <div class="input"><span>🏢</span><input class="bare" id="employer" placeholder="Company / employer name"></div>
     <div class="row gap10 mt12">
-      <div style="flex:1"><div class="label">Monthly income</div><div class="input"><span>฿</span> 45,000</div></div>
+      <div style="flex:1"><div class="label">Monthly income</div><div class="input"><span>฿</span><span id="incomeEcho" style="margin-left:4px">—</span></div></div>
       <div style="flex:1"><div class="label">Pay type</div>
         <select class="selectbox" id="payType">
           <option value="Payroll">Payroll</option>
@@ -371,7 +385,7 @@
     <div class="input"><span>#</span> 123-4-56789-0</div>
     <div class="card mt12" style="border:1.5px solid var(--ok);background:var(--ok-bg);padding:13px">
       <div class="row gap8"><span>✓</span><b style="color:var(--ok)">Name matches</b></div>
-      <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>"Mr. Somchai Jaidee"</b> matches your verified ID name.</div>
+      <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>"<span class="js-cust-name">your name</span>"</b> matches your verified ID name.</div>
     </div>
     <div class="note-soft mt12">🔒 For your safety, money can only be sent to a bank account in your own name.</div>
     <button class="btn primary dock" data-go="docs">Continue</button>
@@ -485,7 +499,7 @@
     <div class="card" style="background:var(--navy);color:#fff">
       <div class="row gap12 center">
         <div class="avatar" style="background:var(--cobalt);width:52px;height:52px;border-radius:17px;font-size:20px">S</div>
-        <div><b style="font-size:17px">Somchai Jaidee</b><div class="tiny" style="color:#aab8d6">knychr1991@gmail.com · CUSTOMER</div></div>
+        <div><b class="js-cust-name" style="font-size:17px">Somchai Jaidee</b><div class="tiny" style="color:#aab8d6"><span class="js-cust-email">knychr1991@gmail.com</span> · CUSTOMER</div></div>
       </div>
     </div>
     <div class="card flat mt12" style="padding:6px 14px">
@@ -522,7 +536,7 @@
 
 <script src="config.js?v=36"></script>
 <script src="id-verify.js?v=32"></script>
-<script src="app.js?v=36"></script>
+<script src="app.js?v=37"></script>
 <script src="kyc.js?v=32"></script>
 <script src="docs.js?v=34"></script>
 </body>
