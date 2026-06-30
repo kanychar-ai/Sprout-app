@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Sprout · Back office</title>
 <link rel="stylesheet" href="../assets/styles.css">
-<link rel="stylesheet" href="admin.css?v=5">
+<link rel="stylesheet" href="admin.css?v=6">
 </head>
 <body>
 <div class="app-shell" id="shell">
@@ -65,8 +65,13 @@
       <!-- Pre-screening rules panel -->
       <div class="bo-panel" data-panel="prescreen" hidden>
         <div class="bo-bar sticky-bar">
-          <div><b>Pre-screening rules</b><div class="tiny muted">Turn a check on, pick which product it applies to, set its limits — then Save.</div></div>
+          <div><b>Pre-screening rules</b><div class="tiny muted">Pick a product, switch its checks on/off and set the limits — then Save.</div></div>
           <div class="bo-top-actions"><button class="btn ghost sm" id="rulesReset">↺ Reset</button><button class="btn primary sm" id="rulesSave">💾 Save rules</button></div>
+        </div>
+        <div class="prod-picker">
+          <span class="label" style="margin:0">Set up rules for</span>
+          <select class="field" id="ruleProductSel"></select>
+          <span class="tiny muted" id="ruleProductHint"></span>
         </div>
         <div class="bo-msg" id="rulesMsg" hidden></div>
         <div id="rulesList"></div>
@@ -149,7 +154,7 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="../app/config.js?v=33"></script>
-<script type="module" src="admin.js?v=11"></script>
+<script src="../app/config.js?v=34"></script>
+<script type="module" src="admin.js?v=12"></script>
 </body>
 </html>

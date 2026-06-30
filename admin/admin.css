@@ -131,11 +131,12 @@ select.field { cursor: pointer; }
 .sticky-bar { position: sticky; top: 0; z-index: 5; background: #fff;
   border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow-card); }
 
-/* "applies to product" selector — highlighted so it reads as the first choice */
-.rule-applies { display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
-  background: var(--cobalt-50); border: 1px solid var(--cobalt-100); border-radius: 11px; padding: 8px 12px; }
-.rule-applies .label { flex: 0 0 auto; color: var(--ink-2); }
-.rule-applies .field { flex: 1; height: 40px; max-width: 300px; }
+/* product picker — choose which product's rule set you're editing */
+.prod-picker { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 16px;
+  background: var(--cobalt-50); border: 1px solid var(--cobalt-100); border-radius: 14px; padding: 12px 14px; }
+.prod-picker .label { flex: 0 0 auto; color: var(--ink-2); font-size: 13.5px; }
+.prod-picker .field { flex: 0 1 280px; height: 44px; font-weight: 600; }
+.prod-picker .tiny { flex: 1 1 100%; }
 
 /* ---- pre-screening rule cards ------------------------------------------- */
 .rule { background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }

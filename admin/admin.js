@@ -54,7 +54,7 @@ async function loadProducts() {
   const { data, error } = await sb.from('products').select('*').order('sort', { ascending: true });
   if (error) { msg($('listMsg'), 'Could not load: ' + error.message); return; }
   productNames = (data || []).map((p) => p.name);
-  if (rulesCache.length) renderRules();   // refresh the rule dropdowns now product names are known
+  refreshRulesUI();   // refresh the product picker + rule cards now product names are known
   $('countLabel').textContent = (data.length || 0) + ' product' + (data.length === 1 ? '' : 's');
   const list = $('list');
   list.innerHTML = '';
@@ -167,7 +167,8 @@ const RULE_META = {
   nationality:  { type: 'toggle', note: 'Pass only Thai nationals / residents.' }
 };
 
-let rulesCache = [];
+let rulesCache = [];        // ALL rows: every product's set + the '' default set
+let rulesProduct = '';      // which product's set is being edited ('' = default)
 
 async function loadRules() {
   msg($('rulesMsg'), '', 'err');
@@ -178,22 +179,45 @@ async function loadRules() {
     return;
   }
   rulesCache = data || [];
+  refreshRulesUI();
+}
+
+// keep the product dropdown and the rule cards in sync
+function refreshRulesUI() {
+  const sel = $('ruleProductSel');
+  if (sel) {
+    sel.innerHTML = ['<option value="">All products (default)</option>']
+      .concat(productNames.map((n) => '<option value="' + esc(n) + '">' + esc(n) + '</option>')).join('');
+    if (rulesProduct && productNames.indexOf(rulesProduct) === -1) rulesProduct = '';  // product removed
+    sel.value = rulesProduct;
+  }
   renderRules();
 }
 
 function renderRules() {
   const host = $('rulesList');
   host.innerHTML = '';
-  if (!rulesCache.length) {
+  const base = rulesCache.filter((r) => r.product === '');   // canonical checks (keys, labels, order)
+  if (!base.length) {
     host.innerHTML = '<div class="muted tiny">No rules yet — run supabase/prescreen.sql to seed them.</div>';
     return;
   }
-  rulesCache.forEach((r) => {
-    const meta = RULE_META[r.key] || { type: 'toggle' };
-    const cfg = r.config || {};
+  const hasOwn = rulesProduct && rulesCache.some((r) => r.product === rulesProduct);
+  const hint = $('ruleProductHint');
+  if (hint) hint.textContent = !rulesProduct
+    ? 'Default set — used by any product without its own rules.'
+    : (hasOwn ? '✏️ Editing ' + rulesProduct + '’s own rules.'
+              : 'New — pre-filled from the default. Save to give ' + rulesProduct + ' its own rules.');
+
+  base.forEach((type) => {
+    const meta = RULE_META[type.key] || { type: 'toggle' };
+    // effective values: this product's own row if it has one, otherwise the default row
+    const own = rulesProduct ? rulesCache.find((r) => r.product === rulesProduct && r.key === type.key) : type;
+    const eff = own || type;
+    const cfg = eff.config || {};
     const card = document.createElement('div');
-    card.className = 'rule' + (r.enabled ? '' : ' off');
-    card.dataset.key = r.key;
+    card.className = 'rule' + (eff.enabled ? '' : ' off');
+    card.dataset.key = type.key;
 
     let editor = '';
     if (meta.type === 'range') {
@@ -213,34 +237,23 @@ function renderRules() {
       editor = '<div class="tiny muted">' + esc(meta.note || 'No extra settings.') + '</div>';
     }
 
-    // "applies to" dropdown: blank = all products, else a specific product name
-    const prodOpts = ['<option value=""' + (!r.product ? ' selected' : '') + '>All products</option>']
-      .concat(productNames.map((n) =>
-        '<option value="' + esc(n) + '"' + (r.product === n ? ' selected' : '') + '>' + esc(n) + '</option>'))
-      .join('');
-
     card.innerHTML =
       '<div class="rule-head">' +
-        '<label class="bo-switch"><input type="checkbox" class="rule-on"' + (r.enabled ? ' checked' : '') + '><span class="track"></span></label>' +
-        '<b>' + esc(r.label) + '</b><span class="tiny muted">' + esc(r.key) + '</span>' +
-      '</div><div class="rule-cfg">' +
-        '<div class="rule-applies"><span class="label" style="margin:0">Applies to</span>' +
-          '<select class="field rule-product">' + prodOpts + '</select></div>' +
-        editor +
-      '</div>';
+        '<label class="bo-switch"><input type="checkbox" class="rule-on"' + (eff.enabled ? ' checked' : '') + '><span class="track"></span></label>' +
+        '<b>' + esc(type.label) + '</b><span class="tiny muted">' + esc(type.key) + '</span>' +
+      '</div><div class="rule-cfg">' + editor + '</div>';
 
-    card.querySelector('.rule-on').addEventListener('change', (e) => {
-      card.classList.toggle('off', !e.target.checked);
-    });
+    card.querySelector('.rule-on').addEventListener('change', (e) => card.classList.toggle('off', !e.target.checked));
     host.appendChild(card);
   });
 }
 
 async function saveRules() {
+  const base = rulesCache.filter((r) => r.product === '');
   const rows = [];
   document.querySelectorAll('#rulesList .rule').forEach((card) => {
     const key = card.dataset.key;
-    const src = rulesCache.find((x) => x.key === key) || {};
+    const type = base.find((x) => x.key === key) || {};
     const meta = RULE_META[key] || { type: 'toggle' };
     const enabled = card.querySelector('.rule-on').checked;
     let config = {};
@@ -251,19 +264,19 @@ async function saveRules() {
     } else if (meta.type === 'multi') {
       config = { allowed: Array.from(card.querySelectorAll('[data-opt]:checked')).map((c) => c.dataset.opt) };
     }
-    const product = card.querySelector('.rule-product').value || null;
-    rows.push({ key: key, label: src.label, enabled: enabled, config: config, sort: src.sort, product: product });
+    rows.push({ product: rulesProduct, key: key, label: type.label, enabled: enabled, config: config, sort: type.sort });
   });
   $('rulesSave').disabled = true;
-  const { error } = await sb.from('prescreen_rules').upsert(rows, { onConflict: 'key' });
+  const { error } = await sb.from('prescreen_rules').upsert(rows, { onConflict: 'product,key' });
   $('rulesSave').disabled = false;
   if (error) { msg($('rulesMsg'), 'Save failed: ' + error.message); return; }
-  toast('Pre-screening rules saved'); loadRules();
+  toast(rulesProduct ? ('Saved rules for ' + rulesProduct) : 'Saved default rules'); loadRules();
 }
 function numOrNull(v) { return v === '' || v == null ? null : (parseInt(v, 10) || 0); }
 
 $('rulesSave').addEventListener('click', saveRules);
 $('rulesReset').addEventListener('click', () => { loadRules(); toast('Reverted to saved rules'); });
+$('ruleProductSel').addEventListener('change', (e) => { rulesProduct = e.target.value; renderRules(); });
 
 // ---- document requirements -------------------------------------------------
 let docsCache = [];
