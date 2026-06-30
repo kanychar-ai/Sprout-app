@@ -24,6 +24,7 @@
     kyc:      ['Verify identity', 'Step 1 of 4 · e-KYC'],
     income:   ['Income', 'Step 2 of 4'],
     bank:     ['Receiving account', 'Step 3 of 4'],
+    banklist: ['Select bank', 'Search by name'],
     docs:     ['Documents', 'Step 4 of 4 · Upload'],
     tax:      ['Tax & compliance', 'Regulatory declarations'],
     esign:    ['Loan agreement', 'Review & e-sign'],
@@ -92,6 +93,10 @@
     if (name === 'income') {
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
+    }
+    if (name === 'banklist' && typeof renderBankList === 'function') {
+      var bs = document.getElementById('bankSearch'); if (bs) bs.value = '';
+      renderBankList('');
     }
     if (name === 'role') setTimeout(function () { if (location.hash === '#role') show('home', false); }, 1400);
   }
@@ -280,15 +285,58 @@
     renderOcc(); // initial list (all occupations)
   }
 
-  // ---- bank picker (receiving account step) ----
-  var bankPick = document.getElementById('bankPick');
-  if (bankPick) {
-    bankPick.addEventListener('click', function (e) {
-      var b = e.target.closest('.bank'); if (!b) return;
-      bankPick.querySelectorAll('.bank').forEach(function (x) { x.classList.remove('on'); });
-      b.classList.add('on');
-    });
+  // ---- bank picker (receiving account step) — searchable list -----------------
+  var BANKS = [
+    { code: 'KBANK', name: 'Kasikornbank (KBank)', color: '#0a8a3f', letter: 'K' },
+    { code: 'SCB',   name: 'Siam Commercial Bank',  color: '#4e2a84', letter: 'S' },
+    { code: 'BBL',   name: 'Bangkok Bank',          color: '#1e2c6b', letter: 'B' },
+    { code: 'KTB',   name: 'Krungthai Bank',        color: '#1ba5e1', letter: 'T' },
+    { code: 'BAY',   name: 'Krungsri (BAY)',        color: '#7b6b00', letter: 'A' },
+    { code: 'TTB',   name: 'TMBThanachart (ttb)',   color: '#1279be', letter: 'tt' },
+    { code: 'GSB',   name: 'Government Savings Bank', color: '#ec008c', letter: 'G' },
+    { code: 'BAAC',  name: 'BAAC',                  color: '#2e8b57', letter: '฿' },
+    { code: 'CIMB',  name: 'CIMB Thai',             color: '#7a1f2b', letter: 'C' },
+    { code: 'UOB',   name: 'UOB Thailand',          color: '#005091', letter: 'U' },
+    { code: 'KKP',   name: 'Kiatnakin Phatra',      color: '#00a3a1', letter: 'KK' },
+    { code: 'LHB',   name: 'LH Bank',               color: '#6a2c2c', letter: 'L' }
+  ];
+  var selectedBank = null;
+  function renderBankList(q) {
+    var host = document.getElementById('bankListItems'); if (!host) return;
+    q = (q || '').toLowerCase().trim();
+    var rows = BANKS.filter(function (b) {
+      return !q || b.name.toLowerCase().indexOf(q) !== -1 || b.code.toLowerCase().indexOf(q) !== -1;
+    }).map(function (b) {
+      var on = selectedBank && selectedBank.code === b.code;
+      return '<button class="bankrow' + (on ? ' on' : '') + '" data-bank="' + b.code + '">' +
+        '<span class="bk" style="background:' + b.color + '">' + b.letter + '</span>' +
+        '<span class="nm">' + esc(b.name) + '</span>' + (on ? '<span class="ck">✓</span>' : '') + '</button>';
+    }).join('');
+    host.innerHTML = rows || '<div class="tiny muted" style="padding:10px 2px">No bank matches “' + esc(q) + '”.</div>';
   }
+  function selectBank(code) {
+    var b = null; for (var i = 0; i < BANKS.length; i++) if (BANKS[i].code === code) b = BANKS[i];
+    if (!b) return;
+    selectedBank = b;
+    var logo = document.getElementById('bankSelLogo'), nm = document.getElementById('bankSelName');
+    if (logo) { logo.textContent = b.letter; logo.style.background = b.color; logo.style.color = '#fff'; }
+    if (nm) { nm.textContent = b.name; nm.classList.remove('muted'); }
+  }
+  var bankSearch = document.getElementById('bankSearch');
+  if (bankSearch) bankSearch.addEventListener('input', function () { renderBankList(bankSearch.value); });
+  var bankListItems = document.getElementById('bankListItems');
+  if (bankListItems) bankListItems.addEventListener('click', function (e) {
+    var row = e.target.closest('.bankrow'); if (!row) return;
+    selectBank(row.dataset.bank);
+    if (history[history.length - 1] === 'banklist') history.pop();   // return to the bank step
+    show('bank', false);
+  });
+  // reveal the name-match card once an account number is entered
+  var acctEl = document.getElementById('acctNumber');
+  if (acctEl) acctEl.addEventListener('input', function () {
+    var m = document.getElementById('bankMatch');
+    if (m) m.hidden = acctEl.value.replace(/\D/g, '').length < 6;
+  });
 
   // ---- document add (mock) ----
   document.querySelectorAll('[data-add]').forEach(function (el) {

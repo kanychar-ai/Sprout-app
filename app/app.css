@@ -324,6 +324,28 @@ body {
 .bank .bk { width: 30px; height: 30px; border-radius: 8px; margin: 0 auto; color: #fff;
   display: flex; align-items: center; justify-content: center; font-weight: 800; }
 
+/* single bank selector row (opens the searchable list) */
+.bank-select { display: flex; align-items: center; gap: 12px; width: 100%; background: #fff;
+  border: 1.5px solid var(--line-2); border-radius: 14px; height: 56px; padding: 0 14px; cursor: pointer; font: inherit; }
+.bank-select .bk { width: 34px; height: 34px; border-radius: 9px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+.bank-select .bank-sel-name { flex: 1; text-align: left; font-size: 15px; font-weight: 600; color: var(--ink); }
+.bank-select .bank-sel-name.muted { color: var(--ink-3); font-weight: 500; }
+.bank-select .chev { color: var(--ink-3); font-size: 22px; line-height: 1; }
+
+/* searchable bank list rows */
+.bankrow { display: flex; align-items: center; gap: 12px; width: 100%; background: #fff;
+  border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; font: inherit; }
+.bankrow.on { border-color: var(--cobalt); box-shadow: 0 0 0 3px var(--cobalt-50); }
+.bankrow .bk { width: 34px; height: 34px; border-radius: 9px; color: #fff; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+.bankrow .nm { flex: 1; text-align: left; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.bankrow .ck { color: var(--cobalt); font-weight: 800; font-size: 16px; }
+
+/* amber warning note (receiving-account safety) */
+.note-warn { background: var(--amber-bg); color: #7a5512; border-radius: 14px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; }
+.note-warn b { color: #5e3f00; }
+
 /* scan line animation for e-KYC */
 /* live camera + captured-photo review inside the scan frame */
 #kycVideo, #kycShot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;

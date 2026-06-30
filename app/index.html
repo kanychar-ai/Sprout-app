@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
-<link rel="stylesheet" href="app.css?v=32">
+<link rel="stylesheet" href="app.css?v=33">
 </head>
 <body>
 
@@ -358,22 +358,28 @@
   <!-- 2.9 Receiving bank + name match -->
   <section class="view" data-view="bank" hidden>
     <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="done"></i><i class="on"></i><i></i></div><span class="step-count">Step 3 of 4</span></div>
-    <div class="label">Bank</div>
-    <div class="row gap8 bankpick" id="bankPick">
-      <button class="tile bank on" data-bank="SCB"><span class="bk" style="background:#4e2a84">S</span><div class="tiny mt6" style="font-weight:600">SCB</div></button>
-      <button class="tile bank" data-bank="KBank"><span class="bk" style="background:#0a5c2e">K</span><div class="tiny mt6">KBank</div></button>
-      <button class="tile bank" data-bank="KTB"><span class="bk" style="background:#1279be">T</span><div class="tiny mt6">KTB</div></button>
-      <button class="tile bank" data-bank="BBL"><span class="bk" style="background:#f7c600;color:#333">B</span><div class="tiny mt6">BBL</div></button>
-    </div>
-    <div class="tiny muted mt6">Logos from Bank Directory API · PromptPay-ready</div>
+    <div style="font-size:13px;color:var(--ink-2)">Where should we send your loan? The account must be in <b>your own name</b>.</div>
+    <div class="label mt12">Bank</div>
+    <button class="bank-select" id="bankSelect" data-go="banklist">
+      <span class="bk" id="bankSelLogo" style="background:#e2e5ec;color:#8a92a6">?</span>
+      <span class="bank-sel-name muted" id="bankSelName">Select your bank</span>
+      <span class="chev">›</span>
+    </button>
     <div class="label mt12">Account number</div>
-    <div class="input"><span>#</span> 123-4-56789-0</div>
-    <div class="card mt12" style="border:1.5px solid var(--ok);background:var(--ok-bg);padding:13px">
+    <div class="input"><span>#</span><input class="bare" id="acctNumber" inputmode="numeric" placeholder="123-4-56789-0"></div>
+    <div id="bankMatch" class="card mt12" style="border:1.5px solid var(--ok);background:var(--ok-bg);padding:13px" hidden>
       <div class="row gap8"><span>✓</span><b style="color:var(--ok)">Name matches</b></div>
       <div class="tiny" style="color:#1b6b3a;margin-top:4px">Account holder <b>"<span class="js-cust-name">your name</span>"</b> matches your verified ID name.</div>
     </div>
-    <div class="note-soft mt12">🔒 For your safety, money can only be sent to a bank account in your own name.</div>
+    <div class="note-warn mt12">⚠️ The account must be in <b>your own name</b> — we match it to your national ID. If the names don't match, we can't transfer the loan.</div>
     <button class="btn primary dock" data-go="docs">Continue</button>
+  </section>
+
+  <!-- 2.9b Bank picker (searchable) -->
+  <section class="view" data-view="banklist" hidden>
+    <div class="input focus"><span>🔎</span><input class="bare" id="bankSearch" placeholder="Search bank…"></div>
+    <div id="bankListItems" class="mt12"></div>
+    <div class="tiny muted mt12">📚 Bank names &amp; logos loaded from API</div>
   </section>
 
   <!-- 2.10 Documents -->
@@ -390,6 +396,7 @@
 
   <!-- 2.11 Tax & compliance -->
   <section class="view" data-view="tax" hidden>
+    <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i></div><span class="step-count">Almost done · declarations</span></div>
     <div class="card flat">
       <b class="tiny">FATCA / CRS</b>
       <div class="li" style="padding:11px 0"><div style="flex:1" class="tiny">Are you a US person for tax?</div>
@@ -408,6 +415,7 @@
 
   <!-- 2.12 e-signature -->
   <section class="view" data-view="esign" hidden>
+    <div class="step-head mb12"><div class="steps"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i></div><span class="step-count">Final step · sign</span></div>
     <div class="card" style="background:var(--navy);color:#fff">
       <div class="tiny" style="color:#aab8d6">Key terms · EIR disclosure</div>
       <div class="row between mt8"><span class="tiny" style="color:#cdd6ea">Principal</span><b id="esPrincipal">฿150,000</b></div>
@@ -521,7 +529,7 @@
 
 <script src="config.js?v=36"></script>
 <script src="id-verify.js?v=32"></script>
-<script src="app.js?v=41"></script>
+<script src="app.js?v=42"></script>
 <script src="kyc.js?v=32"></script>
 <script src="docs.js?v=34"></script>
 </body>
