@@ -15,6 +15,16 @@
 .hub-link .t span { font-size:12px; color:var(--ink-3); }
 .hub-link .chev { color:var(--ink-3); }
 
+/* application-data hero: who am I underwriting + what they ask, at a glance */
+.data-hero { display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:var(--navy); color:#fff; border-radius:16px; padding:14px 16px; }
+.data-hero .dh-id { display:flex; align-items:center; gap:12px; min-width:0; }
+.data-hero .dh-av { width:42px; height:42px; border-radius:12px; background:var(--lime); color:var(--navy);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex:0 0 auto; }
+.data-hero b { font-size:16px; }
+.data-hero .muted { color:rgba(255,255,255,.6) !important; }
+.data-hero .dh-ask { text-align:right; flex:0 0 auto; white-space:nowrap; }
+
 .kv { display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
 .kv:last-child { border-bottom:none; }
 .kv .v { font-weight:700; }

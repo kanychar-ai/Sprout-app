@@ -218,12 +218,22 @@ function renderData() {
   const c = current;
   $('dataView').innerHTML =
     '<div class="tiny muted">Submitted by customer · read-only</div>' +
+    // at-a-glance: who is this and what are they asking for
+    '<div class="data-hero mt12">' +
+      '<div class="dh-id"><div class="dh-av">' + esc(initials(c.customer_name)) + '</div>' +
+        '<div><b>' + esc(c.customer_name || '—') + '</b>' +
+        '<div class="tiny muted">' + esc(c.national_id || '—') + (c.occupation ? ' · ' + esc(c.occupation) : '') + '</div></div></div>' +
+      '<div class="dh-ask"><b>' + baht(c.amount) + '</b><div class="tiny muted">' + esc(c.product || '—') + ' · ' + (c.term || '—') + ' mo</div></div>' +
+    '</div>' +
+    // applicant first — who am I underwriting
+    '<div class="card flat mt12" style="padding:6px 15px"><b class="tiny">Applicant</b>' +
+      kv('Full name', c.customer_name) + kv('National ID', c.national_id) + kv('Phone', c.phone) +
+      kv('Occupation', c.occupation) + kv('Employer', c.employer) +
+      kv('Monthly income', baht(c.income)) + kv('Existing debt', baht(c.existing_debt) + ' / mo') + '</div>' +
+    // then the loan request — what they are asking for
     '<div class="card flat mt12" style="padding:6px 15px"><b class="tiny">Loan request</b>' +
       kv('Product', c.product) + kv('Amount', baht(c.amount)) + kv('Term', (c.term || '—') + ' months') +
       kv('Monthly', baht(c.monthly)) + kv('Purpose', c.purpose) + '</div>' +
-    '<div class="card flat mt12" style="padding:6px 15px"><b class="tiny">Applicant</b>' +
-      kv('Occupation', c.occupation) + kv('Employer', c.employer) + kv('Monthly income', baht(c.income)) +
-      kv('Existing debt', baht(c.existing_debt) + ' / mo') + kv('Phone', c.phone) + kv('National ID', c.national_id) + '</div>' +
     '<div class="note-soft mt12">🛡️ ID &amp; income cross-checked against e-KYC and uploaded payslip.</div>';
 }
 function renderScore() {
