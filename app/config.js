@@ -15,7 +15,7 @@ window.SPROUT_CONFIG = {
 
   // enabled pre-screening rules the customer's screening step reads (back-office controlled)
   prescreenApi: 'https://luhnjwfpiwnldcsulyex.supabase.co/rest/v1/prescreen_rules' +
-    '?select=key,label,enabled,config&enabled=eq.true&order=sort.asc',
+    '?select=key,label,enabled,config,product&enabled=eq.true&order=sort.asc',
   prescreenHeaders: { apikey: 'sb_publishable_2yGL94L0n6HScZCJnYRyNA_LvcnMgoV' },
 
   // active document requirements the upload step reads (back-office controlled)

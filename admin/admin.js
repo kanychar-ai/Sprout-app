@@ -7,6 +7,7 @@ const sb = createClient(C.supabaseUrl, C.supabaseKey);
 
 const $ = (id) => document.getElementById(id);
 const FIELDS = ['name', 'tag', 'tag_class', 'description', 's1l', 's1v', 's2l', 's2v', 'sort'];
+let productNames = [];   // active+inactive product names, for the rule "applies to" dropdown
 
 function msg(el, text, kind) {
   el.textContent = text; el.className = 'bo-msg ' + (kind || 'err'); el.hidden = !text;
@@ -52,6 +53,8 @@ async function loadProducts() {
   msg($('listMsg'), '', 'err');
   const { data, error } = await sb.from('products').select('*').order('sort', { ascending: true });
   if (error) { msg($('listMsg'), 'Could not load: ' + error.message); return; }
+  productNames = (data || []).map((p) => p.name);
+  if (rulesCache.length) renderRules();   // refresh the rule dropdowns now product names are known
   $('countLabel').textContent = (data.length || 0) + ' product' + (data.length === 1 ? '' : 's');
   const list = $('list');
   list.innerHTML = '';
@@ -210,11 +213,21 @@ function renderRules() {
       editor = '<div class="tiny muted">' + esc(meta.note || 'No extra settings.') + '</div>';
     }
 
+    // "applies to" dropdown: blank = all products, else a specific product name
+    const prodOpts = ['<option value=""' + (!r.product ? ' selected' : '') + '>All products</option>']
+      .concat(productNames.map((n) =>
+        '<option value="' + esc(n) + '"' + (r.product === n ? ' selected' : '') + '>' + esc(n) + '</option>'))
+      .join('');
+
     card.innerHTML =
       '<div class="rule-head">' +
         '<label class="bo-switch"><input type="checkbox" class="rule-on"' + (r.enabled ? ' checked' : '') + '><span class="track"></span></label>' +
         '<b>' + esc(r.label) + '</b><span class="tiny muted">' + esc(r.key) + '</span>' +
-      '</div><div class="rule-cfg">' + editor + '</div>';
+      '</div><div class="rule-cfg">' +
+        '<div class="rule-applies"><span class="label" style="margin:0">Applies to</span>' +
+          '<select class="field rule-product">' + prodOpts + '</select></div>' +
+        editor +
+      '</div>';
 
     card.querySelector('.rule-on').addEventListener('change', (e) => {
       card.classList.toggle('off', !e.target.checked);
@@ -238,7 +251,8 @@ async function saveRules() {
     } else if (meta.type === 'multi') {
       config = { allowed: Array.from(card.querySelectorAll('[data-opt]:checked')).map((c) => c.dataset.opt) };
     }
-    rows.push({ key: key, label: src.label, enabled: enabled, config: config, sort: src.sort });
+    const product = card.querySelector('.rule-product').value || null;
+    rows.push({ key: key, label: src.label, enabled: enabled, config: config, sort: src.sort, product: product });
   });
   $('rulesSave').disabled = true;
   const { error } = await sb.from('prescreen_rules').upsert(rows, { onConflict: 'key' });
@@ -249,6 +263,7 @@ async function saveRules() {
 function numOrNull(v) { return v === '' || v == null ? null : (parseInt(v, 10) || 0); }
 
 $('rulesSave').addEventListener('click', saveRules);
+$('rulesReset').addEventListener('click', () => { loadRules(); toast('Reverted to saved rules'); });
 
 // ---- document requirements -------------------------------------------------
 let docsCache = [];

@@ -415,7 +415,7 @@
     var host = document.getElementById('psList');
     if (!host || !rules || !rules.length) return; // keep the static fallback
     host.innerHTML = '';
-    rules.forEach(function (r) {
+    rules.filter(ruleAppliesToProduct).forEach(function (r) {
       var label = String(PS_LABELS[r.key] || r.label || r.key).replace(/[<>&]/g, '');
       var div = document.createElement('div');
       div.className = 'row gap10 psitem';
@@ -474,10 +474,17 @@
       default:             return false;
     }
   }
+  // a rule applies when it has no product scope (all products) or matches the
+  // product the customer chose. Unknown product yet → don't hide it.
+  function ruleAppliesToProduct(r) {
+    if (!r.product) return true;
+    var name = (typeof selectedProduct !== 'undefined' && selectedProduct) ? selectedProduct.name : null;
+    return name ? r.product === name : true;
+  }
   function evaluateApplication() {
     if (!prescreenRules || !prescreenRules.length) return { ok: true, fails: [] };
     var p = buildProfile();
-    var fails = prescreenRules.filter(function (r) { return ruleFails(r, p); });
+    var fails = prescreenRules.filter(function (r) { return ruleAppliesToProduct(r) && ruleFails(r, p); });
     return { ok: fails.length === 0, fails: fails };
   }
 
@@ -605,6 +612,7 @@
   // ---- pre-screening animation, then auto-route to status ----
   var psRan = false;
   function runPrescreen() {
+    renderPrescreenList(prescreenRules);   // reflect the chosen product before screening
     var ring = document.getElementById('psRing');
     var pct = document.getElementById('psPct');
     var items = document.querySelectorAll('#psList .psitem');

@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Sprout · Back office</title>
 <link rel="stylesheet" href="../assets/styles.css">
-<link rel="stylesheet" href="admin.css?v=4">
+<link rel="stylesheet" href="admin.css?v=5">
 </head>
 <body>
 <div class="app-shell" id="shell">
@@ -64,9 +64,9 @@
 
       <!-- Pre-screening rules panel -->
       <div class="bo-panel" data-panel="prescreen" hidden>
-        <div class="bo-bar">
-          <div><b>Pre-screening rules</b><div class="tiny muted">Turn checks on/off and set their criteria. The customer's screening step uses the enabled rules.</div></div>
-          <button class="btn primary sm" id="rulesSave">Save rules</button>
+        <div class="bo-bar sticky-bar">
+          <div><b>Pre-screening rules</b><div class="tiny muted">Turn a check on, pick which product it applies to, set its limits — then Save.</div></div>
+          <div class="bo-top-actions"><button class="btn ghost sm" id="rulesReset">↺ Reset</button><button class="btn primary sm" id="rulesSave">💾 Save rules</button></div>
         </div>
         <div class="bo-msg" id="rulesMsg" hidden></div>
         <div id="rulesList"></div>
@@ -149,7 +149,7 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script src="../app/config.js?v=29"></script>
-<script type="module" src="admin.js?v=10"></script>
+<script src="../app/config.js?v=33"></script>
+<script type="module" src="admin.js?v=11"></script>
 </body>
 </html>
