@@ -524,8 +524,18 @@
     { view: 'docs',   label: 'Upload documents',  done: 'Documents uploaded' }
   ];
   function wizardIndex(view) { for (var i = 0; i < WIZARD.length; i++) if (WIZARD[i].view === view) return i; return -1; }
-  function getProgress() { try { return JSON.parse(localStorage.getItem('sprout_progress') || 'null'); } catch (e) { return null; } }
-  function saveProgress(pr) { try { localStorage.setItem('sprout_progress', JSON.stringify(pr)); } catch (e) {} }
+  function currentEmail() { var p = getProfile(); return (p && p.email) ? p.email : null; }
+  // progress is scoped to the signed-in account: another account's (or legacy,
+  // unstamped) progress on this device is ignored, so a new sign-up starts empty.
+  function getProgress() {
+    try {
+      var pr = JSON.parse(localStorage.getItem('sprout_progress') || 'null');
+      if (!pr) return null;
+      if (pr.email !== currentEmail()) return null;   // not this account's application
+      return pr;
+    } catch (e) { return null; }
+  }
+  function saveProgress(pr) { try { pr.email = currentEmail(); localStorage.setItem('sprout_progress', JSON.stringify(pr)); } catch (e) {} }
   function resetProgress() { saveProgress({ started: false, submitted: false, step: 0, current: WIZARD[0].view }); }
   // record that the customer reached this step (so an unfinished app can resume here)
   function markStep(view) {
@@ -960,6 +970,7 @@
       mobile: mobile, income: 0
     };
     saveProfile(profile);
+    if (typeof resetApplication === 'function') resetApplication();   // brand-new account → no application yet
     if (cfg.customersApi) {
       fetch(cfg.customersApi, {
         method: 'POST',
