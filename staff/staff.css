@@ -4,6 +4,11 @@
 .case-row b { font-size:15px; }
 .case-row .sub { font-size:12.5px; color:var(--ink-3); margin-top:4px; }
 .case-row .meta { margin-left:auto; text-align:right; }
+/* submit time + overdue flag (waiting > 1 day) */
+.case-row .cr-time { display:flex; align-items:center; gap:8px; margin-top:5px; font-size:12px; color:var(--ink-3); }
+.case-row .cr-aged { color:var(--soft-red); font-weight:700; }
+.case-row.aged { border-color:var(--soft-red); background:var(--soft-red-bg); }
+.case-row.aged:hover { border-color:var(--soft-red); }
 
 .hub-head { background:#fff; border:1px solid var(--line); border-radius:18px; padding:16px; }
 .hub-av { width:46px; height:46px; border-radius:14px; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; }

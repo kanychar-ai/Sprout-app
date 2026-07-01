@@ -122,12 +122,28 @@ async function loadTasks() {
   host.innerHTML = '';
   data.forEach((c) => host.appendChild(caseRow(c)));
 }
+function timeAgo(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+  const d = Math.floor(h / 24); return d + (d === 1 ? ' day ago' : ' days ago');
+}
+function fmtSubmitted(dt) {
+  return dt.toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · ' + timeAgo(Date.now() - dt.getTime());
+}
 function caseRow(c) {
-  const el = document.createElement('div'); el.className = 'case-row';
+  const el = document.createElement('div');
+  const submitted = c.created_at ? new Date(c.created_at) : null;
+  const ageMs = submitted ? (Date.now() - submitted.getTime()) : 0;
+  const aged = ageMs > 24 * 60 * 60 * 1000;   // waiting over a day → flag for priority
+  el.className = 'case-row' + (aged ? ' aged' : '');
   el.innerHTML =
     '<div class="row1"><b>#' + esc(c.id) + ' · ' + esc(c.customer_name) + '</b>' +
       '<span class="meta">' + statusBadge(c.status) + '</span></div>' +
-    '<div class="sub">' + esc(c.product) + ' · ' + baht(c.amount) + ' · score ' + (c.score ?? '—') + '</div>';
+    '<div class="sub">' + esc(c.product) + ' · ' + baht(c.amount) + ' · score ' + (c.score ?? '—') + '</div>' +
+    '<div class="cr-time">🕓 ' + (submitted ? esc(fmtSubmitted(submitted)) : 'unknown') +
+      (aged ? '<span class="cr-aged">⏰ Over 1 day</span>' : '') + '</div>';
   el.addEventListener('click', () => openCase(c.id));
   return el;
 }
