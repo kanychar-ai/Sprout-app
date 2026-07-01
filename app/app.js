@@ -777,16 +777,22 @@
 
   var bureauScore = null;     // looked up live by the entered National ID; null until found
   var bureauScoreFor = null;  // which National ID the cached score belongs to
-  function loadCreditScore() {
+  // fetch the bureau score for a National ID (Promise<number|null>) — normalises to digits so formatting differs are OK
+  function fetchBureauScore(nid) {
     var cfg = window.SPROUT_CONFIG || {};
-    var nid = currentNID();
-    if (!cfg.creditBureauApi || !nid) { bureauScore = null; bureauScoreFor = null; return; }
-    if (nid === bureauScoreFor) return;
-    fetch(cfg.creditBureauApi + '?select=score&national_id=eq.' + encodeURIComponent(nid),
+    nid = (nid || '').trim();
+    if (!cfg.creditBureauApi || !nid) return Promise.resolve(null);
+    return fetch(cfg.creditBureauApi + '?select=score&national_id=eq.' + encodeURIComponent(nid),
       { headers: cfg.creditBureauHeaders || {} })
       .then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (rows) { bureauScoreFor = nid; bureauScore = (rows && rows.length) ? rows[0].score : null; })
-      .catch(function () {});
+      .then(function (rows) { return (rows && rows.length) ? rows[0].score : null; })
+      .catch(function () { return null; });
+  }
+  function loadCreditScore() {
+    var nid = currentNID();
+    if (!nid) { bureauScore = null; bureauScoreFor = null; return; }
+    if (nid === bureauScoreFor) return;
+    fetchBureauScore(nid).then(function (s) { bureauScoreFor = nid; bureauScore = s; });
   }
   // refresh the bureau score whenever the National ID changes
   document.addEventListener('input', function (e) {
@@ -1028,25 +1034,29 @@
     var dsr = computeDsr(income, debt);
     // persist the entered income so the home limit and prescreen reflect it
     if (p.email) { p.income = income; saveProfile(p); persistCustomerIncome(p.email, income); }
-    // run the product's auto pre-screening rules and record why it passed/failed
-    var ev = (typeof evaluateApplication === 'function') ? evaluateApplication() : { ok: true, fails: [] };
-    var prescreenFails = ev.fails.map(function (r) { return r.label || (PS_LABELS[r.key] || r.key); });
-    var sc = computeScoreBreakdown(bureauScore, dsr, income, debt, val('payType'));
-    var body = {
-      id: id, customer_name: name, product: prod, amount: amount, term: term,
-      monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
-      occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
-      phone: val('kycPhone') || p.mobile || '', national_id: nid || null, applicant_email: p.email || null,
-      score: sc.total, score_factors: sc.factors, dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review',
-      prescreen_pass: ev.ok, prescreen_fails: prescreenFails
-    };
-    var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
-    var extra = cfg.casesHeaders || {};
-    Object.keys(extra).forEach(function (k) { headers[k] = extra[k]; });
-    fetch(cfg.casesApi, { method: 'POST', headers: headers, body: JSON.stringify(body) })
-      .then(function (r) { if (r.ok) { try { localStorage.setItem('sprout_case', id); } catch (e) {} } })
-      .catch(function () {});
-    uploadIdPhotos(id);   // push the captured ID photos for the officer to review
+    uploadIdPhotos(id);   // push the captured ID + selfie photos (independent of scoring)
+    // look up the freshest bureau score at submit time, THEN score + post (avoids a
+    // stale/empty cached value and uses the latest back-office bureau data)
+    fetchBureauScore(nid).then(function (bureau) {
+      bureauScore = bureau; bureauScoreFor = nid;   // keep the prescreen checklist/status consistent
+      var ev = (typeof evaluateApplication === 'function') ? evaluateApplication() : { ok: true, fails: [] };
+      var prescreenFails = ev.fails.map(function (r) { return r.label || (PS_LABELS[r.key] || r.key); });
+      var sc = computeScoreBreakdown(bureau, dsr, income, debt, val('payType'));
+      var body = {
+        id: id, customer_name: name, product: prod, amount: amount, term: term,
+        monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
+        occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
+        phone: val('kycPhone') || p.mobile || '', national_id: nid || null, applicant_email: p.email || null,
+        score: sc.total, score_factors: sc.factors, dsr: dsr, ncb: ncbFromBureau(bureau), status: 'to_review',
+        prescreen_pass: ev.ok, prescreen_fails: prescreenFails
+      };
+      var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
+      var extra = cfg.casesHeaders || {};
+      Object.keys(extra).forEach(function (k) { headers[k] = extra[k]; });
+      fetch(cfg.casesApi, { method: 'POST', headers: headers, body: JSON.stringify(body) })
+        .then(function (r) { if (r.ok) { try { localStorage.setItem('sprout_case', id); } catch (e) {} } })
+        .catch(function () {});
+    });
   }
   window.SproutCase = { submit: submitCase }; // hook
   document.body.addEventListener('click', function (e) {
