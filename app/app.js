@@ -450,17 +450,34 @@
   function loadExistingDebt() {
     if (!debt) return;
     var cfg = window.SPROUT_CONFIG || {};
-    // existing debt is tied to the person — matched by their National ID
-    var nid = ((typeof currentNID === 'function' && currentNID()) || (getProfile() || {}).national_id || '').trim();
-    if (!cfg.casesApi || !nid) { debt.value = '0'; calc(); return; }
-    fetch(cfg.casesApi + '?select=monthly&status=eq.disbursed&national_id=eq.' + encodeURIComponent(nid),
+    if (!cfg.casesApi) { debt.value = '0'; calc(); return; }
+    var p = getProfile() || {};
+    // existing debt is tied to the person via their National ID
+    var nid = ((typeof currentNID === 'function' && currentNID()) || p.national_id || '').trim();
+    function sumByNid(id) {
+      fetch(cfg.casesApi + '?select=monthly&status=eq.disbursed&national_id=eq.' + encodeURIComponent(id),
+        { headers: cfg.casesHeaders || {} })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (rows) {
+          var sum = (rows || []).reduce(function (a, b) { return a + (+b.monthly || 0); }, 0);
+          debt.value = String(sum); calc();
+        }).catch(function () { debt.value = '0'; calc(); });
+    }
+    if (nid) { sumByNid(nid); return; }
+    // National ID not entered yet → recover it from this account's most recent case
+    var ors = [];
+    if (p.email) ors.push('applicant_email.eq.' + encodeURIComponent(p.email));
+    if (p.mobile) ors.push('phone.eq.' + encodeURIComponent(p.mobile));
+    if (!ors.length) { debt.value = '0'; calc(); return; }
+    fetch(cfg.casesApi + '?select=national_id&national_id=not.is.null&order=created_at.desc&limit=1&or=(' + ors.join(',') + ')',
       { headers: cfg.casesHeaders || {} })
       .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) {
-        var sum = (rows || []).reduce(function (a, b) { return a + (+b.monthly || 0); }, 0);
-        debt.value = String(sum); calc();
-      })
-      .catch(function () { debt.value = '0'; calc(); });
+        var found = rows && rows[0] && rows[0].national_id;
+        if (!found) { debt.value = '0'; calc(); return; }
+        var pp = getProfile(); if (pp) { pp.national_id = found; saveProfile(pp); }   // remember for next time
+        sumByNid(found);
+      }).catch(function () { debt.value = '0'; calc(); });
   }
   loadExistingDebt();
 
