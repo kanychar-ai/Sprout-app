@@ -449,9 +449,15 @@
   // repaid) Sprout loans; 0 if they have none. Auto-filled, not typed.
   function loadExistingDebt() {
     if (!debt) return;
-    var cfg = window.SPROUT_CONFIG || {}, p = getProfile(), email = p && p.email;
-    if (!cfg.casesApi || !email) { debt.value = '0'; calc(); return; }
-    fetch(cfg.casesApi + '?select=monthly&status=eq.disbursed&applicant_email=eq.' + encodeURIComponent(email),
+    var cfg = window.SPROUT_CONFIG || {}, p = getProfile() || {};
+    // match the customer's disbursed loans by any identity the app already holds
+    var ors = [];
+    if (p.email) ors.push('applicant_email.eq.' + encodeURIComponent(p.email));
+    if (p.mobile) ors.push('phone.eq.' + encodeURIComponent(p.mobile));
+    var nid = (typeof currentNID === 'function') ? currentNID() : '';
+    if (nid) ors.push('national_id.eq.' + encodeURIComponent(nid));
+    if (!cfg.casesApi || !ors.length) { debt.value = '0'; calc(); return; }
+    fetch(cfg.casesApi + '?select=monthly&status=eq.disbursed&or=(' + ors.join(',') + ')',
       { headers: cfg.casesHeaders || {} })
       .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) {
