@@ -343,9 +343,6 @@ async function renderDocs() {
     }));
     host.appendChild(row);
   });
-  const req = document.createElement('button'); req.className = 'btn ghost mt8'; req.textContent = '⬇ Request another document';
-  req.addEventListener('click', () => { logEvent(c.id, 'requested_docs', 'Requested another document'); toast('Requested · logged'); });
-  $('docsView').appendChild(req);
 }
 function renderCompliance() {
   const rows = [['Sanctions / watchlist', 'Clear ✓'], ['PEP screening', 'Not a PEP ✓'], ['FATCA / CRS', 'TH — not US ✓'], ['Adverse media', 'None ✓'], ['AML risk level', 'Low']];
