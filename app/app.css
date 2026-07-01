@@ -386,3 +386,6 @@ body {
 .agreement-text p { margin: 0 0 10px; }
 .agreement-text p:last-child { margin-bottom: 0; }
 .agreement-text b { color: var(--ink-2); }
+
+/* auto-filled, read-only calculator field (e.g. existing debt from active loans) */
+.field[readonly] { background: #eef1f6; color: var(--ink-2); cursor: default; }

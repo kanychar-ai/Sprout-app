@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
-<link rel="stylesheet" href="app.css?v=34">
+<link rel="stylesheet" href="app.css?v=35">
 </head>
 <body>
 
@@ -255,7 +255,7 @@
     <div class="card flat mt12">
       <div class="row gap10">
         <div style="flex:1"><div class="label">Monthly income</div><input class="field" id="income" inputmode="numeric" value="45000"></div>
-        <div style="flex:1"><div class="label">Existing debt</div><input class="field" id="debt" inputmode="numeric" value="8500"></div>
+        <div style="flex:1"><div class="label">Existing debt <span class="label-hint">· auto</span></div><input class="field" id="debt" inputmode="numeric" value="0" readonly title="Monthly repayments on your active Sprout loans"></div>
       </div>
       <div class="label mt12">Loan purpose</div>
       <select class="selectbox" id="purpose">
@@ -533,7 +533,7 @@
 
 <script src="config.js?v=36"></script>
 <script src="id-verify.js?v=32"></script>
-<script src="app.js?v=46"></script>
+<script src="app.js?v=47"></script>
 <script src="kyc.js?v=32"></script>
 <script src="docs.js?v=34"></script>
 </body>

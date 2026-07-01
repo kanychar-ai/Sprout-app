@@ -94,6 +94,7 @@
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
     }
+    if (name === 'calc' && typeof loadExistingDebt === 'function') loadExistingDebt();
     if (name === 'banklist' && typeof renderBankList === 'function') {
       var bs = document.getElementById('bankSearch'); if (bs) bs.value = '';
       renderBankList('');
@@ -443,6 +444,23 @@
   function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
   [amt, term, income, debt].forEach(function (el) { el.addEventListener('input', calc); });
   calc();
+
+  // existing debt = the monthly repayments of the customer's disbursed (not yet
+  // repaid) Sprout loans; 0 if they have none. Auto-filled, not typed.
+  function loadExistingDebt() {
+    if (!debt) return;
+    var cfg = window.SPROUT_CONFIG || {}, p = getProfile(), email = p && p.email;
+    if (!cfg.casesApi || !email) { debt.value = '0'; calc(); return; }
+    fetch(cfg.casesApi + '?select=monthly&status=eq.disbursed&applicant_email=eq.' + encodeURIComponent(email),
+      { headers: cfg.casesHeaders || {} })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var sum = (rows || []).reduce(function (a, b) { return a + (+b.monthly || 0); }, 0);
+        debt.value = String(sum); calc();
+      })
+      .catch(function () { debt.value = '0'; calc(); });
+  }
+  loadExistingDebt();
 
   // ---- loan products (data-driven; served by the back-office API) -----------
   // When the Supabase back office is wired up, window.SPROUT_CONFIG.productsApi
@@ -886,7 +904,7 @@
       id: id, customer_name: name, product: prod, amount: amount, term: term,
       monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
       occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
-      phone: p.mobile || '', national_id: nid || null,
+      phone: p.mobile || '', national_id: nid || null, applicant_email: p.email || null,
       score: computeScore(bureauScore, dsr), dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review',
       prescreen_pass: ev.ok, prescreen_fails: prescreenFails
     };
