@@ -186,9 +186,8 @@ function actionFor(c) {
   if (c.status === 'pending_approval') {
     if (c.reviewer_email === me.email) return sod;
     if (!can('approveNormal')) return '<div class="note-soft mt14">Recommended ' + esc(c.recommendation) + ' — waiting for an officer to decide.</div>';
-    // officer can decide it, OR send it to a manager to decide
-    return '<button class="btn primary mt14" data-go="decide">Make decision</button>' +
-      '<button class="btn ghost mt10" data-act="escalate">→ Send to a manager</button>';
+    // approver can decide it, OR (inside the decision screen) hand it up to a manager
+    return '<button class="btn primary mt14" data-go="decide">Make decision · or send to a manager</button>';
   }
   if (c.status === 'pending_manager') {
     if (c.reviewer_email === me.email) return sod;
@@ -221,7 +220,10 @@ function prescreenBanner(c) {
 function renderHub(c, events) {
   let recHtml = '';
   if (c.reviewer_email) recHtml += '<div class="kv"><span>Reviewer recommendation</span><span class="v">' + esc(c.recommendation || '—') + ' · ' + esc(c.reviewer_name || c.reviewer_email) + '</span></div>';
+  if (c.reviewer_note) recHtml += '<div class="kv"><span>Reviewer note</span><span class="v">' + esc(c.reviewer_note) + '</span></div>';
+  if (c.escalation_note) recHtml += '<div class="kv"><span>Escalated to manager</span><span class="v">' + esc(c.escalation_note) + '</span></div>';
   if (c.decided_at) recHtml += '<div class="kv"><span>Decision</span><span class="v">' + (c.status === 'approved' ? 'Approved' : 'Rejected') + ' · ' + esc(c.approver_name || c.approver_email) + '</span></div>';
+  if (c.decided_at && c.decision_reason) recHtml += '<div class="kv"><span>Decision reason</span><span class="v">' + esc(c.decision_reason) + '</span></div>';
 
   $('caseHub').innerHTML =
     '<div class="hub-head"><div class="row gap12 center"><div class="hub-av">' + esc(initials(c.customer_name)) + '</div>' +
@@ -400,16 +402,29 @@ function renderChat() {
 let recChoice = 'approve';
 function renderReview() {
   const c = current; recChoice = 'approve';
+  const APPROVE_NOTE = 'Docs verified, income & DSR within policy. Suggest approve ' + baht(c.amount) + '.';
   $('reviewView').innerHTML =
     '<div class="card" style="background:var(--cobalt-50)"><div class="tiny muted">Loan request · #' + esc(c.id) + '</div>' +
       '<b style="font-size:16px">' + esc(c.customer_name) + ' · ' + esc(c.product) + '</b><div class="amount" style="font-size:22px">' + baht(c.amount) + '</div></div>' +
     '<div class="label mt14">Your recommendation to the approver</div>' +
     '<div class="seg toggle" id="recSeg" style="width:100%"><button class="on" data-rec="approve">Recommend approve</button><button data-rec="decline">Recommend decline</button></div>' +
-    '<div class="label mt12">Reviewer note</div><textarea class="field" id="recNote" rows="3" style="height:auto;padding:12px">Docs verified, income &amp; DSR within policy. Suggest approve ' + baht(c.amount) + '.</textarea>' +
+    '<div class="label mt12">Reviewer note <span class="tiny" id="recNoteReq" style="color:var(--soft-red)" hidden>· reason required to decline</span></div>' +
+    '<textarea class="field" id="recNote" rows="3" style="height:auto;padding:12px" placeholder="Why you recommend this decision">' + esc(APPROVE_NOTE) + '</textarea>' +
     '<button class="btn primary mt14" id="recSubmit">→ Submit to approver</button>' +
     '<button class="btn ghost mt10" id="recReqDocs">⬇ Request more docs</button>';
   document.querySelectorAll('#recSeg button').forEach((b) => b.addEventListener('click', () => {
-    document.querySelectorAll('#recSeg button').forEach((x) => x.classList.toggle('on', x === b)); recChoice = b.dataset.rec;
+    document.querySelectorAll('#recSeg button').forEach((x) => x.classList.toggle('on', x === b));
+    recChoice = b.dataset.rec;
+    const ta = $('recNote'), req = $('recNoteReq');
+    if (recChoice === 'decline') {
+      if (ta.value.trim() === APPROVE_NOTE) ta.value = '';
+      ta.placeholder = 'Explain why this application should be declined (shown to the approver and customer)';
+      if (req) req.hidden = false;
+    } else {
+      if (!ta.value.trim()) ta.value = APPROVE_NOTE;
+      ta.placeholder = 'Why you recommend this decision';
+      if (req) req.hidden = true;
+    }
   }));
   $('recSubmit').addEventListener('click', submitReview);
   $('recReqDocs').addEventListener('click', async () => {
@@ -420,6 +435,7 @@ function renderReview() {
 }
 async function submitReview() {
   const note = $('recNote').value.trim();
+  if (recChoice === 'decline' && !note) { toast('A decline needs a reason'); $('recNote').focus(); return; }
   const { error } = await sb.from('cases').update({
     status: 'pending_approval', recommendation: recChoice,
     reviewer_email: me.email, reviewer_name: me.name, reviewer_note: note, reviewed_at: new Date().toISOString()
@@ -432,20 +448,33 @@ async function submitReview() {
 // ---- Approver: decide ------------------------------------------------------
 function renderDecide() {
   const c = current;
+  const canEscalate = c.status === 'pending_approval';   // approver stage → may hand up to a manager
+  const escBlock = c.escalation_note
+    ? '<div class="card flat mt12" style="border-left:3px solid var(--amber)"><div class="tiny muted">⚑ Escalated for a manager decision</div>' +
+        '<div class="tiny mt6" style="color:var(--ink-2)">“' + esc(c.escalation_note) + '”</div></div>'
+    : '';
   $('decideView').innerHTML =
     '<div class="card flat"><div class="tiny muted">Reviewer (maker) recommended</div>' +
       '<b style="font-size:15px;color:' + (c.recommendation === 'approve' ? 'var(--ok)' : 'var(--soft-red)') + '">' + esc((c.recommendation || '').toUpperCase()) + '</b>' +
       '<div class="tiny muted mt6">' + esc(c.reviewer_name || c.reviewer_email) + '</div>' +
       '<div class="tiny mt6" style="color:var(--ink-2)">“' + esc(c.reviewer_note || '') + '”</div></div>' +
+    escBlock +
     '<div class="card" style="background:var(--cobalt-50);margin-top:12px"><b>' + esc(c.customer_name) + ' · ' + esc(c.product) + '</b>' +
       '<div class="amount" style="font-size:22px">' + baht(c.amount) + '</div><div class="tiny muted">Score ' + (c.score ?? '—') + ' · DSR ' + (c.dsr ?? '—') + '%</div></div>' +
     '<div class="label mt14">Final decision (checker)</div>' +
     '<div class="row gap10"><button class="btn primary" id="decApprove" style="flex:1">✓ Approve</button><button class="btn ghost danger" id="decReject" style="flex:1">✕ Reject</button></div>' +
-    '<div class="label mt12">Reason / note (sent to customer on reject)</div>' +
+    '<div class="label mt12">Reason / note <span class="tiny muted">— required to reject' + (canEscalate ? ' or escalate' : '') + '; a reject reason is shown to the customer</span></div>' +
     '<textarea class="field" id="decReason" rows="2" style="height:auto;padding:12px" placeholder="Reason for the decision"></textarea>' +
+    (canEscalate ? '<button class="btn ghost mt12" id="decEscalate">⚑ Send to a manager to decide</button>' : '') +
     '<div class="note-soft mt12">🔒 Segregation of duties: you are not the reviewer of this case. Logged who/when/what.</div>';
   $('decApprove').addEventListener('click', () => decide('approved'));
   $('decReject').addEventListener('click', () => decide('rejected'));
+  if (canEscalate) $('decEscalate').addEventListener('click', () => {
+    if (c.reviewer_email === me.email) { toast('You reviewed this — another officer must handle it'); return; }
+    const reason = $('decReason').value.trim();
+    if (!reason) { toast('Add a note for the manager'); $('decReason').focus(); return; }
+    escalate(reason);
+  });
 }
 async function decide(outcome) {
   const c = current;
@@ -476,11 +505,12 @@ function renderDisburse() {
   });
 }
 
-// escalate a special case to a manager (from the case hub)
-async function escalate() {
+// approver hands the case up to a manager to make the final decision (with a note)
+async function escalate(reason) {
   const c = current; if (!c) return;
-  await sb.from('cases').update({ status: 'pending_manager' }).eq('id', c.id);
-  await logEvent(c.id, 'escalated', 'Sent to a manager for special-case approval (' + baht(c.amount) + ')');
+  const { error } = await sb.from('cases').update({ status: 'pending_manager', escalation_note: reason || null }).eq('id', c.id);
+  if (error) { toast(error.message); return; }
+  await logEvent(c.id, 'escalated', 'Sent to a manager for a decision' + (reason ? ' — ' + reason : '') + ' (' + baht(c.amount) + ')');
   toast('Sent to manager'); show('tasks', false); loadTasks();
 }
 
@@ -488,7 +518,6 @@ async function escalate() {
 const RENDER = { data: renderData, score: renderScore, docs: renderDocs, compliance: renderCompliance, chat: renderChat, review: renderReview, decide: renderDecide, disburse: renderDisburse };
 document.body.addEventListener('click', (e) => {
   const t = e.target.closest('[data-go]'); if (t && current && RENDER[t.dataset.go]) RENDER[t.dataset.go]();
-  const a = e.target.closest('[data-act="escalate"]'); if (a) escalate();
 });
 
 try { const em = new URLSearchParams(location.search).get('email'); if (em && $('email')) $('email').value = em; } catch (e) {}
