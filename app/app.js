@@ -95,9 +95,12 @@
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
     }
-    if (name === 'kyc') {   // prefill the mobile from the signed-up profile when we have it
+    if (name === 'kyc') {   // pull the mobile from registration; lock it when we have it
       var ph = document.getElementById('kycPhone'), pr = getProfile();
-      if (ph && !ph.value && pr && pr.mobile) ph.value = pr.mobile;
+      if (ph) {
+        if (pr && pr.mobile) { ph.value = pr.mobile; ph.readOnly = true; ph.classList.add('locked'); setText('kycPhoneHint', '· from registration'); }
+        else { ph.readOnly = false; ph.classList.remove('locked'); setText('kycPhoneHint', ''); }
+      }
     }
     if (name === 'calc' && typeof loadExistingDebt === 'function') loadExistingDebt();
     if (name === 'banklist' && typeof renderBankList === 'function') {

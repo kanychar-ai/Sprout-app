@@ -401,3 +401,6 @@ body {
 .selfie-cam video { transform: scaleX(-1); }       /* mirror live view; captured image is un-mirrored */
 .selfie-ph { font-size: 70px; color: rgba(255,255,255,.35); }
 .selfie-stage.live .selfie-ph, .selfie-stage.shot .selfie-ph { display: none; }
+
+/* read-only mobile pulled from registration */
+.bare.locked { color: var(--ink-2); }
