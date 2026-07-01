@@ -92,8 +92,14 @@ body {
   .sb-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; margin: 0; width: 100%; order: 3; }
   .sb-item { width: auto; flex: 0 0 auto; white-space: nowrap; padding: 8px 12px; font-size: 13px; }
   .sb-item .i { font-size: 15px; }
-  .sb-foot { flex-direction: row; align-items: center; margin: 0; padding: 0; border: none; gap: 10px; }
-  .sb-link, .sb-user { display: none; }
+  /* app links + sign out on their own row (pills), so nothing is hidden on mobile */
+  .sb-foot { order: 4; width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin: 0; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.1); }
+  .sb-link { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.85); padding: 8px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 600; }
+  .sb-link:hover { color: #fff; }
+  .sb-user { display: none; }
+  .sb-logout { margin-left: auto; width: auto; padding: 8px 14px; }
 }
 
 /* ---- login card --------------------------------------------------------- */
