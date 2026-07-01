@@ -231,7 +231,7 @@ function renderHub(c, events) {
 
 // ---- detail screens (read) -------------------------------------------------
 function kv(k, v) { return '<div class="kv"><span>' + k + '</span><span class="v">' + esc(v == null || v === '' ? '—' : v) + '</span></div>'; }
-function renderData() {
+async function renderData() {
   const c = current;
   $('dataView').innerHTML =
     '<div class="tiny muted">Submitted by customer · read-only</div>' +
@@ -247,11 +247,29 @@ function renderData() {
       kv('Full name', c.customer_name) + kv('National ID', c.national_id) + kv('Phone', c.phone) +
       kv('Occupation', c.occupation) + kv('Employer', c.employer) +
       kv('Monthly income', baht(c.income)) + kv('Existing debt', baht(c.existing_debt) + ' / mo') + '</div>' +
+    // captured e-KYC ID photos (filled in async below)
+    '<div id="idPhotos" class="mt12"></div>' +
     // then the loan request — what they are asking for
     '<div class="card flat mt12" style="padding:6px 15px"><b class="tiny">Loan request</b>' +
       kv('Product', c.product) + kv('Amount', baht(c.amount)) + kv('Term', (c.term || '—') + ' months') +
       kv('Monthly', baht(c.monthly)) + kv('Purpose', c.purpose) + '</div>' +
     '<div class="note-soft mt12">🛡️ ID &amp; income cross-checked against e-KYC and uploaded payslip.</div>';
+
+  // pull the ID photos captured at e-KYC and show them for identity verification
+  const host = $('idPhotos'); if (!host) return;
+  const pub = (window.SPROUT_CONFIG || {}).storagePublicUrl || '';
+  const { data: idDocs } = await sb.from('case_documents').select('*').eq('case_id', c.id).in('doc_key', ['id_front', 'id_back']);
+  const list = (idDocs || []).sort((a, b) => String(a.doc_key).localeCompare(String(b.doc_key)));
+  if (!list.length) {
+    host.innerHTML = '<div class="card flat" style="padding:12px 15px"><b class="tiny">ID document · e-KYC</b><div class="tiny muted" style="margin-top:6px">No ID photos were captured for this application.</div></div>';
+    return;
+  }
+  host.innerHTML = '<div class="card flat" style="padding:12px 15px"><b class="tiny">ID document · e-KYC</b><div class="id-thumbs mt10">' +
+    list.map((d) => {
+      const url = pub + encodeURI(d.path || ''), side = d.doc_key === 'id_front' ? 'Front' : 'Back';
+      return '<button class="id-thumb" data-url="' + esc(url) + '" data-name="' + esc(d.filename || side) + '"><img src="' + esc(url) + '" alt="' + side + '"><span>' + side + '</span></button>';
+    }).join('') + '</div></div>';
+  host.querySelectorAll('.id-thumb').forEach((b) => b.addEventListener('click', () => viewFile(b.dataset.url, b.dataset.name)));
 }
 function renderScore() {
   const c = current;

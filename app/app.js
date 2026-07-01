@@ -833,6 +833,35 @@
     try { if (window.localStorage) localStorage.removeItem('sprout_case'); } catch (e) {}
   }
 
+  // upload the captured e-KYC ID photos so officers can view them during underwriting
+  function dataUrlToBlob(d) {
+    var parts = d.split(','), mime = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+    var bin = atob(parts[1]), arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+  function uploadIdPhotos(caseId) {
+    var cfg = window.SPROUT_CONFIG || {};
+    if (!cfg.storageUploadUrl || !window.SproutKYC) return;
+    ['front', 'back'].forEach(function (side) {
+      var d = window.SproutKYC.getShot ? window.SproutKYC.getShot(side) : null;
+      if (!d || d.indexOf('data:') !== 0) return;
+      var path = caseId + '/id_' + side + '.jpg';
+      fetch(cfg.storageUploadUrl + encodeURI(path), {
+        method: 'POST',
+        headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'x-upsert': 'true', 'Content-Type': 'image/jpeg' },
+        body: dataUrlToBlob(d)
+      }).then(function (r) {
+        if (!r.ok) return;
+        fetch(cfg.caseDocsApi, {
+          method: 'POST',
+          headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify({ case_id: caseId, doc_key: 'id_' + side, label: 'National ID (' + side + ')', filename: 'id_' + side + '.jpg', path: path, status: 'review' })
+        }).catch(function () {});
+      }).catch(function () {});
+    });
+  }
+
   // create the application case in the back office when the customer submits
   var caseSubmitted = false;
   function submitCase() {
@@ -867,6 +896,7 @@
     fetch(cfg.casesApi, { method: 'POST', headers: headers, body: JSON.stringify(body) })
       .then(function (r) { if (r.ok) { try { localStorage.setItem('sprout_case', id); } catch (e) {} } })
       .catch(function () {});
+    uploadIdPhotos(id);   // push the captured ID photos for the officer to review
   }
   window.SproutCase = { submit: submitCase }; // hook
   document.body.addEventListener('click', function (e) {
