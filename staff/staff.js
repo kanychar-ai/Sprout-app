@@ -272,16 +272,35 @@ async function renderData() {
     }).join('') + '</div></div>';
   host.querySelectorAll('.id-thumb').forEach((b) => b.addEventListener('click', () => viewFile(b.dataset.url, b.dataset.name)));
 }
+// same formulas as the customer app; used for cases submitted before score_factors existed
+function fallbackFactors(c) {
+  const cl = (v) => Math.max(0, Math.min(1, v));
+  const dsr = +c.dsr || 0, income = +c.income || 0, debt = +c.existing_debt || 0;
+  const bureau = c.ncb === 'clear' ? 650 : (c.ncb === 'review' ? 520 : 0);
+  return [
+    { label: 'Repayment ability (DSR ' + dsr + '%)', points: Math.round(35 * cl(1 - dsr / 70)), max: 35, detail: '35 × (1 − DSR/70)' },
+    { label: 'Credit bureau / NCB', points: bureau ? Math.round(30 * cl((bureau - 300) / 600)) : 0, max: 30, detail: '30 × (bureau − 300)/600 · estimated from NCB ' + (c.ncb || '—') },
+    { label: 'Income stability & tenure', points: Math.min(20, Math.min(15, Math.round(income / 3000)) + 3), max: 20, detail: 'min(15, income/3000) + pay-type bonus' },
+    { label: 'Existing obligations', points: income > 0 ? Math.round(10 * cl(1 - debt / income)) : 0, max: 10, detail: '10 × (1 − existing debt/income)' },
+    { label: 'Past Sprout repayment', points: 2, max: 5, detail: 'New-customer baseline +2' }
+  ];
+}
 function renderScore() {
   const c = current;
-  const factors = [['Repayment ability (DSR ' + (c.dsr ?? '—') + '%)', 30], ['Credit bureau / NCB', 24], ['Income stability & tenure', 12], ['Existing obligations', 4], ['Past Sprout repayment', 2]];
+  const factors = (Array.isArray(c.score_factors) && c.score_factors.length) ? c.score_factors : fallbackFactors(c);
   const band = c.score >= 70 ? 'Good' : c.score >= 40 ? 'Fair' : 'Low';
   $('scoreView').innerHTML =
     '<div class="card flat" style="text-align:center;padding:18px"><div class="tiny muted">Affordability score</div>' +
       '<div class="amount" style="font-size:34px;color:var(--cobalt)">' + band + ' · ' + (c.score ?? '—') + '</div>' +
-      '<div class="tiny muted">Bands: 0–39 low · 40–69 fair · 70–100 good</div></div>' +
+      '<div class="tiny muted">Bands: 0–39 low · 40–69 fair · 70–100 good · total = sum of the components below</div></div>' +
     '<div class="card flat mt12" style="padding:14px"><b class="tiny">What goes into it</b>' +
-      factors.map((f) => '<div style="margin-top:12px"><div class="row between"><span class="tiny">' + f[0] + '</span><b class="tiny" style="color:var(--cobalt)">+' + f[1] + '</b></div><div class="score-bar"><i style="width:' + (f[1] / 30 * 100) + '%"></i></div></div>').join('') +
+      factors.map((f) => {
+        const pts = f.points ?? 0, max = f.max ?? 35, label = f.label ?? '', detail = f.detail || '';
+        return '<div style="margin-top:14px"><div class="row between"><span class="tiny">' + esc(label) + '</span>' +
+          '<b class="tiny" style="color:var(--cobalt)">+' + pts + ' / ' + max + '</b></div>' +
+          '<div class="score-bar"><i style="width:' + Math.round(pts / max * 100) + '%"></i></div>' +
+          (detail ? '<div class="tiny muted" style="margin-top:4px">ƒ ' + esc(detail) + '</div>' : '') + '</div>';
+      }).join('') +
     '</div>';
 }
 // open an uploaded file — images inline (lightbox), PDFs/others in a new tab

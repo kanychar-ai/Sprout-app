@@ -750,6 +750,30 @@
     return Math.round(Math.max(0, Math.min(100, bNorm * 0.7 + afford * 0.3)));
   }
   function ncbFromBureau(bureau) { return !bureau ? 'no-hit' : (bureau >= 600 ? 'clear' : 'review'); }
+  // transparent affordability score (0–100) = sum of 5 components, each with a formula.
+  function computeScoreBreakdown(bureau, dsr, income, debt, paytype) {
+    function cl(v) { return Math.max(0, Math.min(1, v)); }
+    dsr = dsr || 0; income = income || 0; debt = debt || 0;
+    var payBonus = paytype === 'Payroll' ? 5 : ((paytype === 'Self-employed' || paytype === 'Business owner') ? 3 : 1);
+    var factors = [
+      { key: 'dsr', label: 'Repayment ability (DSR ' + dsr + '%)', max: 35,
+        points: Math.round(35 * cl(1 - dsr / 70)),
+        detail: '35 × (1 − DSR/70)  →  35 × (1 − ' + dsr + '/70)' },
+      { key: 'bureau', label: 'Credit bureau / NCB', max: 30,
+        points: bureau ? Math.round(30 * cl((bureau - 300) / 600)) : 0,
+        detail: bureau ? ('30 × (bureau − 300)/600  →  bureau ' + bureau) : 'No bureau record → 0' },
+      { key: 'income', label: 'Income stability & tenure', max: 20,
+        points: Math.min(20, Math.min(15, Math.round(income / 3000)) + payBonus),
+        detail: 'min(15, income/3000) + pay-type bonus (Payroll 5 / self-emp 3 / other 1)  →  income ' + income + ', ' + (paytype || 'n/a') },
+      { key: 'obligations', label: 'Existing obligations', max: 10,
+        points: income > 0 ? Math.round(10 * cl(1 - debt / income)) : 0,
+        detail: '10 × (1 − existing debt/income)  →  ' + debt + '/' + income },
+      { key: 'history', label: 'Past Sprout repayment', max: 5,
+        points: 2, detail: 'New-customer baseline +2 (up to +5 with on-time repayment history)' }
+    ];
+    var total = factors.reduce(function (a, b) { return a + b.points; }, 0);
+    return { total: Math.max(0, Math.min(100, total)), factors: factors };
+  }
 
   var bureauScore = null;     // looked up live by the entered National ID; null until found
   var bureauScoreFor = null;  // which National ID the cached score belongs to
@@ -1007,12 +1031,13 @@
     // run the product's auto pre-screening rules and record why it passed/failed
     var ev = (typeof evaluateApplication === 'function') ? evaluateApplication() : { ok: true, fails: [] };
     var prescreenFails = ev.fails.map(function (r) { return r.label || (PS_LABELS[r.key] || r.key); });
+    var sc = computeScoreBreakdown(bureauScore, dsr, income, debt, val('payType'));
     var body = {
       id: id, customer_name: name, product: prod, amount: amount, term: term,
       monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
       occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
       phone: val('kycPhone') || p.mobile || '', national_id: nid || null, applicant_email: p.email || null,
-      score: computeScore(bureauScore, dsr), dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review',
+      score: sc.total, score_factors: sc.factors, dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review',
       prescreen_pass: ev.ok, prescreen_fails: prescreenFails
     };
     var headers = { 'Content-Type': 'application/json', Prefer: 'return=minimal' };
