@@ -308,6 +308,12 @@
     <div class="row gap8 mt12" style="flex-wrap:wrap" id="kycChecks" hidden>
       <span class="badge ok">✓ Good lighting</span><span class="badge ok">✓ In frame</span><span class="badge amber">Hold still</span>
     </div>
+    <!-- capture controls sit right under the camera so the eye never leaves it -->
+    <button class="btn primary mt12" id="kycCapture">📷 Capture front</button>
+    <div class="row gap10 mt12" id="kycReview" hidden>
+      <button class="btn ghost" id="kycRetake">Retake</button>
+      <button class="btn primary" id="kycUse">Use photo</button>
+    </div>
     <div class="row gap10 mt12" id="kycSlots">
       <div class="idslot" id="slotFront" role="button" tabindex="0"><div class="idslot-th">🪪</div><div class="idslot-lbl">Front</div><span class="badge ghost tiny idslot-st">Required</span></div>
       <div class="idslot" id="slotBack" role="button" tabindex="0"><div class="idslot-th">🪪</div><div class="idslot-lbl">Back</div><span class="badge ghost tiny idslot-st">Required</span></div>
@@ -322,11 +328,6 @@
       </div>
     </div>
     <div class="note-soft mt12">🔒 Your ID is encrypted and the photo is deleted right after we read it (PDPA).</div>
-    <button class="btn primary dock" id="kycCapture">📷 Capture front</button>
-    <div class="row dock" id="kycReview" hidden>
-      <button class="btn ghost" id="kycRetake">Retake</button>
-      <button class="btn primary" id="kycUse">Use photo</button>
-    </div>
     <button class="btn primary dock" id="kycContinue" data-go="income" hidden disabled>Continue</button>
   </section>
 
