@@ -95,6 +95,10 @@
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
     }
+    if (name === 'kyc') {   // prefill the mobile from the signed-up profile when we have it
+      var ph = document.getElementById('kycPhone'), pr = getProfile();
+      if (ph && !ph.value && pr && pr.mobile) ph.value = pr.mobile;
+    }
     if (name === 'calc' && typeof loadExistingDebt === 'function') loadExistingDebt();
     if (name === 'banklist' && typeof renderBankList === 'function') {
       var bs = document.getElementById('bankSearch'); if (bs) bs.value = '';
@@ -175,6 +179,7 @@
   var STEP_GUARDS = {
     kyc: function () {
       if (!currentNID()) return 'Please enter your National ID';
+      if (!val('kycPhone')) return 'Please enter your mobile number';
       if (!val('dob')) return 'Please add your date of birth';
       if (!val('gender')) return 'Please select your gender';
       return null;
@@ -758,9 +763,13 @@
   }
   // refresh the bureau score whenever the National ID changes
   document.addEventListener('input', function (e) {
-    if (e.target && e.target.id === 'nationalId') {
+    if (!e.target) return;
+    if (e.target.id === 'nationalId') {
       loadCreditScore();
       var pp = getProfile(); if (pp) { pp.national_id = e.target.value.trim(); saveProfile(pp); }  // remember for debt/credit lookups
+    }
+    if (e.target.id === 'kycPhone') {
+      var pm = getProfile(); if (pm) { pm.mobile = e.target.value.trim(); saveProfile(pm); }        // remember the mobile
     }
   });
   // pick the rule set for the chosen product: the product's own rules if it has
@@ -999,7 +1008,7 @@
       id: id, customer_name: name, product: prod, amount: amount, term: term,
       monthly: (pmt > 0 ? pmt : Math.round(amount / Math.max(1, term))), purpose: val('purpose') || 'Personal',
       occupation: val('occField'), employer: val('employer'), income: income, existing_debt: debt,
-      phone: p.mobile || '', national_id: nid || null, applicant_email: p.email || null,
+      phone: val('kycPhone') || p.mobile || '', national_id: nid || null, applicant_email: p.email || null,
       score: computeScore(bureauScore, dsr), dsr: dsr, ncb: ncbFromBureau(bureauScore), status: 'to_review',
       prescreen_pass: ev.ok, prescreen_fails: prescreenFails
     };
