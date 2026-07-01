@@ -184,11 +184,21 @@
       return null;
     },
     income: function () {
+      var idErr = identityErr(); if (idErr) return idErr;   // can't skip ID/selfie via Resume
       if (!val('occField')) return 'Please enter your occupation';
       if (!val('employer')) return 'Please enter your employer';
       return null;
-    }
+    },
+    esign: function () { return identityErr(); }             // final gate before submit
   };
+  // identity must be fully captured this session before the application can proceed
+  function identityErr() {
+    var K = window.SproutKYC, S = window.SproutSelfie;
+    if (!currentNID()) return 'Please verify your ID (Step 1) first';
+    if (!(K && K.getShot && K.getShot('front') && K.getShot('back'))) return 'Please capture both sides of your ID first';
+    if (!(S && S.getShot && S.getShot())) return 'Please take your selfie first';
+    return null;
+  }
   // navigation wiring (data-go on any element)
   document.body.addEventListener('click', function (e) {
     var t = e.target.closest('[data-go]');
@@ -196,7 +206,7 @@
     var cur = history[history.length - 1];
     if (STEP_GUARDS[cur] && t.dataset.go !== cur) {     // leaving a step forward → validate
       var err = STEP_GUARDS[cur]();
-      if (err) { showToast('⚠️ ' + err); return; }
+      if (err) { showToast('⚠️ ' + err); if (/ID|selfie/i.test(err)) show('kyc'); return; }
     }
     show(t.dataset.go);
   });
