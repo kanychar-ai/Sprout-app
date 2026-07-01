@@ -89,7 +89,7 @@
     if (name === 'status' && typeof renderStatusOutcome === 'function') renderStatusOutcome();
     if (typeof markStep === 'function') markStep(name);   // record progress on step screens
     if (typeof fillIdentity === 'function') fillIdentity();
-    if (name === 'home') { if (typeof renderHome === 'function') renderHome(); if (typeof renderHomeApp === 'function') renderHomeApp(); }
+    if (name === 'home') { if (typeof renderHome === 'function') renderHome(); if (typeof renderHomeApp === 'function') renderHomeApp(); if (typeof syncHomeFromCases === 'function') syncHomeFromCases(); }
     if (name === 'income') {
       var ie = document.getElementById('incomeEcho'), inc = document.getElementById('income');
       if (ie && inc) ie.textContent = (+inc.value || 0).toLocaleString('en-US');
@@ -644,6 +644,57 @@
   }
   function renderHomeApp() { renderProgress(); renderActivity(); }
   renderHomeApp();
+
+  // reflect the customer's real application from the back office: pull their most
+  // recent case (by National ID / account) to recover income (→ credit limit) and
+  // show the true application status, since the local profile may not have them.
+  function customerCaseOrs() {
+    var p = getProfile() || {}, ors = [];
+    var nid = ((typeof currentNID === 'function' && currentNID()) || p.national_id || '').trim();
+    if (nid) ors.push('national_id.eq.' + encodeURIComponent(nid));
+    if (p.email) ors.push('applicant_email.eq.' + encodeURIComponent(p.email));
+    if (p.mobile) ors.push('phone.eq.' + encodeURIComponent(p.mobile));
+    return ors;
+  }
+  function applyCaseStatusToHome(c) {
+    var STATUS_MAP = {
+      to_review: ['In review', 'amber', 'Your application is being reviewed by an officer.'],
+      awaiting_docs: ['Awaiting docs', 'amber', 'We need more documents to continue your review.'],
+      pending_approval: ['In review', 'amber', 'Your application is with an approver.'],
+      pending_manager: ['In review', 'amber', 'Your application is awaiting a manager decision.'],
+      approved: ['Approved', 'ok', 'Approved — awaiting disbursement.'],
+      disbursed: ['Loan active', 'ok', 'Your loan has been disbursed.'],
+      rejected: ['Not approved', 'red', 'This application was not approved.']
+    };
+    var m = STATUS_MAP[c.status]; if (!m) return;   // unknown status → keep local progress
+    var stepsEl = document.getElementById('homeSteps');
+    if (stepsEl) { var h = ''; for (var i = 0; i < WIZARD.length; i++) h += '<i class="done"></i>'; stepsEl.innerHTML = h; }
+    var badge = document.getElementById('homeStepsLeft'); if (badge) { badge.textContent = m[0]; badge.className = 'badge ' + m[1]; }
+    setText('homeStepMsg', m[2]);
+    var btn = document.getElementById('homeContinue');
+    if (btn) {
+      var repay = c.status === 'disbursed';
+      btn.textContent = repay ? 'Repay loan' : 'Track status';
+      btn.dataset.go = repay ? 'repay' : 'status';
+    }
+  }
+  function syncHomeFromCases() {
+    var cfg = window.SPROUT_CONFIG || {}; if (!cfg.casesApi) return;
+    var ors = customerCaseOrs(); if (!ors.length) return;
+    fetch(cfg.casesApi + '?select=id,status,income,national_id&order=created_at.desc&limit=1&or=(' + ors.join(',') + ')',
+      { headers: cfg.casesHeaders || {} })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var c = rows && rows[0]; if (!c) return;
+        var p = getProfile(), changed = false;
+        if (p) {
+          if ((!p.income || +p.income === 0) && +c.income > 0) { p.income = +c.income; changed = true; }
+          if (!p.national_id && c.national_id) { p.national_id = c.national_id; changed = true; }
+          if (changed) { saveProfile(p); renderHome(); }
+        }
+        applyCaseStatusToHome(c);
+      }).catch(function () {});
+  }
 
   // ---- pre-screening checklist driven by back-office rules -----------------
   // customer-friendly wording for each enabled rule; falls back to the static
