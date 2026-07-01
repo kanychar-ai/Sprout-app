@@ -390,11 +390,14 @@ body {
 /* auto-filled, read-only calculator field (e.g. existing debt from active loans) */
 .field[readonly] { background: #eef1f6; color: var(--ink-2); cursor: default; }
 
-/* selfie / liveness capture stage */
-.selfie-stage { position: relative; width: 220px; height: 220px; margin: 10px auto 0; border-radius: 50%;
-  background: #0f1b33; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.selfie-stage video, .selfie-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.selfie-stage video { transform: scaleX(-1); }   /* mirror the front camera */
-.selfie-ph { font-size: 66px; color: rgba(255,255,255,.35); }
+/* selfie / guided liveness */
+.selfie-prompt { text-align: center; font-size: 15px; font-weight: 700; color: var(--ink); min-height: 22px; }
+.selfie-stage { position: relative; width: 232px; height: 232px; margin: 12px auto 0; }
+.selfie-prog { position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(var(--cobalt) 0%, rgba(37,99,235,.15) 0); transition: background .35s ease; }
+.selfie-cam { position: absolute; inset: 9px; border-radius: 50%; overflow: hidden; background: #0f1b33;
+  display: flex; align-items: center; justify-content: center; }
+.selfie-cam video, .selfie-cam img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.selfie-cam video { transform: scaleX(-1); }       /* mirror live view; captured image is un-mirrored */
+.selfie-ph { font-size: 70px; color: rgba(255,255,255,.35); }
 .selfie-stage.live .selfie-ph, .selfie-stage.shot .selfie-ph { display: none; }
-.selfie-ring { position: absolute; inset: 5px; border-radius: 50%; border: 3px dashed var(--cobalt); opacity: .55; pointer-events: none; }

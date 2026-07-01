@@ -10,7 +10,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="apple-touch-icon" href="../assets/icon-192.png">
-<link rel="stylesheet" href="app.css?v=36">
+<link rel="stylesheet" href="app.css?v=37">
 </head>
 <body>
 
@@ -334,16 +334,18 @@
   <!-- 2.7b Selfie / liveness -->
   <section class="view" data-view="selfie" hidden>
     <div class="step-head mb12"><div class="steps"><i class="on"></i><i></i><i></i><i></i></div><span class="step-count">Step 1 of 4 · Selfie</span></div>
-    <div style="font-size:13px;color:var(--ink-2)">Face forward, stay in the frame, then blink.</div>
+    <div class="selfie-prompt" id="selfiePrompt">Get ready for a quick face check</div>
     <div class="selfie-stage mt12" id="selfieStage">
-      <video id="selfieVideo" playsinline muted autoplay></video>
-      <img id="selfieShot" alt="Captured selfie" hidden>
-      <div class="selfie-ring"></div>
-      <div class="selfie-ph">👤</div>
+      <div class="selfie-prog" id="selfieProg"></div>
+      <div class="selfie-cam">
+        <video id="selfieVideo" playsinline muted autoplay></video>
+        <img id="selfieShot" alt="Captured selfie" hidden>
+        <div class="selfie-ph">👤</div>
+      </div>
     </div>
     <input type="file" id="selfieFile" accept="image/*" capture="user" hidden>
-    <div class="tiny" id="selfieMsg" style="text-align:center;margin-top:8px;color:var(--ink-3)">Starting camera…</div>
-    <button class="btn primary dock" id="selfieCapture">📸 Capture selfie</button>
+    <div class="tiny" id="selfieMsg" style="text-align:center;margin-top:10px;color:var(--ink-3)">Starting camera…</div>
+    <button class="btn ghost dock" id="selfieManual" hidden>📸 Take a selfie photo</button>
     <div class="row dock" id="selfieReview" hidden>
       <button class="btn ghost" id="selfieRetake">Retake</button>
       <button class="btn primary" id="selfieUse" data-go="income">Use photo</button>
@@ -556,7 +558,7 @@
 <script src="id-verify.js?v=32"></script>
 <script src="app.js?v=53"></script>
 <script src="kyc.js?v=32"></script>
-<script src="selfie.js?v=1"></script>
+<script src="selfie.js?v=2"></script>
 <script src="docs.js?v=35"></script>
 </body>
 </html>
