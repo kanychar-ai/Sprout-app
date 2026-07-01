@@ -22,6 +22,7 @@
     products: ['Loan products', 'Choose what fits'],
     calc:     ['EIR calculator', 'Personal Loan'],
     kyc:      ['Verify identity', 'Step 1 of 4 · e-KYC'],
+    selfie:   ['Identity verification', 'Step 1 of 4 · Selfie'],
     income:   ['Income', 'Step 2 of 4'],
     bank:     ['Receiving account', 'Step 3 of 4'],
     banklist: ['Select bank', 'Search by name'],
@@ -176,6 +177,10 @@
       if (!currentNID()) return 'Please enter your National ID';
       if (!val('dob')) return 'Please add your date of birth';
       if (!val('gender')) return 'Please select your gender';
+      return null;
+    },
+    selfie: function () {
+      if (!(window.SproutSelfie && window.SproutSelfie.getShot && window.SproutSelfie.getShot())) return 'Please capture your selfie';
       return null;
     },
     income: function () {
@@ -936,11 +941,10 @@
   }
   function uploadIdPhotos(caseId) {
     var cfg = window.SPROUT_CONFIG || {};
-    if (!cfg.storageUploadUrl || !window.SproutKYC) return;
-    ['front', 'back'].forEach(function (side) {
-      var d = window.SproutKYC.getShot ? window.SproutKYC.getShot(side) : null;
+    if (!cfg.storageUploadUrl) return;
+    function up(key, label, d) {
       if (!d || d.indexOf('data:') !== 0) return;
-      var path = caseId + '/id_' + side + '.jpg';
+      var path = caseId + '/' + key + '.jpg';
       fetch(cfg.storageUploadUrl + encodeURI(path), {
         method: 'POST',
         headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'x-upsert': 'true', 'Content-Type': 'image/jpeg' },
@@ -950,10 +954,15 @@
         fetch(cfg.caseDocsApi, {
           method: 'POST',
           headers: { apikey: cfg.supabaseKey, Authorization: 'Bearer ' + cfg.supabaseKey, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
-          body: JSON.stringify({ case_id: caseId, doc_key: 'id_' + side, label: 'National ID (' + side + ')', filename: 'id_' + side + '.jpg', path: path, status: 'review' })
+          body: JSON.stringify({ case_id: caseId, doc_key: key, label: label, filename: key + '.jpg', path: path, status: 'review' })
         }).catch(function () {});
       }).catch(function () {});
-    });
+    }
+    var K = window.SproutKYC;
+    up('id_front', 'National ID (front)', K && K.getShot ? K.getShot('front') : null);
+    up('id_back', 'National ID (back)', K && K.getShot ? K.getShot('back') : null);
+    var S = window.SproutSelfie;
+    up('selfie', 'Selfie', S && S.getShot ? S.getShot() : null);
   }
 
   // create the application case in the back office when the customer submits

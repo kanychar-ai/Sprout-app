@@ -258,16 +258,17 @@ async function renderData() {
   // pull the ID photos captured at e-KYC and show them for identity verification
   const host = $('idPhotos'); if (!host) return;
   const pub = (window.SPROUT_CONFIG || {}).storagePublicUrl || '';
-  const { data: idDocs } = await sb.from('case_documents').select('*').eq('case_id', c.id).in('doc_key', ['id_front', 'id_back']);
-  const list = (idDocs || []).sort((a, b) => String(a.doc_key).localeCompare(String(b.doc_key)));
+  const { data: idDocs } = await sb.from('case_documents').select('*').eq('case_id', c.id).in('doc_key', ['id_front', 'id_back', 'selfie']);
+  const ORDER = { selfie: 0, id_front: 1, id_back: 2 }, LABEL = { selfie: 'Selfie', id_front: 'ID front', id_back: 'ID back' };
+  const list = (idDocs || []).slice().sort((a, b) => (ORDER[a.doc_key] ?? 9) - (ORDER[b.doc_key] ?? 9));
   if (!list.length) {
-    host.innerHTML = '<div class="card flat" style="padding:12px 15px"><b class="tiny">ID document · e-KYC</b><div class="tiny muted" style="margin-top:6px">No ID photos were captured for this application.</div></div>';
+    host.innerHTML = '<div class="card flat" style="padding:12px 15px"><b class="tiny">Identity · e-KYC</b><div class="tiny muted" style="margin-top:6px">No ID / selfie photos were captured for this application.</div></div>';
     return;
   }
-  host.innerHTML = '<div class="card flat" style="padding:12px 15px"><b class="tiny">ID document · e-KYC</b><div class="id-thumbs mt10">' +
+  host.innerHTML = '<div class="card flat" style="padding:12px 15px"><b class="tiny">Identity · e-KYC</b><div class="id-thumbs mt10">' +
     list.map((d) => {
-      const url = pub + encodeURI(d.path || ''), side = d.doc_key === 'id_front' ? 'Front' : 'Back';
-      return '<button class="id-thumb" data-url="' + esc(url) + '" data-name="' + esc(d.filename || side) + '"><img src="' + esc(url) + '" alt="' + side + '"><span>' + side + '</span></button>';
+      const url = pub + encodeURI(d.path || ''), lbl = LABEL[d.doc_key] || d.doc_key, cls = d.doc_key === 'selfie' ? ' selfie' : '';
+      return '<button class="id-thumb' + cls + '" data-url="' + esc(url) + '" data-name="' + esc(d.filename || lbl) + '"><img src="' + esc(url) + '" alt="' + lbl + '"><span>' + lbl + '</span></button>';
     }).join('') + '</div></div>';
   host.querySelectorAll('.id-thumb').forEach((b) => b.addEventListener('click', () => viewFile(b.dataset.url, b.dataset.name)));
 }
