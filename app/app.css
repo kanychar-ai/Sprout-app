@@ -379,3 +379,10 @@ body {
 /* pre-screening checklist */
 .psitem { color: #7e8db0; transition: color .3s; }
 .psitem .psck { margin-left: auto; }
+
+/* loan agreement — full text, scrollable */
+.agreement-box { max-height: 240px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.agreement-text { line-height: 1.6; margin-top: 8px; }
+.agreement-text p { margin: 0 0 10px; }
+.agreement-text p:last-child { margin-bottom: 0; }
+.agreement-text b { color: var(--ink-2); }
