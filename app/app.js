@@ -801,7 +801,8 @@
       gender: val('gender'),
       occupation: val('occField'),
       paytype: val('payType') || 'Payroll',
-      docsComplete: true,
+      // real check: every required upload doc must actually be uploaded
+      docsComplete: (window.SproutDocs && window.SproutDocs.allRequiredUploaded) ? window.SproutDocs.allRequiredUploaded() : false,
       compliance: complianceAnswers(),
       credit_score: (bureauScore != null ? bureauScore : 0),   // 0 when the bureau has no record (no fake score)
       income: income,

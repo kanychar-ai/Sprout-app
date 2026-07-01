@@ -181,5 +181,13 @@
 
   render();
   loadDocs(); // override the fallback with the back-office list when available
-  window.SproutDocs = { addFile: addFile, files: files }; // test/programmatic hook
+  // every "Required" upload doc has a file? (KYC-provided/preset docs count as done)
+  function allRequiredUploaded() {
+    return DOCS.every(function (d) {
+      if (d.tag !== 'Required') return true;   // optional / informational don't block
+      if (d.preset) return true;               // provided by e-KYC (e.g. National ID)
+      return !!files[d.key];
+    });
+  }
+  window.SproutDocs = { addFile: addFile, files: files, allRequiredUploaded: allRequiredUploaded }; // hooks
 })();
